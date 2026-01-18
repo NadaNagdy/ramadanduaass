@@ -1,17 +1,48 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Sparkles } from 'lucide-react';
-import { ramadanReflections, type Reflection } from '@/lib/reflections';
+import { Sparkles, Volume2, VolumeX } from 'lucide-react';
+import { getRandomReflection, type Reflection } from '@/lib/reflections';
 
 const RamadanReflection = () => {
   const [reflection, setReflection] = useState<Reflection | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [utterance, setUtterance] = useState<SpeechSynthesisUtterance | null>(null);
 
   useEffect(() => {
-    // Pick a random reflection on mount (client-side only)
-    const randomIndex = Math.floor(Math.random() * ramadanReflections.length);
-    setReflection(ramadanReflections[randomIndex]);
+    setReflection(getRandomReflection());
   }, []);
+
+  useEffect(() => {
+    if (reflection) {
+      const newUtterance = new SpeechSynthesisUtterance(reflection.dua);
+      newUtterance.lang = 'ar-SA'; // اللغة العربية
+      newUtterance.rate = 0.8; // سرعة القراءة
+      newUtterance.pitch = 1; // نبرة الصوت
+      
+      newUtterance.onend = () => {
+        setIsPlaying(false);
+      };
+
+      setUtterance(newUtterance);
+    }
+
+    return () => {
+      window.speechSynthesis.cancel();
+    };
+  }, [reflection]);
+
+  const togglePlayPause = () => {
+    if (!utterance) return;
+
+    if (isPlaying) {
+      window.speechSynthesis.cancel();
+      setIsPlaying(false);
+    } else {
+      window.speechSynthesis.speak(utterance);
+      setIsPlaying(true);
+    }
+  };
 
   if (!reflection) {
     return null;
@@ -47,10 +78,23 @@ const RamadanReflection = () => {
                 {reflection.reflection}
               </p>
 
-              <div className="bg-gold/10 p-4 rounded-xl">
-                <p className="text-lg font-amiri leading-relaxed italic">
+              <div className="bg-gold/10 p-4 rounded-xl relative">
+                <p className="text-lg font-amiri leading-relaxed italic pr-12">
                   {reflection.dua}
                 </p>
+                
+                {/* زر الاستماع */}
+                <button
+                  onClick={togglePlayPause}
+                  className="absolute top-4 left-4 bg-gold/20 hover:bg-gold/30 text-gold p-2 rounded-full transition-all duration-300 hover:scale-110"
+                  aria-label={isPlaying ? 'إيقاف الاستماع' : 'الاستماع للدعاء'}
+                >
+                  {isPlaying ? (
+                    <VolumeX className="w-5 h-5" />
+                  ) : (
+                    <Volume2 className="w-5 h-5" />
+                  )}
+                </button>
               </div>
             </div>
           </CardContent>
@@ -60,4 +104,4 @@ const RamadanReflection = () => {
   );
 };
 
-export default RamadanReflection;  // ← تأكدي من السطر ده
+export default RamadanReflection;
