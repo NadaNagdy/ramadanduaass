@@ -1,66 +1,67 @@
+'use client';
 
-"use client";
+import { Card, CardContent } from '@/components/ui/card';
+import { Heart } from 'lucide-react';
+import { useState } from 'react';
 
-import React from 'react';
-import { HandHeart, Star } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { CommunityDua } from '@/lib/duas';
-import { useLocalStorage } from '@/hooks/use-local-storage';
-import { Button } from './ui/button';
-
-interface CommunityDuaCardProps {
-  dua: CommunityDua;
+interface CommunityDua {
+  id: string;
+  text: string;
+  author: string;
+  likes: number;
+  category?: string;
 }
 
-const CommunityDuaCard: React.FC<CommunityDuaCardProps> = ({ dua }) => {
-  const [amenedDuas, setAmenedDuas] = useLocalStorage<number[]>('amened_duas', []);
-  const isAmened = amenedDuas.includes(dua.id);
+interface CommunityDuaCardProps {
+  dua: CommunityDua;  // ✅ object مش string
+}
 
-  const handleAmenClick = () => {
-    if (isAmened) {
-      setAmenedDuas(amenedDuas.filter(id => id !== dua.id));
+export default function CommunityDuaCard({ dua }: CommunityDuaCardProps) {
+  const [likes, setLikes] = useState(dua.likes);
+  const [isLiked, setIsLiked] = useState(false);
+
+  const handleLike = () => {
+    if (isLiked) {
+      setLikes(likes - 1);
     } else {
-      setAmenedDuas([...amenedDuas, dua.id]);
+      setLikes(likes + 1);
     }
+    setIsLiked(!isLiked);
   };
 
-  const amenCount = dua.amens + (isAmened ? 1 : 0);
-
   return (
-    <div className={cn(
-      "relative bg-card-gradient rounded-3xl p-6 border transition-all duration-300 shadow-md",
-      dua.isGolden ? "border-gold/50 shadow-gold/10" : "border-gold/20"
-    )}>
-      {dua.isGolden && (
-        <div className="absolute -top-3 -right-3 p-2 bg-gold rounded-full shadow-lg">
-          <Star className="w-5 h-5 text-navy fill-current" />
+    <Card className="bg-card-gradient border-gold/20 rounded-3xl overflow-hidden hover:border-gold/40 transition-all">
+      <CardContent className="p-6" dir="rtl">
+        <p className="text-xl font-amiri leading-relaxed text-cream mb-4">
+          {dua.text}
+        </p>
+        
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-gold/70">— {dua.author}</span>
+          
+          <button
+            onClick={handleLike}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
+              isLiked 
+                ? 'bg-red-500/20 text-red-500' 
+                : 'bg-gold/10 text-gold hover:bg-gold/20'
+            }`}
+          >
+            <Heart 
+              className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} 
+            />
+            <span>{likes}</span>
+          </button>
         </div>
-      )}
-      <div className="flex items-start gap-4">
-        <div className="w-12 h-12 bg-gold/10 rounded-full flex items-center justify-center text-gold font-bold text-xl">
-          {dua.author.charAt(0)}
-        </div>
-        <div className="flex-1 text-right">
-          <p className="font-bold text-cream">{dua.author}</p>
-          <p className="font-amiri text-cream/90 text-lg mt-2">{dua.text}</p>
-        </div>
-      </div>
-      <div className="mt-4 pt-4 border-t border-gold/10 flex justify-end items-center gap-4">
-        <span className="text-sm text-gold tabular-nums">{amenCount.toLocaleString('ar')}</span>
-        <Button
-          onClick={handleAmenClick}
-          variant="ghost"
-          className={cn(
-            "flex items-center gap-2 transition-colors",
-            isAmened ? "text-gold" : "text-cream/60 hover:text-gold"
-          )}
-        >
-          <HandHeart className={cn("w-5 h-5", isAmened && "fill-current")} />
-          <span>{isAmened ? 'تم التأمين' : 'آمين'}</span>
-        </Button>
-      </div>
-    </div>
-  );
-};
 
-export default CommunityDuaCard;
+        {dua.category && (
+          <div className="mt-4">
+            <span className="inline-block px-3 py-1 bg-gold/10 text-gold text-xs rounded-full">
+              {dua.category}
+            </span>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
