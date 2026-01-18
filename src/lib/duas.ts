@@ -7,6 +7,15 @@ export interface Dua {
   audioUrl?: string;
 }
 
+// أضف هذا Interface الجديد
+export interface CommunityDua {
+  id: string;
+  text: string;
+  author: string;
+  category: string;
+  likes: number;
+  timestamp: number;
+}
 export const dailyDuas: Dua[] = [
     { id: 1, day: 1, arabicTitle: "دعاء اليوم الأول", dua: "اللَّهُمَّ اجْعَلْ صِيَامِي فِيهِ صِيَامَ الصَّائِمِينَ وَ قِيَامِي فِيهِ قِيَامَ الْقَائِمِينَ، وَ نَبِّهْنِي فِيهِ عَنْ نَوْمَةِ الْغَافِلِينَ، وَ اغْفِرْ لِي ذَنْبِي فِيهِ يَا إِلَهَ الْعَالَمِينَ، وَ اعْفُ عَنِّي يَا عَافِياً عَنِ الْمُجْرِمِينَ.", category: ["myself"], audioUrl: "/audio/day1.mp3" },
     { id: 2, day: 2, arabicTitle: "دعاء اليوم الثاني", dua: "اللَّهُمَّ قَرِّبْنِي فِيهِ إِلَى مَرْضَاتِكَ، وَ جَنِّبْنِي فِيهِ مِنْ سَخَطِكَ وَ نَقِمَاتِكَ، وَ وَفِّقْنِي فِيهِ لِقِرَاءَةِ آيَاتِكَ، بِرَحْمَتِكَ يَا أَرْحَمَ الرَّاحِمِينَ.", category: ["myself"], audioUrl: "/audio/day2.mp3" },
