@@ -242,10 +242,11 @@ export const ramadanReflections: Reflection[] = [
     reflection: "ارحم الضعفاء والفقراء والمساكين واليتامى. أطعم الجائع، واكسُ العاري، وساعد المحتاج. فمن لا يرحم لا يُرحم، والراحمون يرحمهم الرحمن. ارحموا من في الأرض يرحمكم من في السماء.",
     dua: "اللهم ارحمني برحمتك الواسعة",
     category: "أخلاق"
-  },
-  {
+  }
+];
 
-export function getRandomReflection(): Reflection {
+// Helper function to get a random reflection - استخدم const بدلاً من function
+export const getRandomReflection = (): Reflection => {
   const randomIndex = Math.floor(Math.random() * ramadanReflections.length);
   return ramadanReflections[randomIndex];
-}
+};
