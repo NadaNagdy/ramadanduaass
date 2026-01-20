@@ -9,7 +9,7 @@ interface HeroAvatarProps {
 }
 
 const HeroAvatar: React.FC<HeroAvatarProps> = ({
-  size = 300,
+  size = 200,
   className = '',
   isSpeaking = false,
 }) => {
@@ -23,77 +23,209 @@ const HeroAvatar: React.FC<HeroAvatarProps> = ({
     }
 
     const interval = setInterval(() => {
-      setMouthState((prev) => (prev === 2 ? 1 : prev + 1));
+      setMouthState((prev) => (prev === 2 ? 0 : prev + 1));
     }, 300);
 
     return () => clearInterval(interval);
   }, [isSpeaking]);
 
   return (
-    <div
-      className={`relative w-[${size}px] h-[${size}px] ${className}`}
-      style={{ width: size, height: size }}
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 200 200"
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
     >
-      {/* Circle background / Shadow */}
-      <div
-        className="absolute inset-0 rounded-full"
-        style={{
-          background: 'radial-gradient(circle at center, #ffe8d6 0%, #f5d0b8 100%)',
-        }}
-      />
+      {/* Background Circle */}
+      <defs>
+        <radialGradient id="bg-gradient" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#FFE8D6" />
+          <stop offset="100%" stopColor="#F5D0B8" />
+        </radialGradient>
+      </defs>
+      
+      <circle cx="100" cy="100" r="95" fill="url(#bg-gradient)" />
 
-      {/* Hijab */}
-      <div
-        className="absolute top-0 left-0 w-full h-full rounded-full"
-        style={{
-          background: 'linear-gradient(180deg, #f5e0c8 0%, #e0cbbf 100%)',
-          zIndex: 1,
-        }}
+      {/* Hijab Back Layer */}
+      <ellipse
+        cx="100"
+        cy="90"
+        rx="75"
+        ry="85"
+        fill="#E6C9B3"
       />
-
-      {/* Flower crown */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 flex space-x-1 z-10">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div
-            key={i}
-            style={{
-              width: 10,
-              height: 10,
-              borderRadius: '50%',
-              backgroundColor: `hsl(${100 + i * 20}, 70%, 60%)`,
-            }}
-          />
-        ))}
-      </div>
+      
+      {/* Hijab Front Layers with draping effect */}
+      <path
+        d="M 40 90 Q 40 60 100 50 Q 160 60 160 90 L 160 130 Q 100 140 40 130 Z"
+        fill="#F5E0C8"
+      />
+      
+      {/* Hijab shadow/fold */}
+      <path
+        d="M 50 95 Q 75 100 100 95 Q 125 100 150 95"
+        stroke="#D4B5A0"
+        strokeWidth="1.5"
+        fill="none"
+        opacity="0.4"
+      />
 
       {/* Face */}
-      <div
-        className="absolute top-1/3 left-1/2 -translate-x-1/2 w-3/4 h-2/3 rounded-full"
-        style={{ backgroundColor: '#ffd6b3', zIndex: 2 }}
-      >
-        {/* Eyes */}
-        <div className="absolute top-1/3 left-1/4 w-6 h-6 rounded-full bg-brown-800">
-          <div className="absolute w-3 h-3 rounded-full bg-black top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-        </div>
-        <div className="absolute top-1/3 right-1/4 w-6 h-6 rounded-full bg-brown-800">
-          <div className="absolute w-3 h-3 rounded-full bg-black top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-        </div>
-
-        {/* Eyebrows */}
-        <div className="absolute top-1/4 left-1/4 w-6 h-1 rounded-full bg-brown-700 rotate-3" />
-        <div className="absolute top-1/4 right-1/4 w-6 h-1 rounded-full bg-brown-700 -rotate-3" />
-
-        {/* Mouth */}
-        <div
-          className="absolute bottom-1/4 left-1/2 -translate-x-1/2 rounded-full"
-          style={{
-            width: 20,
-            height: mouthState === 0 ? 2 : mouthState === 1 ? 6 : 4,
-            backgroundColor: '#d97d7d',
-          }}
+      <ellipse
+        cx="100"
+        cy="115"
+        rx="48"
+        ry="58"
+        fill="#FFD6B3"
+      />
+      
+      {/* Left Eyebrow */}
+      <path
+        d="M 72 98 Q 77 95 85 96"
+        stroke="#8B4513"
+        strokeWidth="3"
+        strokeLinecap="round"
+        fill="none"
+      />
+      
+      {/* Right Eyebrow */}
+      <path
+        d="M 115 96 Q 123 95 128 98"
+        stroke="#8B4513"
+        strokeWidth="3"
+        strokeLinecap="round"
+        fill="none"
+      />
+      
+      {/* Left Eye */}
+      <ellipse
+        cx="80"
+        cy="108"
+        rx="9"
+        ry="13"
+        fill="white"
+      />
+      <ellipse
+        cx="80"
+        cy="110"
+        rx="7"
+        ry="10"
+        fill="#5D4037"
+      />
+      <circle
+        cx="82"
+        cy="108"
+        r="2.5"
+        fill="white"
+      />
+      
+      {/* Right Eye */}
+      <ellipse
+        cx="120"
+        cy="108"
+        rx="9"
+        ry="13"
+        fill="white"
+      />
+      <ellipse
+        cx="120"
+        cy="110"
+        rx="7"
+        ry="10"
+        fill="#5D4037"
+      />
+      <circle
+        cx="122"
+        cy="108"
+        r="2.5"
+        fill="white"
+      />
+      
+      {/* Nose */}
+      <path
+        d="M 100 118 L 98 125 Q 100 127 102 125 Z"
+        fill="#E6A57E"
+        opacity="0.3"
+      />
+      <circle
+        cx="98"
+        cy="125"
+        r="1.5"
+        fill="#D4906B"
+        opacity="0.5"
+      />
+      
+      {/* Left Blush */}
+      <ellipse
+        cx="67"
+        cy="125"
+        rx="10"
+        ry="7"
+        fill="#FFB6B9"
+        opacity="0.5"
+      />
+      
+      {/* Right Blush */}
+      <ellipse
+        cx="133"
+        cy="125"
+        rx="10"
+        ry="7"
+        fill="#FFB6B9"
+        opacity="0.5"
+      />
+      
+      {/* Mouth - changes based on speaking state */}
+      {mouthState === 0 && (
+        <path
+          d="M 88 138 Q 100 142 112 138"
+          stroke="#D97D7D"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          fill="none"
         />
-      </div>
-    </div>
+      )}
+      
+      {mouthState === 1 && (
+        <ellipse
+          cx="100"
+          cy="140"
+          rx="8"
+          ry="6"
+          fill="#D97D7D"
+        />
+      )}
+      
+      {mouthState === 2 && (
+        <ellipse
+          cx="100"
+          cy="140"
+          rx="6"
+          ry="4"
+          fill="#D97D7D"
+        />
+      )}
+      
+      {/* Neck/Shoulders */}
+      <path
+        d="M 60 165 Q 100 175 140 165 L 145 200 L 55 200 Z"
+        fill="#F5E0C8"
+      />
+      
+      {/* Clothing detail */}
+      <path
+        d="M 50 175 Q 100 185 150 175 L 160 200 L 40 200 Z"
+        fill="#E6C9B3"
+      />
+
+      {/* Optional flower decoration on hijab */}
+      <g opacity="0.6">
+        <circle cx="130" cy="70" r="4" fill="#FFB6B9" />
+        <circle cx="125" cy="75" r="3.5" fill="#FFD6B9" />
+        <circle cx="135" cy="75" r="3.5" fill="#FFE8D6" />
+      </g>
+    </svg>
   );
 };
 
