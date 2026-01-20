@@ -29,7 +29,6 @@ export interface DailyDua {
   meaning?: string;
   source?: string;
   category?: string;
-  timeOfDay?: 'morning' | 'evening' | 'night' | 'anytime';
 }
 
 export const dailyDuas: Dua[] = [
@@ -90,75 +89,6 @@ export const categoryDuas: Record<string, string[]> = {
    ]
 };
   
-    export const dailyDuas: DailyDua[] = [
-  {
-    id: '1',
-    title: 'Morning Dua',
-    arabicTitle: 'دعاء الصباح',
-    dua: 'أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ',
-    transliteration: 'Asbahna wa asbahal-mulku lillah, walhamdu lillah',
-    meaning: 'أصبحنا وأصبح الملك لله، والحمد لله',
-    source: 'أذكار الصباح',
-    category: 'صباح',
-    timeOfDay: 'morning'
-  },
-  {
-    id: '2',
-    title: 'Evening Dua',
-    arabicTitle: 'دعاء المساء',
-    dua: 'أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ',
-    transliteration: 'Amsayna wa amsal-mulku lillah, walhamdu lillah',
-    meaning: 'أمسينا وأمسى الملك لله، والحمد لله',
-    source: 'أذكار المساء',
-    category: 'مساء',
-    timeOfDay: 'evening'
-  },
-  {
-    id: '3',
-    title: 'Before Sleep',
-    arabicTitle: 'دعاء النوم',
-    dua: 'بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا',
-    transliteration: 'Bismika Allahumma amutu wa ahya',
-    meaning: 'باسمك اللهم أموت وأحيا',
-    source: 'أذكار النوم',
-    category: 'نوم',
-    timeOfDay: 'night'
-  },
-  {
-    id: '4',
-    title: 'Upon Waking',
-    arabicTitle: 'دعاء الاستيقاظ',
-    dua: 'الْحَمْدُ لِلَّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ',
-    transliteration: 'Alhamdu lillahil-ladhi ahyana ba\'da ma amatana wa ilayhin-nushur',
-    meaning: 'الحمد لله الذي أحيانا بعد ما أماتنا وإليه النشور',
-    source: 'دعاء الاستيقاظ',
-    category: 'صباح',
-    timeOfDay: 'morning'
-  },
-  {
-    id: '5',
-    title: 'Before Eating',
-    arabicTitle: 'دعاء الطعام',
-    dua: 'بِسْمِ اللَّهِ',
-    transliteration: 'Bismillah',
-    meaning: 'باسم الله',
-    source: 'سنة نبوية',
-    category: 'طعام',
-    timeOfDay: 'anytime'
-  },
-  {
-    id: '6',
-    title: 'After Eating',
-    arabicTitle: 'دعاء بعد الطعام',
-    dua: 'الْحَمْدُ لِلَّهِ الَّذِي أَطْعَمَنَا وَسَقَانَا وَجَعَلَنَا مُسْلِمِينَ',
-    transliteration: 'Alhamdu lillahil-ladhi at\'amana wa saqana wa ja\'alana muslimin',
-    meaning: 'الحمد لله الذي أطعمنا وسقانا وجعلنا مسلمين',
-    source: 'سنة نبوية',
-    category: 'طعام',
-    timeOfDay: 'anytime'
-  }
-];
-
 export function getDailyDuas(timeOfDay?: string): DailyDua[] {
   if (!timeOfDay) return dailyDuas;
   return dailyDuas.filter(dua => dua.timeOfDay === timeOfDay || dua.timeOfDay === 'anytime');
