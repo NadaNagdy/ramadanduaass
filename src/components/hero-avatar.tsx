@@ -9,9 +9,9 @@ interface HeroAvatarProps {
 }
 
 const HeroAvatar: React.FC<HeroAvatarProps> = ({
-  isSpeaking = false,
-  size = 320,
-  className = '',
+  isSpeaking={true}
+  size={400}
+  className="border-2 border-red-500",
 }) => {
   const [blink, setBlink] = useState(false);
   const [mouthState, setMouthState] = useState(0);
