@@ -22,7 +22,6 @@ export default function AiDuaClient() {
   const [isTyping, setIsTyping] = useState(false);
   const { toast } = useToast();
 
-  // كشف الكتابة لتفعيل HeroAvatar
   useEffect(() => {
     if (intention.length > 0) {
       setIsTyping(true);
@@ -78,8 +77,9 @@ export default function AiDuaClient() {
   const handleShare = () => {
     if (!generatedDua) return;
 
+    // ✅ استخدام window داخل client فقط
     const duaText = generatedDua.duaText;
-    const shareUrl = window.location.href; // هنا آمن لأنه client فقط
+    const shareUrl = window.location.href;
     const socialMedia = {
       twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(duaText)}&url=${encodeURIComponent(shareUrl)}`,
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(duaText)}`,
@@ -95,7 +95,7 @@ export default function AiDuaClient() {
 
   return (
     <div className="min-h-screen bg-hero-gradient pt-32 pb-20 px-4 relative overflow-hidden">
-      {/* ... نفس البقية بدون تغيير ... */}
+      {/* نفس باقي الكود بدون تغيير */}
     </div>
   );
 }
