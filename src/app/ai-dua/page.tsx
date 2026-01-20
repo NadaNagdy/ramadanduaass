@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import DuaCard from '@/components/dua-card';
-import HeroAvatar from '@/components/hero-avatar'; // المسار الصح للملف
+import HeroAvatar from '@/components/hero-avatar';
 
 type RephraseDuaOutput = {
   duaText: string;
@@ -20,7 +20,13 @@ export default function AiDuaPage() {
   const [generatedDua, setGeneratedDua] = useState<RephraseDuaOutput | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [isClient, setIsClient] = useState(false); // ✅ لتحديد إذا الصفحة على المتصفح
   const { toast } = useToast();
+
+  // تحديد أن الصفحة على المتصفح
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // كشف الكتابة لتفعيل HeroAvatar
   useEffect(() => {
@@ -43,10 +49,10 @@ export default function AiDuaPage() {
       });
       return;
     }
-    
+
     setIsGenerating(true);
     setGeneratedDua(null);
-    
+
     try {
       const response = await fetch('/api/rephrase-dua', {
         method: 'POST',
@@ -76,7 +82,7 @@ export default function AiDuaPage() {
   };
 
   const handleShare = () => {
-    if (!generatedDua) return;
+    if (!generatedDua || !isClient) return; // ✅ تأكد أننا على المتصفح قبل استخدام window
 
     const duaText = generatedDua.duaText;
     const shareUrl = window.location.href;
@@ -199,3 +205,4 @@ export default function AiDuaPage() {
     </div>
   );
 }
+
