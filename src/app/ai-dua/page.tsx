@@ -1,12 +1,13 @@
-"use client";
+'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FloatingStars, DecorativeDivider, Lantern } from '@/components/islamic-decorations';
 import { Send, Sparkles, Loader2, RefreshCw, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import DuaCard from '@/components/dua-card';
+import HeroAvatar from '@/components/hero-avatar'; // المسار الصح للملف
 
 type RephraseDuaOutput = {
   duaText: string;
@@ -18,7 +19,19 @@ export default function AiDuaPage() {
   const [intention, setIntention] = useState('');
   const [generatedDua, setGeneratedDua] = useState<RephraseDuaOutput | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
   const { toast } = useToast();
+
+  // كشف الكتابة لتفعيل HeroAvatar
+  useEffect(() => {
+    if (intention.length > 0) {
+      setIsTyping(true);
+      const timer = setTimeout(() => setIsTyping(false), 500);
+      return () => clearTimeout(timer);
+    } else {
+      setIsTyping(false);
+    }
+  }, [intention]);
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,15 +50,11 @@ export default function AiDuaPage() {
     try {
       const response = await fetch('/api/rephrase-dua', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ intention }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to generate dua');
-      }
+      if (!response.ok) throw new Error('Failed to generate dua');
 
       const result = await response.json();
       setGeneratedDua(result);
@@ -60,7 +69,7 @@ export default function AiDuaPage() {
       setIsGenerating(false);
     }
   };
-  
+
   const handleReset = () => {
     setGeneratedDua(null);
     setIntention('');
@@ -76,10 +85,7 @@ export default function AiDuaPage() {
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(duaText)}`,
       whatsapp: `https://api.whatsapp.com/send?text=${encodeURIComponent(duaText + ' ' + shareUrl)}`,
     };
-    const embedCode = `<iframe src="${shareUrl}" width="600" height="400" style="border:none;overflow:hidden;" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>`;
-
     console.log('Share Links:', socialMedia);
-    console.log('Embed Code:', embedCode);
 
     toast({
       title: "مشاركة الدعاء",
@@ -88,19 +94,34 @@ export default function AiDuaPage() {
   };
 
   return (
-    <div className="min-h-screen bg-hero-gradient pt-32 pb-20 px-4">
+    <div className="min-h-screen bg-hero-gradient pt-32 pb-20 px-4 relative overflow-hidden">
       <FloatingStars />
+
       <div className="max-w-3xl mx-auto relative z-10 animate-fade-in">
+        {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-block p-4 bg-gold/10 rounded-full mb-4 animate-float">
             <Sparkles className="w-10 h-10 text-gold" />
           </div>
-          <h1 className="font-amiri text-4xl md:text-5xl font-bold text-gold mb-4">تهادوا الحب غيباً بالدعاء</h1>
+          <h1 className="font-amiri text-4xl md:text-5xl font-bold text-gold mb-4">اصنع دعاءك</h1>
           <p className="text-cream/70 text-lg">
-            اكتب حاجتك أو لمن تحب بصدق، وسيقوم النظام بصياغة دعاء مأثور ومناسب ببركة هذا الشهر
+            اكتب حاجتك أو لمن تحب بصدق، وسيقوم النظام بصياغة دعاء مأثور ومناسب.
           </p>
         </div>
 
+        {/* Avatar */}
+        <div className="flex flex-col items-center mb-8">
+          <HeroAvatar 
+            isSpeaking={isTyping} 
+            size={250} 
+            className="mb-4" 
+          />
+          <p className="text-cream/70 text-lg">
+            {isTyping ? '✍️ تكتب نيتك...' : '🤲 في انتظار نيتك'}
+          </p>
+        </div>
+
+        {/* Form */}
         <form onSubmit={handleGenerate} className="mb-12">
           <div className="relative group h-48">
             <Textarea
@@ -122,6 +143,7 @@ export default function AiDuaPage() {
           </div>
         </form>
 
+        {/* Result */}
         {generatedDua && !isGenerating && (
           <div className="animate-fade-in space-y-8">
             <DecorativeDivider />
