@@ -5,13 +5,13 @@ import React, { useState, useEffect } from 'react';
 interface HeroAvatarProps {
   size?: number;
   className?: string;
+  isSpeaking?: boolean;
 }
 
-const HeroAvatar: React.FC<HeroAvatarProps> = ({ size = 300, className = '' }) => {
+const HeroAvatar: React.FC<HeroAvatarProps> = ({ size = 300, className = '', isSpeaking = false }) => {
   const [blink, setBlink] = useState(false);
   const [mouthState, setMouthState] = useState(0);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [scrollY, setScrollY] = useState(0);
 
   // Blink animation
   useEffect(() => {
@@ -23,22 +23,27 @@ const HeroAvatar: React.FC<HeroAvatarProps> = ({ size = 300, className = '' }) =
     return () => clearInterval(blinkInterval);
   }, []);
 
-  // Mouth moves with scroll
+  // Mouth animation
   useEffect(() => {
-    const handleScroll = () => {
-      setScrollY(window.scrollY);
-      setMouthState(Math.floor((window.scrollY / 50) % 3));
+    let interval: ReturnType<typeof setInterval>;
+    if (isSpeaking) {
+      interval = setInterval(() => {
+        setMouthState((prev) => (prev + 1) % 3);
+      }, 150);
+    } else {
+      setMouthState(0);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isSpeaking]);
 
-  // Face moves with mouse
+  // Track mouse movement for face movement
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       const rect = document.body.getBoundingClientRect();
-      const x = (e.clientX / rect.width - 0.5) * 2; // -1 to 1
-      const y = (e.clientY / rect.height - 0.5) * 2; // -1 to 1
+      const x = ((e.clientX / window.innerWidth) - 0.5) * 20; // -10 to 10
+      const y = ((e.clientY / window.innerHeight) - 0.5) * 20; // -10 to 10
       setMousePos({ x, y });
     };
     window.addEventListener('mousemove', handleMouseMove);
@@ -48,15 +53,11 @@ const HeroAvatar: React.FC<HeroAvatarProps> = ({ size = 300, className = '' }) =
   return (
     <div
       className={`relative inline-block ${className}`}
-      style={{ width: size, height: size * 1.5 }}
+      style={{ width: size, height: size * 1.4, transform: `translate(${mousePos.x}px, ${mousePos.y}px)` }}
     >
       {/* Glow */}
       <div
-        className={`absolute bottom-0 left-1/4 w-2/3 h-2/3 rounded-full transition-all duration-500`}
-        style={{
-          backgroundColor: scrollY > 0 ? 'rgba(255,200,51,0.4)' : 'rgba(255,200,51,0.2)',
-          transform: scrollY > 0 ? 'scale(1.1)' : 'scale(1)',
-        }}
+        className={`absolute bottom-0 left-1/4 w-2/3 h-2/3 rounded-full transition-all duration-500 ${isSpeaking ? 'bg-yellow-400/40 scale-110' : 'bg-yellow-300/20 scale-100'}`}
       />
 
       <svg viewBox="0 0 200 280" className="relative z-10 w-full h-full">
@@ -78,51 +79,40 @@ const HeroAvatar: React.FC<HeroAvatarProps> = ({ size = 300, className = '' }) =
         />
 
         {/* تاج ورد */}
-        <g transform="translate(100, 30)">
-          <circle cx="-30" cy="0" r="8" fill="#ff6b81" />
-          <circle cx="-15" cy="-5" r="6" fill="#ffb6b9" />
-          <circle cx="0" cy="0" r="7" fill="#ff6b81" />
-          <circle cx="15" cy="-5" r="6" fill="#ffb6b9" />
-          <circle cx="30" cy="0" r="8" fill="#ff6b81" />
-        </g>
+        <circle cx="60" cy="60" r="6" fill="#ff7eb9" />
+        <circle cx="100" cy="50" r="8" fill="#ffb347" />
+        <circle cx="140" cy="60" r="6" fill="#ff7eb9" />
 
-        {/* الوجه يتحرك مع الماوس */}
-        <g
-          transform={`translate(${100 + mousePos.x * 10}, ${120 + mousePos.y * 10})`}
-        >
-          {/* Face */}
-          <ellipse cx="0" cy="0" rx="55" ry="70" fill="url(#skin)" />
+        {/* الوجه */}
+        <ellipse cx="100" cy="120" rx="55" ry="70" fill="url(#skin)" />
 
-          {/* الحواجب */}
-          <path d="M-35 -25 Q-25 -35 -15 -25" stroke="#3e2723" strokeWidth="3" strokeLinecap="round" />
-          <path d="M15 -25 Q25 -35 35 -25" stroke="#3e2723" strokeWidth="3" strokeLinecap="round" />
+        {/* الحواجب */}
+        <path d="M65 100 Q75 90 85 100" stroke="#3e2723" strokeWidth="3" strokeLinecap="round" />
+        <path d="M115 100 Q125 90 135 100" stroke="#3e2723" strokeWidth="3" strokeLinecap="round" />
 
-          {/* العيون + رموش */}
-          {blink ? (
-            <>
-              <line x1="-25" y1="0" x2="-5" y2="0" stroke="#3e2723" strokeWidth="3" strokeLinecap="round" />
-              <line x1="5" y1="0" x2="25" y2="0" stroke="#3e2723" strokeWidth="3" strokeLinecap="round" />
-            </>
-          ) : (
-            <>
-              <circle cx="-20" cy="0" r="8" fill="url(#eyeGrad)" />
-              <circle cx="20" cy="0" r="8" fill="url(#eyeGrad)" />
-              <circle cx="-20" cy="0" r="4" fill="#000" />
-              <circle cx="20" cy="0" r="4" fill="#000" />
-              {/* رموش */}
-              <line x1="-27" y1="-8" x2="-21" y2="-5" stroke="#3e2723" strokeWidth="1.5" />
-              <line x1="-13" y1="-8" x2="-9" y2="-5" stroke="#3e2723" strokeWidth="1.5" />
-              <line x1="13" y1="-8" x2="17" y2="-5" stroke="#3e2723" strokeWidth="1.5" />
-              <line x1="27" y1="-8" x2="33" y2="-5" stroke="#3e2723" strokeWidth="1.5" />
-            </>
-          )}
+        {/* العيون ورموش */}
+        {blink ? (
+          <>
+            <line x1="70" y1="120" x2="90" y2="120" stroke="#3e2723" strokeWidth="3" strokeLinecap="round" />
+            <line x1="110" y1="120" x2="130" y2="120" stroke="#3e2723" strokeWidth="3" strokeLinecap="round" />
+          </>
+        ) : (
+          <>
+            <circle cx="75" cy="120" r="8" fill="url(#eyeGrad)" />
+            <circle cx="125" cy="120" r="8" fill="url(#eyeGrad)" />
+            <circle cx="75" cy="120" r="4" fill="#000" />
+            <circle cx="125" cy="120" r="4" fill="#000" />
+            {/* رموش */}
+            <line x1="70" y1="112" x2="75" y2="108" stroke="#3e2723" strokeWidth="1.5" />
+            <line x1="125" y1="112" x2="130" y2="108" stroke="#3e2723" strokeWidth="1.5" />
+          </>
+        )}
 
-          {/* Mouth */}
-          <g transform="translate(0, 40)">
-            {mouthState === 0 && <path d="M-10 0 Q0 5 10 0" stroke="#c1727a" strokeWidth="3" fill="none" />}
-            {mouthState === 1 && <path d="M-10 0 Q0 10 10 0 Q0 5 -10 0Z" fill="#c1727a" />}
-            {mouthState === 2 && <path d="M-12 0 Q0 15 12 0 Q0 7 -12 0Z" fill="#c1727a" />}
-          </g>
+        {/* Mouth */}
+        <g transform="translate(100, 160)">
+          {mouthState === 0 && <path d="M-10 0 Q0 5 10 0" stroke="#c1727a" strokeWidth="3" fill="none" />}
+          {mouthState === 1 && <path d="M-10 0 Q0 10 10 0 Q0 5 -10 0Z" fill="#c1727a" />}
+          {mouthState === 2 && <path d="M-12 0 Q0 15 12 0 Q0 7 -12 0Z" fill="#c1727a" />}
         </g>
       </svg>
     </div>
@@ -130,3 +120,4 @@ const HeroAvatar: React.FC<HeroAvatarProps> = ({ size = 300, className = '' }) =
 };
 
 export default HeroAvatar;
+
