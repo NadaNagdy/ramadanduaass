@@ -8,15 +8,38 @@ interface HeroAvatarProps {
   isSpeaking?: boolean;
 }
 
-const HeroAvatar: React.FC<HeroAvatarProps> = ({ size = 300, className = '', isSpeaking = false }) => {
+const HeroAvatar: React.FC<HeroAvatarProps> = ({
+  size = 300,
+  className = '',
+  isSpeaking = false,
+}) => {
   const [mouthState, setMouthState] = useState(0);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
+  // Animate mouth when speaking
+  useEffect(() => {
+    if (!isSpeaking) {
+      setMouthState(0);
+      return;
+    }
 
-      {/* CIRCLE BACKGROUND / SHADOW */}
+    const interval = setInterval(() => {
+      setMouthState((prev) => (prev === 2 ? 1 : prev + 1));
+    }, 300);
+
+    return () => clearInterval(interval);
+  }, [isSpeaking]);
+
+  return (
+    <div
+      className={`relative w-[${size}px] h-[${size}px] ${className}`}
+      style={{ width: size, height: size }}
+    >
+      {/* Circle background / Shadow */}
       <div
-        className={`absolute inset-0 rounded-full`}
-        style={{ background: 'radial-gradient(circle at center, #ffe8d6 0%, #f5d0b8 100%)' }}
+        className="absolute inset-0 rounded-full"
+        style={{
+          background: 'radial-gradient(circle at center, #ffe8d6 0%, #f5d0b8 100%)',
+        }}
       />
 
       {/* Hijab */}
@@ -28,7 +51,7 @@ const HeroAvatar: React.FC<HeroAvatarProps> = ({ size = 300, className = '', isS
         }}
       />
 
-      {/* Flower Crown */}
+      {/* Flower crown */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 flex space-x-1 z-10">
         {Array.from({ length: 5 }).map((_, i) => (
           <div
@@ -55,17 +78,18 @@ const HeroAvatar: React.FC<HeroAvatarProps> = ({ size = 300, className = '', isS
         <div className="absolute top-1/3 right-1/4 w-6 h-6 rounded-full bg-brown-800">
           <div className="absolute w-3 h-3 rounded-full bg-black top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
         </div>
+
         {/* Eyebrows */}
         <div className="absolute top-1/4 left-1/4 w-6 h-1 rounded-full bg-brown-700 rotate-3" />
         <div className="absolute top-1/4 right-1/4 w-6 h-1 rounded-full bg-brown-700 -rotate-3" />
+
         {/* Mouth */}
         <div
-          className="absolute bottom-1/4 left-1/2 -translate-x-1/2"
+          className="absolute bottom-1/4 left-1/2 -translate-x-1/2 rounded-full"
           style={{
             width: 20,
             height: mouthState === 0 ? 2 : mouthState === 1 ? 6 : 4,
             backgroundColor: '#d97d7d',
-            borderRadius: 10,
           }}
         />
       </div>
