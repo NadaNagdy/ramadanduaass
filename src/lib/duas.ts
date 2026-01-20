@@ -20,15 +20,10 @@ export interface CommunityDua {
   amens?: number;
 }
 
-export interface DailyDua {
-  id: string;
-  title: string;
-  arabicTitle: string;
-  dua: string;
-  transliteration?: string;
-  meaning?: string;
-  source?: string;
-  category?: string;
+type DailyDua = {
+  title?: string;
+  text: string;
+  timeOfDay?: string;
 }
 
 export const dailyDuas: Dua[] = [
