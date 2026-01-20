@@ -154,3 +154,15 @@ export const categoryDuas: Record<string, string[]> = {
     "'ربنا هب لنا من أزواجنا وذرياتنا قرة أعين واجعلنا للمتقين إماما'."
   ]
 };
+export interface CommunityDua {
+  id: string;
+  text: string;
+  author: string;
+  category: string;
+  likes: number;
+  timestamp: number;
+  isGolden?: boolean;
+  amens?: number;
+}
+
+export const communityDuas: CommunityDua[] = [];
