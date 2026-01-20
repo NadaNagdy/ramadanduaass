@@ -23,15 +23,17 @@ const HeroAvatar: React.FC<HeroAvatarProps> = ({ isSpeaking = false, size = 300,
 
   // Mouth animation
   useEffect(() => {
-    let interval: NodeJS.Timer | null = null;
+    let interval: NodeJS.Timer;
+
     if (isSpeaking) {
       interval = setInterval(() => {
         setMouthState((prev) => (prev + 1) % 3);
       }, 150);
-    } else {
-      setMouthState(0);
     }
-    return () => interval && clearInterval(interval);
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [isSpeaking]);
 
   return (
@@ -39,7 +41,7 @@ const HeroAvatar: React.FC<HeroAvatarProps> = ({ isSpeaking = false, size = 300,
       className={`relative inline-block ${className}`}
       style={{ width: size, height: size * 1.4 }}
     >
-      {/* Glow behind avatar */}
+      {/* Glow */}
       <div
         className={`absolute bottom-0 left-1/4 w-2/3 h-2/3 rounded-full transition-all duration-500 ${isSpeaking ? 'bg-yellow-400/40 scale-110' : 'bg-yellow-300/20 scale-100'}`}
       />
