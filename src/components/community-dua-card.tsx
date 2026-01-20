@@ -1,91 +1,70 @@
-'use client';
+"use client";
 
-import { Card, CardContent } from '@/components/ui/card';
-import { Heart } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import React from 'react';
+import { HandHeart, Star } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { CommunityDua } from '@/lib/duas';
+import { useLocalStorage } from '@/hooks/use-local-storage';
+import { Button } from './ui/button';
 
 interface CommunityDuaCardProps {
   dua: CommunityDua;
-  onLikeChange?: (duaId: string | number, newLikes: number) => void;
 }
 
-export default function CommunityDuaCard({ dua, onLikeChange }: CommunityDuaCardProps) {
-  const [likes, setLikes] = useState(dua.likes || 0);
-  const [isLiked, setIsLiked] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const likedDuas = JSON.parse(localStorage.getItem('liked_duas') || '[]');
-      const duaIdStr = String(dua.id);
-      setIsLiked(likedDuas.includes(duaIdStr));
-    }
-  }, [dua.id]);
-
-  const handleLike = () => {
-    const newLikes = isLiked ? likes - 1 : likes + 1;
-    const newIsLiked = !isLiked;
-    
-    setLikes(newLikes);
-    setIsLiked(newIsLiked);
-
-    if (typeof window !== 'undefined') {
-      const likedDuas = JSON.parse(localStorage.getItem('liked_dus') || '[]');
-      const duaIdStr = String(dua.id);
-      
-      if (newIsLiked) {
-        if (!likedDuas.includes(duaIdStr)) {
-          likedDuas.push(duaIdStr);
-        }
-      } else {
-        const index = likedDuas.indexOf(duaIdStr);
-        if (index > -1) {
-          likedDuas.splice(index, 1);
-        }
-      }
-      
-      localStorage.setItem('liked_duas', JSON.stringify(likedDuas));
-    }
-
-    if (onLikeChange) {
-      onLikeChange(dua.id, newLikes);
+const CommunityDuaCard: React.FC<CommunityDuaCardProps> = ({ dua }) => {
+  const [amenedDuas, setAmenedDuas] = useLocalStorage<string[]>('amened_duas', []); // ✅ Changed to string[]
+  const isAmened = amenedDuas.includes(String(dua.id)); // ✅ Convert to string
+  
+  const handleAmenClick = () => {
+    const duaIdStr = String(dua.id); // ✅ Convert to string
+    if (isAmened) {
+      setAmenedDuas(amenedDuas.filter(id => id !== duaIdStr));
+    } else {
+      setAmenedDuas([...amenedDuas, duaIdStr]);
     }
   };
-
+  
+  const amenCount = (dua.likes || 0) + (isAmened ? 1 : 0); // ✅ Changed from dua.amens to dua.likes
+  
   return (
-    <Card className="bg-card-gradient border-gold/20 rounded-3xl overflow-hidden hover:border-gold/40 transition-all hover:shadow-lg hover:shadow-gold/10">
-      <CardContent className="p-6" dir="rtl">
-        <p className="text-xl font-amiri leading-relaxed text-cream mb-4">
-          {dua.text}
-        </p>
-        
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-gold/70">— {dua.author}</span>
-          
-          <button
-            onClick={handleLike}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all transform hover:scale-105 ${
-              isLiked 
-                ? 'bg-red-500/20 text-red-500' 
-                : 'bg-gold/10 text-gold hover:bg-gold/20'
-            }`}
-            aria-label={isLiked ? 'إلغاء الإعجاب' : 'أعجبني'}
-          >
-            <Heart 
-              className={`w-5 h-5 transition-all ${isLiked ? 'fill-current' : ''}`}
-            />
-            <span className="font-semibold">{likes}</span>
-          </button>
+    <div className={cn(
+      "relative bg-card-gradient rounded-3xl p-6 border transition-all duration-300 shadow-md",
+      dua.isGolden ? "border-gold/50 shadow-gold/10" : "border-gold/20"
+    )}>
+      {dua.isGolden && (
+        <div className="absolute -top-3 -right-3 p-2 bg-gold rounded-full shadow-lg">
+          <Star className="w-5 h-5 text-navy fill-current" />
         </div>
+      )}
+      
+      <div className="flex items-start gap-4">
+        <div className="w-12 h-12 bg-gold/10 rounded-full flex items-center justify-center text-gold font-bold text-xl">
+          {dua.author.charAt(0)}
+        </div>
+        
+        <div className="flex-1 text-right">
+          <p className="font-bold text-cream">{dua.author}</p>
+          <p className="font-amiri text-cream/90 text-lg mt-2">{dua.text}</p>
+        </div>
+      </div>
+      
+      <div className="mt-4 pt-4 border-t border-gold/10 flex justify-end items-center gap-4">
+        <span className="text-sm text-gold tabular-nums">{amenCount.toLocaleString('ar')}</span>
+        
+        <Button
+          onClick={handleAmenClick}
+          variant="ghost"
+          className={cn(
+            "flex items-center gap-2 transition-colors",
+            isAmened ? "text-gold" : "text-cream/60 hover:text-gold"
+          )}
+        >
+          <HandHeart className={cn("w-5 h-5", isAmened && "fill-current")} />
+          <span>{isAmened ? 'تم التأمين' : 'آمين'}</span>
+        </Button>
+      </div>
+    </div>
+  );
+};
 
-        {dua.category && (
-          <div className="mt-4">
-            <span className="inline-block px-3 py-1 bg-gold/10 text-gold text-xs rounded-full">
-              {dua.category}
-            </span>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );  // ✅ إغلاق Card هنا
-}
+export default CommunityDuaCard;
