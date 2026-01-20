@@ -93,6 +93,8 @@ export function getDailyDuas(timeOfDay?: string): DailyDua[] {
   if (!timeOfDay) return dailyDuas;
   return dailyDuas.filter(dua => dua.timeOfDay === timeOfDay || dua.timeOfDay === 'anytime');
 }
+export const communityDuas: CommunityDua[] = [];
+
 
 export function getDailyDuaById(id: string): DailyDua | undefined {
   return dailyDuas.find(dua => dua.id === id);
