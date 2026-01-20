@@ -12,44 +12,7 @@ const HeroAvatar: React.FC<HeroAvatarProps> = ({ size = 300, className = '', isS
   const [mouthState, setMouthState] = useState(0);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
-  // Mouth animation when speaking
-  useEffect(() => {
-    let interval: ReturnType<typeof setInterval> | null = null;
-    if (isSpeaking) {
-      interval = setInterval(() => {
-        setMouthState((prev) => (prev + 1) % 3);
-      }, 150);
-    } else {
-      setMouthState(0);
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isSpeaking]);
 
-  // Mouse tracking for face movement
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePos({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-
-  // Calculate face translation based on mouse
-  const translateX = (mousePos.x / window.innerWidth - 0.5) * 10; // ±5px
-  const translateY = (mousePos.y / window.innerHeight - 0.5) * 10;
-
-  return (
-    <div
-      className={`relative inline-block ${className}`}
-      style={{
-        width: size,
-        height: size * 1.3,
-        transform: `translate(${translateX}px, ${translateY}px)`,
-        transition: 'transform 0.05s ease-out',
-      }}
-    >
       {/* CIRCLE BACKGROUND / SHADOW */}
       <div
         className={`absolute inset-0 rounded-full`}
