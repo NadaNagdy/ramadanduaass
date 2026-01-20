@@ -1,223 +1,202 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { FloatingStars, DecorativeDivider, Lantern } from '@/components/islamic-decorations';
-import { Send, Sparkles, Loader2, RefreshCw, Share2 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import DuaCard from '@/components/dua-card';
-import HeroAvatar from '@/components/hero-avatar';
+import { Feather, Sparkles, Moon, Star, Send } from 'lucide-react';
 
-type RephraseDuaOutput = {
-  duaText: string;
-  simplifiedMeaning: string;
-  spiritualTouch: string;
-};
+/* =========================
+   Hero Avatar Types
+========================= */
+interface HeroAvatarProps {
+  isSpeaking?: boolean;
+  size?: number;
+  className?: string;
+}
 
-export default function AiDuaClient() {
-  const [intention, setIntention] = useState('');
-  const [generatedDua, setGeneratedDua] = useState<RephraseDuaOutput | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [isTyping, setIsTyping] = useState(false);
-  const { toast } = useToast();
+/* =========================
+   Hero Avatar Component
+========================= */
+const HeroAvatar = ({
+  isSpeaking = false,
+  size = 420,
+  className = '',
+}: HeroAvatarProps) => {
+  const [blink, setBlink] = useState(false);
+  const [mouthState, setMouthState] = useState(0);
 
   useEffect(() => {
-    if (intention.length > 0) {
-      setIsTyping(true);
-      const timer = setTimeout(() => setIsTyping(false), 500);
-      return () => clearTimeout(timer);
+    const blinkInterval = setInterval(() => {
+      setBlink(true);
+      setTimeout(() => setBlink(false), 180);
+    }, 4500);
+    return () => clearInterval(blinkInterval);
+  }, []);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (isSpeaking) {
+      interval = setInterval(() => {
+        setMouthState((prev) => (prev + 1) % 4);
+      }, 110);
     } else {
-      setIsTyping(false);
+      setMouthState(0);
     }
-  }, [intention]);
-
-  const handleGenerate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!intention.trim()) {
-      toast({
-        variant: "destructive",
-        title: "خطأ",
-        description: "الرجاء كتابة نيتك أولاً.",
-      });
-      return;
-    }
-
-    setIsGenerating(true);
-    setGeneratedDua(null);
-
-    try {
-      const response = await fetch('/api/rephrase-dua', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ intention }),
-      });
-
-      if (!response.ok) throw new Error('Failed to generate dua');
-
-      const result = await response.json();
-      setGeneratedDua(result);
-    } catch (error) {
-      console.error(error);
-      toast({
-        variant: "destructive",
-        title: "حدث خطأ",
-        description: "لم نتمكن من إنشاء الدعاء، يرجى التأكد من إعدادات مفتاح API والمحاولة مرة أخرى.",
-      });
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  const handleReset = () => {
-    setGeneratedDua(null);
-    setIntention('');
-  };
-
-  const handleShare = () => {
-    if (!generatedDua) return;
-    
-    const duaText = generatedDua.duaText;
-    const shareUrl = window.location.href;
-    
-    const socialMedia = {
-      twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(duaText)}&url=${encodeURIComponent(shareUrl)}`,
-      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(duaText)}`,
-      whatsapp: `https://api.whatsapp.com/send?text=${encodeURIComponent(duaText + ' ' + shareUrl)}`,
+    return () => {
+      if (interval) clearInterval(interval);
     };
-
-    console.log('Share Links:', socialMedia);
-    
-    toast({
-      title: "مشاركة الدعاء",
-      description: "يمكنك الآن مشاركة الدعاء عبر مواقع التواصل الاجتماعي أو تضمينه في موقعك.",
-    });
-  };
+  }, [isSpeaking]);
 
   return (
-    <div className="min-h-screen bg-hero-gradient pt-32 pb-20 px-4 relative overflow-hidden">
-      <FloatingStars />
-      
-      <div className="container mx-auto max-w-4xl relative z-10">
-        {/* Header */}
-        <div className="text-center mb-12 animate-fade-in">
-          <Lantern className="w-20 h-20 text-gold mx-auto mb-6" />
-          <h1 className="font-amiri text-5xl text-cream mb-4">
-            <Sparkles className="inline-block w-8 h-8 ml-2 text-gold" />
-            دعاء بالذكاء الاصطناعي
-          </h1>
-          <p className="text-cream/70 text-lg max-w-2xl mx-auto">
-            اكتب نيتك وحاجتك، وسنساعدك في صياغة دعاء جميل بإذن الله
-          </p>
-          <DecorativeDivider className="mt-6" />
-        </div>
+    <div
+      className={`relative inline-block transition-all duration-1000 ${
+        isSpeaking ? 'scale-[1.02]' : 'animate-float'
+      } ${className}`}
+      style={{ width: size, height: size * 1.3 }}
+    >
+      <div
+        className={`absolute bottom-1/3 left-1/4 w-2/3 h-2/3 rounded-full blur-[120px] transition-all duration-1000 ${
+          isSpeaking
+            ? 'bg-[#ffcc33]/40 scale-125'
+            : 'bg-[#d4af37]/20 scale-100'
+        }`}
+      />
 
-        {/* Input Form */}
-        <div className="bg-navy/40 backdrop-blur-sm rounded-3xl p-8 border border-gold/20 shadow-2xl mb-8 animate-slide-up">
-          <div className="mb-6">
-            <label className="block text-cream font-amiri text-xl mb-3 text-right">
-              ما هي نيتك؟
-            </label>
-            <Textarea
-              value={intention}
-              onChange={(e) => setIntention(e.target.value)}
-              placeholder="مثال: أريد دعاء للنجاح في الدراسة، أو دعاء لشفاء والدتي، أو دعاء للتوفيق في عمل..."
-              className="w-full min-h-[150px] p-4 bg-navy/60 border-gold/30 text-cream placeholder:text-cream/40 rounded-xl text-right font-amiri text-lg resize-none focus:border-gold focus:ring-2 focus:ring-gold/20"
-              disabled={isGenerating}
+      <svg
+        viewBox="0 0 200 260"
+        xmlns="http://www.w3.org/2000/svg"
+        className="relative z-10 w-full h-full drop-shadow-[0_35px_50px_rgba(0,0,0,0.6)]"
+      >
+        <defs>
+          <radialGradient id="skinBase" cx="100" cy="100" r="80">
+            <stop offset="0%" stopColor="#fffaf5" />
+            <stop offset="50%" stopColor="#ffe8d6" />
+            <stop offset="100%" stopColor="#f5d0b8" />
+          </radialGradient>
+
+          <linearGradient id="hairTexture" x1="100" y1="40" x2="100" y2="240">
+            <stop offset="0%" stopColor="#4a3228" />
+            <stop offset="50%" stopColor="#3d2617" />
+            <stop offset="100%" stopColor="#2a1a0f" />
+          </linearGradient>
+
+          <radialGradient id="eyeDeep" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#6d4c41" />
+            <stop offset="60%" stopColor="#3e2723" />
+            <stop offset="100%" stopColor="#1a0f0a" />
+          </radialGradient>
+        </defs>
+
+        {/* Hair Back */}
+        <path
+          d="M30 95C15 125 10 185 20 220C35 252 65 258 100 258C135 258 165 252 180 220C190 185 185 125 170 95"
+          fill="#1a0f0a"
+        />
+
+        {/* Dress */}
+        <path
+          d="M45 195C20 215 15 260 15 260H185C185 260 180 215 155 195L100 185L45 195Z"
+          fill="#fcfaf7"
+        />
+
+        {/* Face */}
+        <ellipse cx="100" cy="105" rx="52" ry="58" fill="url(#skinBase)" />
+
+        {/* Eyes */}
+        <g transform="translate(100, 103)">
+          {blink ? (
+            <path
+              d="M-36 -2Q-22 4 -8 -2 M8 -2Q22 4 36 -2"
+              stroke="#3e2723"
+              strokeWidth="3.5"
+              strokeLinecap="round"
             />
-            {isTyping && (
-              <p className="text-cream/50 text-sm mt-2 text-right">جاري الكتابة...</p>
-            )}
-          </div>
+          ) : (
+            <>
+              <circle cx="-23" cy="0" r="10" fill="url(#eyeDeep)" />
+              <circle cx="23" cy="0" r="10" fill="url(#eyeDeep)" />
+            </>
+          )}
+        </g>
+      </svg>
+    </div>
+  );
+};
 
-          <div className="flex gap-3">
-            <Button
-              onClick={handleGenerate}
-              disabled={isGenerating || !intention.trim()}
-              className="flex-1 bg-gold text-navy font-bold py-6 text-lg rounded-xl hover:bg-gold-light disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105"
-            >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="ml-2 animate-spin" size={20} />
-                  جاري الإنشاء...
-                </>
-              ) : (
-                <>
-                  <Send className="ml-2" size={20} />
-                  أنشئ الدعاء
-                </>
-              )}
-            </Button>
+/* =========================
+   Floating Stars
+========================= */
+const FloatingStars = () => (
+  <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    {[...Array(15)].map((_, i) => (
+      <div
+        key={i}
+        className="absolute animate-pulse"
+        style={{
+          left: `${Math.random() * 100}%`,
+          top: `${Math.random() * 100}%`,
+        }}
+      >
+        <Star className="w-2 h-2 text-yellow-200/30" fill="currentColor" />
+      </div>
+    ))}
+  </div>
+);
 
-            {generatedDua && (
-              <Button
-                onClick={handleReset}
-                variant="outline"
-                className="px-6 py-6 border-gold/30 text-cream hover:bg-gold/10 rounded-xl"
-              >
-                <RefreshCw size={20} />
-              </Button>
-            )}
-          </div>
+/* =========================
+   Crescent Moon
+========================= */
+const CrescentMoon = ({ className = '' }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 100 100" fill="currentColor">
+    <path d="M50,10 A40,40 0 1,0 50,90 A30,30 0 1,1 50,10 Z" />
+  </svg>
+);
+
+/* =========================
+   Page
+========================= */
+export default function AIDuaPage() {
+  const [duaText, setDuaText] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+
+  useEffect(() => {
+    if (duaText.length > 0) {
+      setIsTyping(true);
+      const t = setTimeout(() => setIsTyping(false), 400);
+      return () => clearTimeout(t);
+    }
+  }, [duaText]);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-950 via-blue-900 to-indigo-950 relative overflow-hidden">
+      <FloatingStars />
+
+      <div className="container mx-auto px-4 py-12 max-w-6xl relative z-10">
+        <div className="text-center mb-12">
+          <CrescentMoon className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
+          <h1 className="text-4xl text-amber-50 mb-3 font-serif">
+            صياغة الدعاء
+          </h1>
         </div>
 
-        {/* Generated Dua Display */}
-        {generatedDua && (
-          <div className="animate-fade-in space-y-6">
-            {/* Main Dua Card */}
-            <div className="bg-gradient-to-br from-gold/20 to-navy/40 backdrop-blur-sm rounded-3xl p-8 border-2 border-gold/30 shadow-2xl">
-              <div className="flex items-center justify-between mb-6">
-                <HeroAvatar className="w-12 h-12" />
-                <h2 className="font-amiri text-2xl text-gold">دعاؤك المُقترح</h2>
-              </div>
-              
-              <p className="font-amiri text-3xl text-cream leading-relaxed text-right mb-6">
-                {generatedDua.duaText}
-              </p>
-
-              <DecorativeDivider className="my-6" />
-
-              {/* Meaning Section */}
-              <div className="bg-navy/40 rounded-2xl p-6 mb-4">
-                <h3 className="text-gold font-bold text-lg mb-3 text-right">المعنى المبسط:</h3>
-                <p className="text-cream/90 text-right leading-relaxed">
-                  {generatedDua.simplifiedMeaning}
-                </p>
-              </div>
-
-              {/* Spiritual Touch */}
-              <div className="bg-navy/40 rounded-2xl p-6">
-                <h3 className="text-gold font-bold text-lg mb-3 text-right flex items-center justify-end gap-2">
-                  <Sparkles size={18} />
-                  لمسة روحانية:
-                </h3>
-                <p className="text-cream/90 text-right leading-relaxed italic">
-                  {generatedDua.spiritualTouch}
-                </p>
-              </div>
-
-              {/* Share Button */}
-              <div className="mt-6 text-center">
-                <Button
-                  onClick={handleShare}
-                  className="bg-cream/10 text-cream border border-gold/30 hover:bg-gold/20 px-8 py-3 rounded-xl"
-                >
-                  <Share2 className="ml-2" size={18} />
-                  شارك الدعاء
-                </Button>
-              </div>
-            </div>
-
-            {/* Info Box */}
-            <div className="bg-navy/30 backdrop-blur-sm rounded-2xl p-6 border border-cream/10 text-center">
-              <p className="text-cream/60 text-sm">
-                💡 نذكرك أن الدعاء المقترح هو اجتهاد بشري بمساعدة الذكاء الاصطناعي.
-                يمكنك تعديله كما تشاء، والأهم أن يكون من قلبك.
-              </p>
-            </div>
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="flex justify-center">
+            <HeroAvatar isSpeaking={isTyping} size={420} />
           </div>
-        )}
+
+          <div className="bg-blue-950/40 p-8 rounded-3xl border border-yellow-600/20">
+            <textarea
+              value={duaText}
+              onChange={(e) => setDuaText(e.target.value)}
+              placeholder="اللهم..."
+              className="w-full min-h-[220px] p-5 rounded-2xl bg-blue-950/50 text-amber-50 text-xl"
+              maxLength={500}
+            />
+
+            <button className="mt-6 w-full bg-yellow-600 py-4 rounded-2xl text-blue-950 font-bold">
+              <Send className="inline w-5 h-5 ml-2" />
+              شارك الدعاء
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
