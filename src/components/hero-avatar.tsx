@@ -18,12 +18,13 @@ const HeroAvatar: React.FC<HeroAvatarProps> = ({ isSpeaking = false, size = 300,
       setBlink(true);
       setTimeout(() => setBlink(false), 180);
     }, 4000 + Math.random() * 2000);
+
     return () => clearInterval(blinkInterval);
   }, []);
 
-  // Mouth animation
+  // Mouth animation (تحرك الشفايف أثناء الكلام)
   useEffect(() => {
-    let interval: NodeJS.Timer;
+    let interval: ReturnType<typeof setInterval>;
 
     if (isSpeaking) {
       interval = setInterval(() => {
@@ -41,7 +42,7 @@ const HeroAvatar: React.FC<HeroAvatarProps> = ({ isSpeaking = false, size = 300,
       className={`relative inline-block ${className}`}
       style={{ width: size, height: size * 1.4 }}
     >
-      {/* Glow */}
+      {/* Glow effect */}
       <div
         className={`absolute bottom-0 left-1/4 w-2/3 h-2/3 rounded-full transition-all duration-500 ${isSpeaking ? 'bg-yellow-400/40 scale-110' : 'bg-yellow-300/20 scale-100'}`}
       />
@@ -82,7 +83,7 @@ const HeroAvatar: React.FC<HeroAvatarProps> = ({ isSpeaking = false, size = 300,
           </>
         )}
 
-        {/* Mouth */}
+        {/* Mouth / الشفايف */}
         <g transform="translate(100, 160)">
           {mouthState === 0 && <path d="M-10 0 Q0 5 10 0" stroke="#c1727a" strokeWidth="3" fill="none" />}
           {mouthState === 1 && <path d="M-10 0 Q0 10 10 0 Q0 5 -10 0Z" fill="#c1727a" />}
