@@ -112,7 +112,7 @@ export default function AiDuaPage() {
         {/* Avatar */}
         <div className="flex flex-col items-center mb-8">
           <HeroAvatar 
-            isSpeaking={isTyping} 
+            isSpeaking={!!intention} 
             size={250} 
             className="mb-4" 
           />
