@@ -11,7 +11,7 @@ import { rephraseDua } from '@/ai/flows/rephrase-dua-flow';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import DuaCard from '@/components/dua-card';
 import { toPng } from 'html-to-image';
-import { HeroAvatar } from '@/components/hero-avatar';
+import HeroAvatar from '@/components/hero-avatar'; // ✅ بدون أقواس
 
 type SavedDua = {
   title: string;
