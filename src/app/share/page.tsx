@@ -1,7 +1,8 @@
-import dynamic from 'next/dynamic';
+'use client';
 
-const ShareDuaClient = dynamic(() => import('./ShareDuaClient'), { ssr: false });
+import ShareDuaClient from './ShareDuaClient';
 
 export default function Page() {
   return <ShareDuaClient />;
 }
+
