@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import DuaCard from '@/components/dua-card';
 import { supabase } from '@/lib/supabase';
-import avatarImg from '/mnt/data/fcb1b373-6825-4cb9-be2c-5ee9bdf41234.png';
+import ListeningAnimation from '@/components/listening-animation';
 
 type RephraseDuaOutput = {
   duaText: string;
@@ -86,12 +86,12 @@ export default function AiDuaPage() {
     <div className="min-h-screen bg-hero-gradient pt-32 pb-20 px-4">
       <FloatingStars />
 
-      <div className="max-w-3xl mx-auto relative z-10 animate-fade-in">
-        <div className="text-center mb-12">
-          <div className="relative w-32 h-32 mx-auto animate-float mb-4">
-            <Image src={avatarImg} alt="Avatar" width={128} height={128} className="rounded-full shadow-lg" />
-          </div>
-
+    <div className="absolute top-0 left-0 w-full h-full z-0">
+      <ListeningAnimation />
+    
+        </div>
+        </div>
+    
           <h1 className="font-amiri text-4xl md:text-5xl font-bold text-gold mb-4">تهادوا الحب غيباً بالدعاء</h1>
           <p className="text-cream/70 text-lg">
             اكتب حاجتك أو لمن تحب بصدق، وسيقوم النظام بصياغة دعاء مأثور ومناسب ببركة هذا الشهر
