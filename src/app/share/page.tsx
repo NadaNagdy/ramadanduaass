@@ -8,32 +8,30 @@ import { useRouter } from "next/navigation";
 
 export default function ShareDuaPage() {
   const [dua, setDua] = useState("");
+  const [author, setAuthor] = useState(""); // state للاسم
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const submitDua = async () => {
     if (!dua.trim()) return;
-    
+
     setLoading(true);
-    
+
     try {
       const { data, error } = await supabase
         .from('community_duas')
         .insert([
           {
             text: dua.trim(),
-            author: "مشارك",
+            author: author.trim() || "زائر كريم", // fallback لو الاسم فاضي
             likes: 0,
             created_at: new Date().toISOString()
           }
         ])
         .select();
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
-      // نجح الإرسال
       router.push("/community-duas");
     } catch (error) {
       console.error('Error submitting dua:', error);
@@ -55,7 +53,17 @@ export default function ShareDuaPage() {
           شارك بدعاء من قلبك ليؤمِّن عليه إخوانك وأخواتك، ويكون لك مثل أجرهم.
         </p>
         <DecorativeDivider className="mb-8" />
-        
+
+        {/* حقل الاسم */}
+        <input
+          type="text"
+          value={author}
+          onChange={(e) => setAuthor(e.target.value)}
+          placeholder="أدخل اسمك"
+          className="w-full p-4 mb-4 rounded-xl bg-white/90 text-navy focus:outline-none font-bold text-lg"
+        />
+
+        {/* حقل الدعاء */}
         <textarea
           value={dua}
           onChange={(e) => setDua(e.target.value)}
@@ -64,11 +72,11 @@ export default function ShareDuaPage() {
           className="w-full h-40 p-4 rounded-xl bg-white/90 text-navy focus:outline-none font-amiri text-lg"
           dir="rtl"
         />
-        
+
         <p className="text-sm text-cream/50 mt-2">
           {dua.length} / 500
         </p>
-        
+
         <Button
           onClick={submitDua}
           disabled={loading || !dua.trim()}
