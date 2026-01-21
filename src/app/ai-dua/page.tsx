@@ -1,13 +1,22 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FloatingStars, DecorativeDivider, Lantern } from '@/components/islamic-decorations';
 import { Send, Sparkles, RefreshCw, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import DuaCard from '@/components/dua-card';
-import ListeningAnimation from '@/components/listening-animation';
+import dynamic from 'next/dynamic';
+
+// استيراد الأنيميشن ديناميكياً عشان نتأكد إنه يتحمل جديد
+const ListeningAnimation = dynamic(
+  () => import('@/components/listening-animation'),
+  { 
+    ssr: false,
+    loading: () => <div className="w-full max-w-md h-64 animate-pulse bg-gold/10 rounded-3xl" />
+  }
+);
 
 type RephraseDuaOutput = {
   duaText: string;
@@ -19,7 +28,13 @@ export default function AiDuaPage() {
   const [intention, setIntention] = useState('');
   const [generatedDua, setGeneratedDua] = useState<RephraseDuaOutput | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [key, setKey] = useState(0); // لإعادة تحميل الأنيميشن
   const { toast } = useToast();
+
+  // إعادة تحميل الأنيميشن عند تغيير الحالة
+  useEffect(() => {
+    setKey(prev => prev + 1);
+  }, [isGenerating, generatedDua]);
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,12 +106,13 @@ export default function AiDuaPage() {
       <FloatingStars />
       
       <div className="max-w-6xl mx-auto relative z-10">
-        {/* Grid Layout - Animation على اليسار، المحتوى على اليمين */}
         <div className="grid lg:grid-cols-2 gap-12 items-start">
           
-          {/* Animation Side - تظهر دائماً */}
+          {/* Animation Side */}
           <div className="flex flex-col items-center justify-center animate-fade-in">
-            <ListeningAnimation />
+            <div key={key} className="w-full">
+              <ListeningAnimation />
+            </div>
             <div className="mt-6 text-center">
               <p className="text-gold font-amiri text-xl">
                 {isGenerating ? (
@@ -125,7 +141,7 @@ export default function AiDuaPage() {
             </div>
 
             {!generatedDua && (
-              <form onSubmit={handleGenerate} className="mb-8">
+              <div onSubmit={handleGenerate} className="mb-8">
                 <div className="relative group h-48">
                   <Textarea
                     value={intention}
@@ -136,7 +152,7 @@ export default function AiDuaPage() {
                     disabled={isGenerating}
                   />
                   <Button
-                    type="submit"
+                    onClick={handleGenerate}
                     disabled={isGenerating || !intention.trim()}
                     className="absolute bottom-4 left-4 bg-gold text-navy px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-gold-light transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                   >
@@ -144,7 +160,7 @@ export default function AiDuaPage() {
                     {isGenerating ? 'جاري الصياغة...' : 'صياغة الدعاء'}
                   </Button>
                 </div>
-              </form>
+              </div>
             )}
 
             {generatedDua && !isGenerating && (
