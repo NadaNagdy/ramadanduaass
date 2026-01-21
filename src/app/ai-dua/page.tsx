@@ -91,11 +91,12 @@ export default function AiDuaPage() {
       <FloatingStars />
       
       <div className="max-w-6xl mx-auto relative z-10">
+        {/* Grid Layout - Animation على اليسار، المحتوى على اليمين */}
         <div className="grid lg:grid-cols-2 gap-12 items-start">
           
-          {/* Animation Side */}
+          {/* Animation Side - تظهر دائماً */}
           <div className="flex flex-col items-center justify-center animate-fade-in">
-            {isGenerating && <ListeningAnimation />}
+            <ListeningAnimation />
             <div className="mt-6 text-center">
               <p className="text-gold font-amiri text-xl">
                 {isGenerating ? (
