@@ -83,20 +83,18 @@ export default function AiDuaPage() {
   };
 
   return (
-    <div className="min-h-screen bg-hero-gradient pt-32 pb-20 px-4">
-      <FloatingStars />
+    <div className="relative w-48 h-48 mx-auto mb-4 animate-float">
+    <ListeningAnimation />
+    </div>
 
-    <div className="absolute top-0 left-0 w-full h-full z-0">
-      <ListeningAnimation />
-    
-        </div>
-        </div>
-    
-          <h1 className="font-amiri text-4xl md:text-5xl font-bold text-gold mb-4">تهادوا الحب غيباً بالدعاء</h1>
-          <p className="text-cream/70 text-lg">
-            اكتب حاجتك أو لمن تحب بصدق، وسيقوم النظام بصياغة دعاء مأثور ومناسب ببركة هذا الشهر
-          </p>
-        </div>
+    <h1 className="font-amiri text-4xl md:text-5xl font-bold text-gold mb-4 text-center">
+      تهادوا الحب غيباً بالدعاء
+       </h1>
+
+      <p className="text-cream/70 text-lg text-center">
+           اكتب حاجتك أو لمن تحب بصدق، وسيقوم النظام بصياغة دعاء مأثور ومناسب ببركة هذا الشهر
+            </p>
+
 
         <form onSubmit={handleGenerate} className="mb-12">
           <div className="relative group h-48">
