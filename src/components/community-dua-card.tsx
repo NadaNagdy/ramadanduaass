@@ -19,17 +19,16 @@ interface CommunityDuaCardProps {
   onLikeChange?: (duaId: number, currentLikes: number) => void;
 }
 
-const CommunityDuaCard: React.FC<CommunityDuaCardProps> = ({ dua, onLikeChange }) => {
+export default function CommunityDuaCard({ dua, onLikeChange }: CommunityDuaCardProps) {
   const [hasLiked, setHasLiked] = React.useState(false);
 
-  // Check if user already liked this dua
   React.useEffect(() => {
     const likedDuas = JSON.parse(localStorage.getItem('liked_duas') || '[]');
     setHasLiked(likedDuas.includes(String(dua.id)));
   }, [dua.id]);
 
   const handleLikeClick = () => {
-    if (hasLiked) return; // Prevent multiple likes
+    if (hasLiked) return;
 
     const likedDuas = JSON.parse(localStorage.getItem('liked_duas') || '[]');
     likedDuas.push(String(dua.id));
@@ -86,4 +85,4 @@ const CommunityDuaCard: React.FC<CommunityDuaCardProps> = ({ dua, onLikeChange }
       </div>
     </div>
   );
-};
+}
