@@ -1,8 +1,12 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
 import { FloatingStars, CrescentMoon, DecorativeDivider } from '@/components/islamic-decorations';
+import { Button } from '@/components/ui/button';
+import { supabase } from '@/lib/supabase';
+import Link from 'next/link';
+import { Feather, Loader2 } from 'lucide-react';
+import CommunityDuaCard from '@/components/community-dua-card';
 
 type CommunityDua = {
   id: number;
@@ -21,35 +25,50 @@ export default function CommunityDuasPage() {
   }, []);
 
   async function loadDuas() {
-    const { data, error } = await supabase
-      .from('community_duas')
-      .select('*')
-      .order('created_at', { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from('community_duas')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Error loading duas:', error);
-    } else {
-      setDuas(data || []);
+      if (error) {
+        console.error('Error loading duas:', error);
+      } else {
+        setDuas(data || []);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setLoading(false);
     }
-    
-    setLoading(false);
   }
 
-  async function handleLike(id: number, currentLikes: number) {
-    const { error } = await supabase
-      .from('community_duas')
-      .update({ likes: currentLikes + 1 })
-      .eq('id', id);
+  async function handleLike(duaId: number, currentLikes: number) {
+    try {
+      const { error } = await supabase
+        .from('community_duas')
+        .update({ likes: currentLikes + 1 })
+        .eq('id', duaId);
 
-    if (!error) {
-      loadDuas(); // إعادة التحميل
+      if (!error) {
+        // Update local state
+        setDuas(duas.map(d => 
+          d.id === duaId ? { ...d, likes: currentLikes + 1 } : d
+        ));
+      }
+    } catch (error) {
+      console.error('Error updating likes:', error);
     }
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-hero-gradient flex items-center justify-center">
-        <p className="text-cream text-2xl">جار التحميل...</p>
+      <div className="min-h-screen bg-hero-gradient pt-32 pb-20 px-4 flex items-center justify-center">
+        <FloatingStars />
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-gold mx-auto mb-4 animate-spin" />
+          <p className="text-cream text-xl font-amiri">جار التحميل...</p>
+        </div>
       </div>
     );
   }
@@ -57,34 +76,51 @@ export default function CommunityDuasPage() {
   return (
     <div className="min-h-screen bg-hero-gradient pt-32 pb-20 px-4">
       <FloatingStars />
-      <div className="container mx-auto max-w-3xl">
+      
+      <div className="container mx-auto max-w-3xl text-center animate-fade-in">
         <CrescentMoon className="w-16 h-16 text-gold mx-auto mb-4" />
-        <h1 className="font-amiri text-4xl text-cream text-center mb-2">
-          مجتمع الدعاء
-        </h1>
-        <DecorativeDivider className="mb-12" />
-
-        <div className="space-y-6">
-          {duas.map((dua) => (
-            <div
-              key={dua.id}
-              className="bg-card-gradient rounded-3xl p-6 border border-gold/20"
-            >
-              <p className="font-amiri text-xl text-cream leading-relaxed mb-4" dir="rtl">
-                {dua.text}
-              </p>
-              <div className="flex justify-between items-center">
-                <span className="text-cream/60 text-sm">— {dua.author}</span>
-                <button
-                  onClick={() => handleLike(dua.id, dua.likes)}
-                  className="text-gold hover:text-gold-light"
-                >
-                  ❤️ {dua.likes}
-                </button>
-              </div>
-            </div>
-          ))}
+        
+        <h1 className="font-amiri text-4xl text-cream mb-2">مجتمع الدعاء</h1>
+        
+        <p className="text-cream/60 mb-6">
+          أدعية يشاركها إخوة وأخوات لك. أمّن على دعائهم وشارك بدعاء من قلبك.
+        </p>
+        
+        <DecorativeDivider className="mb-8" />
+        
+        {/* Share Button */}
+        <div className="text-center mb-12">
+          <Link href="/share">
+            <Button className="bg-gold text-navy font-bold py-6 px-10 rounded-2xl text-lg hover:bg-gold-light shadow-lg shadow-gold/20 transform hover:scale-105 transition-transform">
+              <Feather className="ml-3" />
+              شارك بدعاءٍ ليؤمِّن عليه غيرُك
+            </Button>
+          </Link>
         </div>
+        
+        {/* Duas List */}
+        {duas.length === 0 ? (
+          <div className="text-center py-20">
+            <p className="text-cream/50 text-xl mb-6">
+              لا توجد أدعية بعد. كن أول من يشارك! 🤲
+            </p>
+            <Link href="/share">
+              <Button className="bg-gold/20 text-gold border border-gold/30 hover:bg-gold/30">
+                شارك أول دعاء
+              </Button>
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {duas.map((dua) => (
+              <CommunityDuaCard 
+                key={dua.id}
+                dua={dua}
+                onLikeChange={handleLike}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
