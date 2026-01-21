@@ -8,7 +8,7 @@ import { Button } from './ui/button';
 interface CommunityDua {
   id: number;
   text: string;
-  author: string;
+  author?: string; // اختياري، لو فاضي يظهر "زائر كريم"
   likes: number;
   created_at?: string;
   isGolden?: boolean;
@@ -41,6 +41,9 @@ export default function CommunityDuaCard({ dua, onLikeChange }: CommunityDuaCard
     }
   };
 
+  // fallback name if author is empty
+  const authorName = dua.author && dua.author.trim() !== "" ? dua.author : "زائر كريم";
+
   return (
     <div className={cn(
       "relative bg-card-gradient rounded-3xl p-6 border transition-all duration-300 shadow-md hover:shadow-xl",
@@ -53,18 +56,28 @@ export default function CommunityDuaCard({ dua, onLikeChange }: CommunityDuaCard
       )}
       
       <div className="flex items-start gap-4">
+        {/* Avatar with first letter */}
         <div className="w-12 h-12 bg-gold/10 rounded-full flex items-center justify-center text-gold font-bold text-xl shrink-0">
-          {dua.author.charAt(0)}
+          {authorName.charAt(0)}
         </div>
         
         <div className="flex-1 text-right">
-          <p className="font-bold text-cream">{dua.author}</p>
-          <p className="font-amiri text-cream/90 text-lg mt-2 leading-relaxed" dir="rtl">
+          {/* Name field */}
+          <div className="text-sm text-gold font-semibold mb-1">
+            — {authorName}
+          </div>
+
+          {/* Dua text */}
+          <p
+            className="font-amiri text-cream/90 text-lg leading-relaxed"
+            dir="rtl"
+          >
             {dua.text}
           </p>
         </div>
       </div>
       
+      {/* Likes / آمين button */}
       <div className="mt-4 pt-4 border-t border-gold/10 flex justify-end items-center gap-4">
         <span className="text-sm text-gold tabular-nums">
           {dua.likes} آمين
