@@ -11,9 +11,10 @@ import CommunityDuaCard from '@/components/community-dua-card';
 type CommunityDua = {
   id: number;
   text: string;
-  author: string;
+  author?: string; // اختياري عشان نعرض "زائر كريم" لو الاسم فاضي
   likes: number;
   created_at: string;
+  isGolden?: boolean;
 };
 
 export default function CommunityDuasPage() {
@@ -27,7 +28,6 @@ export default function CommunityDuasPage() {
 
   async function loadDuas() {
     try {
-      // Check if Supabase is configured
       if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
         throw new Error('Supabase not configured. Please add environment variables.');
       }
@@ -99,13 +99,6 @@ export default function CommunityDuasPage() {
           >
             إعادة المحاولة
           </Button>
-          <div className="mt-6 p-4 bg-red-900/20 border border-red-500/30 rounded-lg text-left">
-            <p className="text-xs text-cream/50 font-mono">
-              Debug Info:<br/>
-              URL: {process.env.NEXT_PUBLIC_SUPABASE_URL ? '✓ Set' : '✗ Missing'}<br/>
-              Key: {process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '✓ Set' : '✗ Missing'}
-            </p>
-          </div>
         </div>
       </div>
     );
@@ -151,7 +144,10 @@ export default function CommunityDuasPage() {
             {duas.map((dua) => (
               <CommunityDuaCard 
                 key={dua.id}
-                dua={dua}
+                dua={{
+                  ...dua,
+                  author: dua.author || 'زائر كريم' // fallback لو الاسم فاضي
+                }}
                 onLikeChange={handleLike}
               />
             ))}
