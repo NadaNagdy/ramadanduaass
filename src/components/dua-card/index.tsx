@@ -37,7 +37,6 @@ const DuaCard: React.FC<DuaCardProps> = ({
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const isSaved = isInitiallySaved || savedDuas.some(savedDua => savedDua.dua === dua);
   
-  // Load available voices
   useEffect(() => {
     const loadVoices = () => {
       const availableVoices = window.speechSynthesis.getVoices();
@@ -56,7 +55,6 @@ const DuaCard: React.FC<DuaCardProps> = ({
   };
 
   const handlePlayPause = () => {
-    // If there's a custom audio URL, use it
     if (audioUrl && audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
@@ -67,65 +65,61 @@ const DuaCard: React.FC<DuaCardProps> = ({
       return;
     }
 
-    // Otherwise, use text-to-speech
     if ('speechSynthesis' in window) {
       if (isPlaying) {
         window.speechSynthesis.cancel();
         setIsPlaying(false);
       } else {
-        // Cancel any ongoing speech
         window.speechSynthesis.cancel();
         
-        // Create speech utterance
         const utterance = new SpeechSynthesisUtterance(dua);
         
-        // Try to find an Arabic voice
-        const arabicVoice = voices.find(voice => 
-          voice.lang.startsWith('ar') || 
-          voice.lang === 'ar-SA' || 
-          voice.lang === 'ar-EG'
-        );
+        // --- منطق اختيار الصوت النسائي ---
+        const arabicVoices = voices.filter(voice => voice.lang.startsWith('ar'));
         
-        if (arabicVoice) {
-          utterance.voice = arabicVoice;
+        // البحث عن كلمات دلالية للأصوات النسائية المشهورة
+        const femaleVoice = arabicVoices.find(voice => {
+          const name = voice.name.toLowerCase();
+          return (
+            name.includes('female') || 
+            name.includes('leila') ||   // macOS/iOS
+            name.includes('mariam') ||  // Windows/Google
+            name.includes('zira') ||    // Windows
+            name.includes('muna') ||    // macOS
+            name.includes('hoda')       // Google
+          );
+        });
+
+        // إذا لم نجد صوتاً نسائياً محدداً، نأخذ أول صوت عربي متاح
+        const finalVoice = femaleVoice || arabicVoices[0];
+        
+        if (finalVoice) {
+          utterance.voice = finalVoice;
         }
         
-        utterance.lang = 'ar-SA'; // Arabic (Saudi)
-        utterance.rate = 0.75; // Slower for better clarity and reverence
-        utterance.pitch = 1.0; // Normal pitch
-        utterance.volume = 1.0; // Full volume
+        utterance.lang = 'ar-SA';
+        utterance.rate = 0.85; // سرعة هادئة ووقورة
+        utterance.pitch = 1.0;
+        utterance.volume = 1.0;
         
-        // Update state when speech ends
-        utterance.onend = () => {
-          setIsPlaying(false);
-        };
-        
+        utterance.onstart = () => setIsPlaying(true);
+        utterance.onend = () => setIsPlaying(false);
         utterance.onerror = (event) => {
           console.error('Speech error:', event);
           setIsPlaying(false);
-          toast({
-            variant: "destructive",
-            title: "خطأ",
-            description: "لم نتمكن من قراءة الدعاء. جرّب متصفحاً آخر.",
-          });
         };
         
-        // Small delay to ensure voices are loaded
-        setTimeout(() => {
-          window.speechSynthesis.speak(utterance);
-          setIsPlaying(true);
-        }, 100);
+        window.speechSynthesis.speak(utterance);
       }
     } else {
       toast({
         variant: "destructive",
         title: "غير مدعوم",
-        description: "المتصفح لا يدعم قراءة النصوص. جرّب Chrome أو Safari.",
+        description: "المتصفح لا يدعم قراءة النصوص.",
       });
     }
   };
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (isPlaying) {
@@ -157,36 +151,37 @@ const DuaCard: React.FC<DuaCardProps> = ({
         {author && <p className="text-cream/70 text-sm mt-1">بواسطة: {author}</p>}
       </CardHeader>
       <CardContent className="text-center text-3xl leading-loose px-6 sm:px-12 py-8">
-        <p>{dua}</p>
+        <p className="whitespace-pre-line">{dua}</p>
       </CardContent>
       {showActions && (
         <CardFooter className="bg-black/20 p-4 flex justify-center items-center gap-6">
-          <button onClick={handleCopy} className="flex items-center gap-2 text-[#f8f1e7]/60 hover:text-[#d4af37] transition-colors" title="نسخ">
+          <button onClick={handleCopy} className="flex flex-col items-center gap-1 text-[#f8f1e7]/60 hover:text-[#d4af37] transition-colors">
             <Copy className="w-5 h-5" />
-            <span className="text-xs">نسخ</span>
+            <span className="text-[10px]">نسخ</span>
           </button>
+          
           <Link href={shareLink} legacyBehavior>
-            <a className="flex items-center gap-2 text-[#f8f1e7]/60 hover:text-[#d4af37] transition-colors" title="مشاركة كصورة">
+            <a className="flex flex-col items-center gap-1 text-[#f8f1e7]/60 hover:text-[#d4af37] transition-colors">
               <Share2 className="w-5 h-5" />
-              <span className="text-xs">مشاركة</span>
+              <span className="text-[10px]">مشاركة</span>
             </a>
           </Link>
-          <button onClick={handleSave} className="flex items-center gap-2 text-[#f8f1e7]/60 hover:text-[#d4af37] transition-colors" title="حفظ">
+
+          <button onClick={handleSave} className="flex flex-col items-center gap-1 text-[#f8f1e7]/60 hover:text-[#d4af37] transition-colors">
              <Heart className={cn("w-5 h-5", isSaved && "fill-current text-gold")} />
-            <span className="text-xs">حفظ</span>
+            <span className="text-[10px]">حفظ</span>
           </button>
           
           <button 
             onClick={handlePlayPause} 
-            className="flex items-center gap-2 text-[#f8f1e7]/60 hover:text-[#d4af37] transition-colors" 
-            title={isPlaying ? "إيقاف" : "استماع"}
+            className="flex flex-col items-center gap-1 text-[#f8f1e7]/60 hover:text-[#d4af37] transition-colors" 
           >
             {isPlaying ? (
-              <VolumeX className="w-5 h-5 text-green-400 animate-pulse" />
+              <VolumeX className="w-5 h-5 text-gold animate-pulse" />
             ) : (
               <Volume2 className="w-5 h-5" />
             )}
-            <span className="text-xs">{isPlaying ? 'إيقاف' : 'استماع'}</span>
+            <span className="text-[10px]">{isPlaying ? 'إيقاف' : 'استماع'}</span>
           </button>
           
           {audioUrl && <audio ref={audioRef} src={audioUrl} onEnded={() => setIsPlaying(false)} />}
