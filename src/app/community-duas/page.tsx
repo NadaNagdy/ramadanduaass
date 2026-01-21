@@ -5,7 +5,7 @@ import { FloatingStars, CrescentMoon, DecorativeDivider } from '@/components/isl
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
-import { Feather, Loader2 } from 'lucide-react';
+import { Feather, Loader2, AlertCircle } from 'lucide-react';
 import CommunityDuaCard from '@/components/community-dua-card';
 
 type CommunityDua = {
@@ -19,6 +19,7 @@ type CommunityDua = {
 export default function CommunityDuasPage() {
   const [duas, setDuas] = useState<CommunityDua[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadDuas();
@@ -26,18 +27,26 @@ export default function CommunityDuasPage() {
 
   async function loadDuas() {
     try {
+      // Check if Supabase is configured
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+        throw new Error('Supabase not configured. Please add environment variables.');
+      }
+
       const { data, error } = await supabase
         .from('community_duas')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error loading duas:', error);
-      } else {
-        setDuas(data || []);
+        console.error('Supabase error:', error);
+        throw new Error(`Database error: ${error.message}`);
       }
-    } catch (error) {
-      console.error('Error:', error);
+
+      setDuas(data || []);
+      setError(null);
+    } catch (err) {
+      console.error('Error loading duas:', err);
+      setError(err instanceof Error ? err.message : 'حدث خطأ غير معروف');
     } finally {
       setLoading(false);
     }
@@ -51,7 +60,6 @@ export default function CommunityDuasPage() {
         .eq('id', duaId);
 
       if (!error) {
-        // Update local state
         setDuas(duas.map(d => 
           d.id === duaId ? { ...d, likes: currentLikes + 1 } : d
         ));
@@ -73,6 +81,36 @@ export default function CommunityDuasPage() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-hero-gradient pt-32 pb-20 px-4 flex items-center justify-center">
+        <FloatingStars />
+        <div className="max-w-md text-center">
+          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-amiri text-cream mb-4">حدث خطأ</h2>
+          <p className="text-cream/70 mb-6 font-cairo">{error}</p>
+          <Button 
+            onClick={() => {
+              setLoading(true);
+              setError(null);
+              loadDuas();
+            }}
+            className="bg-gold text-navy hover:bg-gold-light"
+          >
+            إعادة المحاولة
+          </Button>
+          <div className="mt-6 p-4 bg-red-900/20 border border-red-500/30 rounded-lg text-left">
+            <p className="text-xs text-cream/50 font-mono">
+              Debug Info:<br/>
+              URL: {process.env.NEXT_PUBLIC_SUPABASE_URL ? '✓ Set' : '✗ Missing'}<br/>
+              Key: {process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '✓ Set' : '✗ Missing'}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-hero-gradient pt-32 pb-20 px-4">
       <FloatingStars />
@@ -88,7 +126,6 @@ export default function CommunityDuasPage() {
         
         <DecorativeDivider className="mb-8" />
         
-        {/* Share Button */}
         <div className="text-center mb-12">
           <Link href="/share">
             <Button className="bg-gold text-navy font-bold py-6 px-10 rounded-2xl text-lg hover:bg-gold-light shadow-lg shadow-gold/20 transform hover:scale-105 transition-transform">
@@ -98,7 +135,6 @@ export default function CommunityDuasPage() {
           </Link>
         </div>
         
-        {/* Duas List */}
         {duas.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-cream/50 text-xl mb-6">
