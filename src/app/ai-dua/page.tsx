@@ -1,14 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
+import React, { useState } from 'react';
 import { FloatingStars, DecorativeDivider, Lantern } from '@/components/islamic-decorations';
-import { Send, Sparkles, Loader2, RefreshCw, Share2, Volume2 } from 'lucide-react';
+import { Send, Sparkles, RefreshCw, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import DuaCard from '@/components/dua-card';
-import { supabase } from '@/lib/supabase';
 import ListeningAnimation from '@/components/listening-animation';
 
 type RephraseDuaOutput = {
@@ -26,21 +24,29 @@ export default function AiDuaPage() {
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!intention.trim()) {
-      toast({ variant: "destructive", title: "خطأ", description: "الرجاء كتابة نيتك أولاً." });
+      toast({
+        variant: "destructive",
+        title: "خطأ",
+        description: "الرجاء كتابة نيتك أولاً.",
+      });
       return;
     }
-
+    
     setIsGenerating(true);
     setGeneratedDua(null);
-
+    
     try {
       const response = await fetch('/api/rephrase-dua', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ intention }),
       });
 
-      if (!response.ok) throw new Error('Failed to generate dua');
+      if (!response.ok) {
+        throw new Error('Failed to generate dua');
+      }
 
       const result = await response.json();
       setGeneratedDua(result);
@@ -55,87 +61,124 @@ export default function AiDuaPage() {
       setIsGenerating(false);
     }
   };
-
+  
   const handleReset = () => {
     setGeneratedDua(null);
     setIntention('');
   };
 
-  const speakDua = (text: string) => {
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'ar-EG';
-      const voices = window.speechSynthesis.getVoices();
-      utterance.voice = voices.find(v => v.lang.startsWith('ar')) || null;
-      window.speechSynthesis.speak(utterance);
-    } else console.warn('Speech synthesis not supported');
-  };
+  const handleShare = () => {
+    if (!generatedDua) return;
 
-  const shareToCommunity = async (text: string) => {
-    const { data, error } = await supabase
-      .from('community_duas')
-      .insert([{ text, author: 'Anonymous', likes: 0 }])
-      .select();
+    const duaText = generatedDua.duaText;
+    const shareUrl = window.location.href;
+    const socialMedia = {
+      twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(duaText)}&url=${encodeURIComponent(shareUrl)}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(duaText)}`,
+      whatsapp: `https://api.whatsapp.com/send?text=${encodeURIComponent(duaText + ' ' + shareUrl)}`,
+    };
 
-    if (error) console.error(error);
-    else toast({ title: "تمت المشاركة", description: "تم نشر الدعاء في المجتمع." });
-    return data;
+    console.log('Share Links:', socialMedia);
+
+    toast({
+      title: "مشاركة الدعاء",
+      description: "يمكنك الآن مشاركة الدعاء عبر مواقع التواصل الاجتماعي أو تضمينه في موقعك.",
+    });
   };
 
   return (
-    <div className="relative w-48 h-48 mx-auto mb-4 animate-float">
-    <ListeningAnimation />
-    </div>
-
-    <h1 className="font-amiri text-4xl md:text-5xl font-bold text-gold mb-4 text-center">
-      تهادوا الحب غيباً بالدعاء
-       </h1>
-
-      <p className="text-cream/70 text-lg text-center">
-           اكتب حاجتك أو لمن تحب بصدق، وسيقوم النظام بصياغة دعاء مأثور ومناسب ببركة هذا الشهر
-            </p>
-
-
-        <form onSubmit={handleGenerate} className="mb-12">
-          <div className="relative group h-48">
-            <Textarea
-              value={intention}
-              onChange={(e) => setIntention(e.target.value)}
-              placeholder="مثلاً: أدعو بالشفاء لصديق، أو بالسكينة في قلبي، أو بالنجاح في عملي..."
-              className="w-full h-40 bg-card border border-gold/30 rounded-3xl p-6 text-cream text-lg focus:outline-none focus:border-gold transition-all resize-none shadow-inner"
-              dir="rtl"
-              disabled={isGenerating}
-            />
-
-            <Button
-              type="submit"
-              disabled={isGenerating || !intention.trim()}
-              className="absolute bottom-4 left-4 bg-gold text-navy px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-gold-light transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-            >
-              {isGenerating ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
-              {isGenerating ? "جاري الصياغة..." : "صياغة الدعاء"}
-            </Button>
+    <div className="min-h-screen bg-hero-gradient pt-32 pb-20 px-4">
+      <FloatingStars />
+      <div className="max-w-3xl mx-auto relative z-10 animate-fade-in">
+        <div className="text-center mb-12">
+          <div className="inline-block p-4 bg-gold/10 rounded-full mb-4 animate-float">
+            <Sparkles className="w-10 h-10 text-gold" />
           </div>
-        </form>
+          <h1 className="font-amiri text-4xl md:text-5xl font-bold text-gold mb-4">
+            تهادوا الحب غيباً بالدعاء
+          </h1>
+          <p className="text-cream/70 text-lg">
+            اكتب حاجتك أو لمن تحب بصدق، وسيقوم النظام بصياغة دعاء مأثور ومناسب ببركة هذا الشهر
+          </p>
+        </div>
 
-        {generatedDua && !isGenerating && (
-          <div className="animate-fade-in space-y-6">
-            <DecorativeDivider />
-            <DuaCard title="الدعاء المصاغ" dua={generatedDua.duaText} showActions={true} />
+        {/* Listening Animation when generating */}
+        {isGenerating && (
+          <div className="mb-8 animate-fade-in">
+            <ListeningAnimation />
+            <p className="text-center text-gold mt-4 font-amiri text-xl animate-pulse">
+              جاري صياغة دعاءك بعناية...
+            </p>
+          </div>
+        )}
 
-            <div className="flex flex-col gap-2">
-              <Button onClick={() => speakDua(generatedDua.duaText)} variant="outline" className="w-full py-3 border-2 border-blue-500/30 rounded-2xl text-blue-500 hover:bg-blue-500/5 hover:text-blue-500 flex items-center justify-center gap-2">
-                <Volume2 className="w-5 h-5" /> استمع للدعاء
-              </Button>
-
-              <Button onClick={() => shareToCommunity(generatedDua.duaText)} variant="outline" className="w-full py-3 border-2 border-green-500/30 rounded-2xl text-green-500 hover:bg-green-500/5 hover:text-green-500 flex items-center justify-center gap-2">
-                <Share2 className="w-5 h-5" /> مشاركة الدعاء
-              </Button>
-
-              <Button onClick={handleReset} variant="outline" className="w-full py-3 border-2 border-dashed border-gold/30 rounded-2xl text-gold hover:bg-gold/5 flex items-center justify-center gap-2">
-                <RefreshCw className="w-5 h-5" /> صياغة دعاء جديد
+        {!isGenerating && !generatedDua && (
+          <form onSubmit={handleGenerate} className="mb-12">
+            <div className="relative group h-48">
+              <Textarea
+                value={intention}
+                onChange={(e) => setIntention(e.target.value)}
+                placeholder="مثلاً: أدعو بالشفاء لصديق، أو بالسكينة في قلبي، أو بالنجاح في عملي..."
+                className="w-full h-40 bg-card border border-gold/30 rounded-3xl p-6 text-cream text-lg focus:outline-none focus:border-gold transition-all resize-none shadow-inner"
+                dir="rtl"
+                disabled={isGenerating}
+              />
+              <Button
+                type="submit"
+                disabled={isGenerating || !intention.trim()}
+                className="absolute bottom-4 left-4 bg-gold text-navy px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-gold-light transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+              >
+                <Send className="w-5 h-5" />
+                صياغة الدعاء
               </Button>
             </div>
+          </form>
+        )}
+
+        {generatedDua && !isGenerating && (
+          <div className="animate-fade-in space-y-8">
+            <DecorativeDivider />
+            <DuaCard 
+              title="الدعاء المصاغ" 
+              dua={generatedDua.duaText} 
+              showActions={true}
+            />
+            
+            <div className="bg-gold/10 border border-gold/20 rounded-3xl p-8">
+              <h4 className="font-amiri text-lg text-gold flex items-center gap-2 justify-end mb-2">
+                <Sparkles className="w-5 h-5" />
+                <span>المعنى المبسط</span>
+              </h4>
+              <p className="font-cairo text-cream/80 text-right">{generatedDua.simplifiedMeaning}</p>
+            </div>
+            
+            <div className="bg-gold/10 border border-gold/20 rounded-3xl p-8">
+              <h4 className="font-amiri text-lg text-gold flex items-center gap-2 justify-end mb-2">
+                <Sparkles className="w-5 h-5" />
+                لمسة روحانية
+              </h4>
+              <p className="text-cream/80 leading-relaxed italic font-amiri text-xl text-right">
+                {generatedDua.spiritualTouch}
+              </p>
+            </div>
+
+            <Button 
+              onClick={handleReset}
+              variant="outline"
+              className="w-full py-6 border-2 border-dashed border-gold/30 rounded-2xl text-gold hover:bg-gold/5 hover:text-gold transition-all flex items-center justify-center gap-2 text-lg"
+            >
+              <RefreshCw className="w-5 h-5" />
+              صياغة دعاء جديد
+            </Button>
+
+            <Button 
+              onClick={handleShare}
+              variant="outline"
+              className="w-full py-6 border-2 border-dashed border-green-500/30 rounded-2xl text-green-500 hover:bg-green-500/5 hover:text-green-500 transition-all flex items-center justify-center gap-2 text-lg"
+            >
+              <Share2 className="w-5 h-5" />
+              مشاركة الدعاء
+            </Button>
           </div>
         )}
 
