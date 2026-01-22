@@ -30,13 +30,10 @@ const DuaCard: React.FC<DuaCardProps> = ({
   const { toast } = useToast();
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  
-  // حل مشكلة Hydration (اختلاف السيرفر عن الكلاينت)
   const [isMounted, setIsMounted] = useState(false);
   const [savedDuas, setSavedDuas] = useLocalStorage<any[]>('saved_duas', []);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
 
-  // التحقق من الحفظ يتم فقط بعد تحميل الصفحة في المتصفح
   const isSaved = isInitiallySaved || (isMounted && savedDuas.some(savedDua => savedDua.dua === dua));
   
   useEffect(() => {
@@ -55,13 +52,11 @@ const DuaCard: React.FC<DuaCardProps> = ({
     }
   }, []);
 
-  // دالة النسخ المحسنة
   const handleCopy = () => {
     navigator.clipboard.writeText(`${title}\n\n${dua}\n\nتم النسخ من منصة الأدعية`);
     toast({ title: '✅ تم نسخ الدعاء', description: "يمكنك لصقه الآن في أي مكان." });
   };
 
-  // دالة المشاركة الذكية (Native Share)
   const handleShare = async () => {
     if (navigator.share) {
       try {
@@ -79,9 +74,7 @@ const DuaCard: React.FC<DuaCardProps> = ({
     }
   };
 
-  // دالة تشغيل الصوت
   const handlePlayPause = () => {
-    // الأولوية لملف الصوت الخارجي إذا وجد
     if (audioUrl && audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
@@ -92,7 +85,6 @@ const DuaCard: React.FC<DuaCardProps> = ({
       return;
     }
 
-    // استخدام قارئ النصوص المدمج
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       if (isPlaying) {
         window.speechSynthesis.cancel();
@@ -102,7 +94,6 @@ const DuaCard: React.FC<DuaCardProps> = ({
         
         const utterance = new SpeechSynthesisUtterance(dua);
         
-        // اختيار صوت عربي مناسب
         const arabicVoices = voices.filter(voice => voice.lang.includes('ar'));
         const preferredVoice = arabicVoices.find(voice => {
             const name = voice.name.toLowerCase();
@@ -132,7 +123,6 @@ const DuaCard: React.FC<DuaCardProps> = ({
     }
   };
 
-  // تنظيف الصوت عند الخروج
   useEffect(() => {
     return () => {
       if (typeof window !== 'undefined' && window.speechSynthesis) {
@@ -171,7 +161,6 @@ const DuaCard: React.FC<DuaCardProps> = ({
       {showActions && (
         <CardFooter className="bg-gray-50/80 p-6 flex justify-center items-center gap-4 sm:gap-8 border-t border-gray-100 flex-wrap">
           
-          {/* زر النسخ */}
           <button onClick={handleCopy} className="group flex flex-col items-center gap-2 text-gray-500 hover:text-emerald-600 transition-all min-w-[60px]">
             <div className="p-3 bg-white rounded-full shadow-sm group-hover:shadow-md border border-gray-100 group-hover:border-emerald-200 transition-all">
                 <Copy className="w-5 h-5" />
@@ -179,7 +168,6 @@ const DuaCard: React.FC<DuaCardProps> = ({
             <span className="text-xs font-semibold">نسخ</span>
           </button>
           
-          {/* زر المشاركة */}
           <button onClick={handleShare} className="group flex flex-col items-center gap-2 text-gray-500 hover:text-blue-600 transition-all min-w-[60px]">
             <div className="p-3 bg-white rounded-full shadow-sm group-hover:shadow-md border border-gray-100 group-hover:border-blue-200 transition-all">
                 <Share2 className="w-5 h-5" />
@@ -187,7 +175,6 @@ const DuaCard: React.FC<DuaCardProps> = ({
             <span className="text-xs font-semibold">مشاركة</span>
           </button>
 
-          {/* زر الحفظ */}
           <button onClick={handleSave} className="group flex flex-col items-center gap-2 text-gray-500 hover:text-red-500 transition-all min-w-[60px]">
             <div className="p-3 bg-white rounded-full shadow-sm group-hover:shadow-md border border-gray-100 group-hover:border-red-200 transition-all">
                  <Heart className={cn("w-5 h-5 transition-all", isSaved && "fill-red-500 text-red-500 scale-110")} />
@@ -195,7 +182,6 @@ const DuaCard: React.FC<DuaCardProps> = ({
             <span className="text-xs font-semibold">{isSaved ? 'محفوظ' : 'حفظ'}</span>
           </button>
           
-          {/* زر الاستماع */}
           <button 
             onClick={handlePlayPause} 
             className="group flex flex-col items-center gap-2 text-gray-500 hover:text-emerald-600 transition-all min-w-[60px]"

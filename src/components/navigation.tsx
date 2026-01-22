@@ -23,7 +23,6 @@ const Navigation: React.FC = () => {
 
   const isActive = (path: string) => {
     if (path === '/') return pathname === path;
-    if (['/laylat-al-qadr', '/prophets-duas', '/quranic-duas'].includes(path)) return false;
     return pathname.startsWith(path);
   };
 
@@ -31,45 +30,61 @@ const Navigation: React.FC = () => {
     <header className="fixed top-0 right-0 left-0 z-50 bg-background/80 backdrop-blur-md border-b border-gold/10">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
-          <Link href="/" className="flex items-center gap-3" onClick={() => setIsOpen(false)}>
+          <Link href="/" className="flex items-center gap-3">
             <CrescentMoon className="w-10 h-10 text-gold glow-gold" />
             <span className="font-amiri text-2xl text-cream font-bold">أدعية رمضان</span>
           </Link>
-          <div className="flex items-center gap-6 overflow-x-auto"hidden md:flex items-center gap-6">
-            {navLinks.map((link) => (
-              <Link key={link.path} href={link.path} className={cn(
-                'font-cairo text-base transition-colors flex items-center gap-2 py-2',
-                isActive(link.path) 
-                  ? 'text-gold font-semibold border-b-2 border-gold' 
-                  : 'text-cream/70 hover:text-gold border-b-2 border-transparent'
-              )}>
-                 {link.icon && <link.icon className="w-4 h-4" />}
-                <span>{link.label}</span>
-              </Link>
-            ))}
-          </div>
-          <button className="md:hidden text-cream p-2" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle menu">
-            {isOpen ? <X /> : <Menu />}
+          
+          <nav className="hidden md:flex items-center gap-6">
+            {navLinks.map((link) => {
+              const Icon = link.icon;
+              return (
+                <Link 
+                  key={link.path} 
+                  href={link.path} 
+                  className={cn(
+                    'font-cairo text-base transition-colors flex items-center gap-2 py-2 whitespace-nowrap',
+                    isActive(link.path) 
+                      ? 'text-gold font-semibold border-b-2 border-gold' 
+                      : 'text-cream/70 hover:text-gold border-b-2 border-transparent'
+                  )}
+                >
+                  {Icon && <Icon className="w-4 h-4" />}
+                  <span>{link.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
+
+          <button 
+            className="md:hidden text-cream p-2" 
+            onClick={() => setIsOpen(!isOpen)} 
+            aria-label="Toggle menu"
+          >
+            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
       </div>
+
       {isOpen && (
-        <div className="md:hidden bg-navy border-t border-gold/10 p-4 absolute top-full left-0 right-0 animate-fade-in">
-          <div className="container mx-auto flex flex-col gap-2">
+        <div className="md:hidden bg-navy border-t border-gold/10 p-4 absolute top-full left-0 right-0 shadow-lg">
+          <nav className="container mx-auto flex flex-col gap-2">
             {navLinks.map((link) => (
               <Link 
                 key={link.path} 
                 href={link.path} 
                 onClick={() => setIsOpen(false)} 
                 className={cn(
-                  'block py-3 text-center rounded-md transition-colors text-lg',
-                  isActive(link.path) ? 'text-navy bg-gold font-semibold' : 'text-cream hover:text-gold hover:bg-gold/10'
+                  'block py-3 px-4 text-center rounded-md transition-colors text-lg',
+                  isActive(link.path) 
+                    ? 'text-navy bg-gold font-semibold' 
+                    : 'text-cream hover:text-gold hover:bg-gold/10'
                 )}
               >
                 {link.label}
               </Link>
             ))}
-          </div>
+          </nav>
         </div>
       )}
     </header>
