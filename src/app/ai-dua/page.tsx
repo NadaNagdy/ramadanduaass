@@ -1,22 +1,21 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { FloatingStars, DecorativeDivider, Lantern } from '@/components/islamic-decorations';
-import { Send, Sparkles, RefreshCw, Share2 } from 'lucide-react';
+import { Send, Sparkles, RefreshCw, Share2, Copy, FileText, Heart } from 'lucide-react'; // Added icons
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import DuaCard from '@/components/dua-card';
-import dynamic from 'next/dynamic';
+import ListeningAnimation from '@/components/listening-animation';
 
-// استيراد الأنيميشن ديناميكياً عشان نتأكد إنه يتحمل جديد
-const ListeningAnimation = dynamic(
-  () => import('@/components/listening-animation'),
-  { 
-    ssr: false,
-    loading: () => <div className="w-full max-w-md h-64 animate-pulse bg-gold/10 rounded-3xl" />
-  }
-);
+// استيراد مكونات القائمة المنسدلة
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type RephraseDuaOutput = {
   duaText: string;
@@ -28,13 +27,7 @@ export default function AiDuaPage() {
   const [intention, setIntention] = useState('');
   const [generatedDua, setGeneratedDua] = useState<RephraseDuaOutput | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [key, setKey] = useState(0); // لإعادة تحميل الأنيميشن
   const { toast } = useToast();
-
-  // إعادة تحميل الأنيميشن عند تغيير الحالة
-  useEffect(() => {
-    setKey(prev => prev + 1);
-  }, [isGenerating, generatedDua]);
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,23 +75,52 @@ export default function AiDuaPage() {
     setIntention('');
   };
 
-  const handleShare = () => {
+  // تعديل دالة المشاركة لتقبل المحتوى المراد مشاركته
+  const handleShare = (type: 'dua' | 'meaning' | 'all') => {
     if (!generatedDua) return;
 
-    const duaText = generatedDua.duaText;
+    let textToShare = "";
+    let message = "";
+
+    switch (type) {
+      case 'dua':
+        textToShare = generatedDua.duaText;
+        message = "تم نسخ نص الدعاء للمشاركة";
+        break;
+      case 'meaning':
+        textToShare = generatedDua.simplifiedMeaning;
+        message = "تم نسخ المعنى المبسط للمشاركة";
+        break;
+      case 'all':
+        textToShare = `${generatedDua.duaText}\n\nالمعنى:\n${generatedDua.simplifiedMeaning}\n\nلمسة روحانية:\n${generatedDua.spiritualTouch}`;
+        message = "تم نسخ المحتوى بالكامل للمشاركة";
+        break;
+    }
+
     const shareUrl = window.location.href;
-    const socialMedia = {
-      twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(duaText)}&url=${encodeURIComponent(shareUrl)}`,
-      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(duaText)}`,
-      whatsapp: `https://api.whatsapp.com/send?text=${encodeURIComponent(duaText + ' ' + shareUrl)}`,
+    
+    // هنا نقوم بنسخ النص للحافظة كخيار أساسي، أو فتح نافذة المشاركة إذا كان متاحاً
+    if (navigator.share) {
+      navigator.share({
+        title: 'دعاء من AiDua',
+        text: textToShare,
+        url: shareUrl,
+      }).catch(console.error);
+    } else {
+      // Fallback: Copy to clipboard
+      navigator.clipboard.writeText(`${textToShare}\n\n${shareUrl}`);
+      toast({
+        title: "تم النسخ",
+        description: message,
+      });
+    }
+
+    // Optional: Log for analytics
+    const socialMediaLinks = {
+      twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(textToShare)}&url=${encodeURIComponent(shareUrl)}`,
+      whatsapp: `https://api.whatsapp.com/send?text=${encodeURIComponent(textToShare + ' ' + shareUrl)}`,
     };
-
-    console.log('Share Links:', socialMedia);
-
-    toast({
-      title: "مشاركة الدعاء",
-      description: "يمكنك الآن مشاركة الدعاء عبر مواقع التواصل الاجتماعي.",
-    });
+    console.log('Share Links:', socialMediaLinks);
   };
 
   return (
@@ -110,9 +132,7 @@ export default function AiDuaPage() {
           
           {/* Animation Side */}
           <div className="flex flex-col items-center justify-center animate-fade-in">
-            <div key={key} className="w-full">
-              <ListeningAnimation />
-            </div>
+            <ListeningAnimation />
             <div className="mt-6 text-center">
               <p className="text-gold font-amiri text-xl">
                 {isGenerating ? (
@@ -141,7 +161,7 @@ export default function AiDuaPage() {
             </div>
 
             {!generatedDua && (
-              <div onSubmit={handleGenerate} className="mb-8">
+              <form onSubmit={handleGenerate} className="mb-8">
                 <div className="relative group h-48">
                   <Textarea
                     value={intention}
@@ -152,7 +172,7 @@ export default function AiDuaPage() {
                     disabled={isGenerating}
                   />
                   <Button
-                    onClick={handleGenerate}
+                    type="submit"
                     disabled={isGenerating || !intention.trim()}
                     className="absolute bottom-4 left-4 bg-gold text-navy px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-gold-light transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                   >
@@ -160,7 +180,7 @@ export default function AiDuaPage() {
                     {isGenerating ? 'جاري الصياغة...' : 'صياغة الدعاء'}
                   </Button>
                 </div>
-              </div>
+              </form>
             )}
 
             {generatedDua && !isGenerating && (
@@ -203,14 +223,44 @@ export default function AiDuaPage() {
                     صياغة دعاء جديد
                   </Button>
 
-                  <Button 
-                    onClick={handleShare}
-                    variant="outline"
-                    className="flex-1 py-6 border-2 border-dashed border-green-500/30 rounded-2xl text-green-500 hover:bg-green-500/5 transition-all flex items-center justify-center gap-2"
-                  >
-                    <Share2 className="w-5 h-5" />
-                    مشاركة
-                  </Button>
+                  {/* القائمة المنسدلة لخيارات المشاركة */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button 
+                        variant="outline"
+                        className="flex-1 py-6 border-2 border-dashed border-green-500/30 rounded-2xl text-green-500 hover:bg-green-500/5 transition-all flex items-center justify-center gap-2"
+                      >
+                        <Share2 className="w-5 h-5" />
+                        مشاركة
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56 bg-card border-gold/20" align="end">
+                      <DropdownMenuItem 
+                        onClick={() => handleShare('dua')}
+                        className="flex items-center gap-2 justify-end cursor-pointer text-right hover:bg-gold/10 focus:bg-gold/10"
+                      >
+                        <span>مشاركة الدعاء فقط</span>
+                        <FileText className="w-4 h-4 text-gold" />
+                      </DropdownMenuItem>
+                      
+                      <DropdownMenuItem 
+                        onClick={() => handleShare('meaning')}
+                        className="flex items-center gap-2 justify-end cursor-pointer text-right hover:bg-gold/10 focus:bg-gold/10"
+                      >
+                        <span>مشاركة المعنى واللمسة</span>
+                        <Heart className="w-4 h-4 text-gold" />
+                      </DropdownMenuItem>
+                      
+                      <DropdownMenuItem 
+                        onClick={() => handleShare('all')}
+                        className="flex items-center gap-2 justify-end cursor-pointer text-right hover:bg-gold/10 focus:bg-gold/10"
+                      >
+                        <span>مشاركة الكل</span>
+                        <Copy className="w-4 h-4 text-gold" />
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
                 </div>
               </div>
             )}
