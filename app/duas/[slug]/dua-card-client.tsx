@@ -1,27 +1,15 @@
-import DuaCardClient from './dua-card-client';
-import type { Metadata } from 'next';
+'use client';
 
-// generateMetadata لازم يكون async
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const duaTitle = decodeURIComponent(params.slug.replace(/-/g, ' '));
-  return {
-    title: `${duaTitle} – دعاء مستجاب`,
-    description: `دعاء ${duaTitle} مكتوب، يمكنك نسخه أو مشاركته كهدية روحانية.`,
-    keywords: ['دعاء', 'أدعية', 'دعاء مستجاب', duaTitle, 'أدعية مكتوبة', 'دعاء قصير'],
-    openGraph: {
-      title: `${duaTitle} – دعاء مستجاب`,
-      description: `شارك دعاء ${duaTitle} كهدية روحانية.`,
-      url: `https://YOUR_DOMAIN/duas/${params.slug}`,
-      siteName: 'منصة الأدعية',
-      locale: 'ar_EG',
-      type: 'article',
-    },
-  };
+interface DuaCardClientProps {
+  title: string;
+  dua: string;
 }
 
-export default function DuaPage({ params }: { params: { slug: string } }) {
-  const title = decodeURIComponent(params.slug.replace(/-/g, ' '));
-  const duaText = 'اللهم ارزقنا الخير والبركة';
-
-  return <DuaCardClient title={title} dua={duaText} />;
+export default function DuaCardClient({ title, dua }: DuaCardClientProps) {
+  return (
+    <div className="p-6 bg-card rounded-2xl shadow-lg max-w-xl mx-auto mt-10">
+      <h1 className="text-3xl text-gold font-bold mb-4">{title}</h1>
+      <p className="text-lg">{dua}</p>
+    </div>
+  );
 }
