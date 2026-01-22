@@ -77,6 +77,6 @@ export default function DuaCard({ dua }: DuaCardProps) {
           )}
         </div>
       </CardContent>
-    
+    </Card>
   );
 }
