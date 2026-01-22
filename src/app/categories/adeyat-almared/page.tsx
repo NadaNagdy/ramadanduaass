@@ -88,3 +88,5 @@ export default function AdeyatAlmaredPage() {
         </div>
       </div>
     </>
+  );
+}
