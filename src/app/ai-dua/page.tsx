@@ -2,21 +2,12 @@
 
 import React, { useState } from 'react';
 import { FloatingStars, DecorativeDivider, Lantern } from '@/components/islamic-decorations';
-import { Send, Sparkles, RefreshCw, Share2, FileText, Wand2 } from 'lucide-react';
+import { Send, Sparkles, RefreshCw, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import DuaCard from '@/components/dua-card';
-import ListeningAnimation from '@/components/listening-animation';
 import GiftCard from '@/components/gift-card';
-
-// استيراد مكونات القائمة المنسدلة (تأكد من وجودها في مشروعك)
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import ListeningAnimation from '@/components/listening-animation';
 
 type RephraseDuaOutput = {
   duaText: string;
@@ -28,6 +19,8 @@ export default function AiDuaPage() {
   const [intention, setIntention] = useState('');
   const [generatedDua, setGeneratedDua] = useState<RephraseDuaOutput | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [senderName, setSenderName] = useState('');
   const { toast } = useToast();
 
   const handleGenerate = async (e: React.FormEvent) => {
@@ -76,38 +69,45 @@ export default function AiDuaPage() {
     setIntention('');
   };
 
-  // دالة المشاركة المعدلة لتقبل نوع المشاركة
-  const handleShare = (type: 'original' | 'ai-full') => {
+  const handleShare = () => {
+    setShowShareDialog(true);
+  };
+
+  const confirmShare = async () => {
     if (!generatedDua) return;
 
-    let textToShare = "";
-    let message = "";
-
-    if (type === 'original') {
-      // الخيار الأول: الدعاء فقط كما هو
-      textToShare = generatedDua.duaText;
-      message = "تم نسخ نص الدعاء للحافظة";
-    } else {
-      // الخيار الثاني: الصياغة الكاملة (الدعاء + المعنى + اللمسة)
-      textToShare = `🤲 *دعاء:* ${generatedDua.duaText}\n\n✨ *المعنى:* ${generatedDua.simplifiedMeaning}\n\n💡 *لمسة روحانية:* ${generatedDua.spiritualTouch}`;
-      message = "تم نسخ الصياغة الكاملة للحافظة";
-    }
-
-    const shareUrl = window.location.href;
-    const fullText = `${textToShare}\n\n🔗 ${shareUrl}`;
-
-    // استخدام Web Share API إذا كانت مدعومة (للموبايل)
-    if (navigator.share) {
-      navigator.share({
-        title: 'دعاء من AiDua',
-        text: fullText,
-      }).catch(console.error);
-    } else {
-      // النسخ للحافظة (للمتصفحات الأخرى)
-      navigator.clipboard.writeText(fullText);
+    const duaText = generatedDua.duaText;
+    const fromName = senderName.trim() || 'صديقك';
+    
+    const shareUrl = `${window.location.origin}/shared-dua?dua=${encodeURIComponent(duaText)}&from=${encodeURIComponent(fromName)}`;
+    
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      
       toast({
-        title: "تم النسخ",
-        description: message,
+        title: "تم نسخ الرابط! 🎁",
+        description: "شارك الهدية الروحانية مع من تحب",
+      });
+      
+      setShowShareDialog(false);
+      setSenderName('');
+      
+      // محاولة فتح نافذة المشاركة إذا كانت متاحة
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: 'هدية دعاء 🎁',
+            text: `${fromName} أرسل لك هدية روحانية من القلب`,
+            url: shareUrl,
+          });
+        } catch (error) {
+          console.log('Share cancelled');
+        }
+      }
+    } catch (error) {
+      toast({
+        title: "رابط المشاركة",
+        description: shareUrl,
       });
     }
   };
@@ -117,9 +117,10 @@ export default function AiDuaPage() {
       <FloatingStars />
       
       <div className="max-w-6xl mx-auto relative z-10">
+        {/* Grid Layout - Animation على اليسار، المحتوى على اليمين */}
         <div className="grid lg:grid-cols-2 gap-12 items-start">
           
-          {/* Animation Side */}
+          {/* Animation Side - تظهر دائماً */}
           <div className="flex flex-col items-center justify-center animate-fade-in">
             <ListeningAnimation />
             <div className="mt-6 text-center">
@@ -176,6 +177,7 @@ export default function AiDuaPage() {
               <div className="animate-fade-in space-y-6">
                 <DecorativeDivider />
                 
+                {/* استبدلنا DuaCard بـ GiftCard */}
                 <GiftCard dua={generatedDua.duaText} />
                 
                 <div className="bg-gold/10 border border-gold/20 rounded-3xl p-6">
@@ -208,39 +210,14 @@ export default function AiDuaPage() {
                     صياغة دعاء جديد
                   </Button>
 
-                  {/* استبدال زر المشاركة العادي بقائمة منسدلة */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button 
-                        variant="outline"
-                        className="flex-1 py-6 border-2 border-dashed border-green-500/30 rounded-2xl text-green-500 hover:bg-green-500/5 transition-all flex items-center justify-center gap-2"
-                      >
-                        <Share2 className="w-5 h-5" />
-                        مشاركة
-                      </Button>
-                    </DropdownMenuTrigger>
-                    
-                    <DropdownMenuContent className="w-56 bg-card border-gold/20" align="end">
-                      {/* الخيار الأول: مشاركة الدعاء فقط */}
-                      <DropdownMenuItem 
-                        onClick={() => handleShare('original')}
-                        className="flex items-center gap-2 justify-end cursor-pointer text-right hover:bg-gold/10 focus:bg-gold/10 py-3"
-                      >
-                        <span>مشاركة نص الدعاء فقط</span>
-                        <FileText className="w-4 h-4 text-gold" />
-                      </DropdownMenuItem>
-                      
-                      {/* الخيار الثاني: مشاركة الصياغة الكاملة من الـ AI */}
-                      <DropdownMenuItem 
-                        onClick={() => handleShare('ai-full')}
-                        className="flex items-center gap-2 justify-end cursor-pointer text-right hover:bg-gold/10 focus:bg-gold/10 py-3"
-                      >
-                        <span>مشاركة الصياغة الكاملة (AI)</span>
-                        <Wand2 className="w-4 h-4 text-gold" />
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-
+                  <Button 
+                    onClick={handleShare}
+                    variant="outline"
+                    className="flex-1 py-6 border-2 border-dashed border-green-500/30 rounded-2xl text-green-500 hover:bg-green-500/5 transition-all flex items-center justify-center gap-2"
+                  >
+                    <Share2 className="w-5 h-5" />
+                    مشاركة هدية
+                  </Button>
                 </div>
               </div>
             )}
@@ -253,6 +230,50 @@ export default function AiDuaPage() {
           <Lantern className="w-20 h-20 text-gold animate-float" style={{ animationDelay: '1.5s' }} />
         </div>
       </div>
+
+      {/* Share Dialog */}
+      {showShareDialog && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-card rounded-3xl p-8 max-w-md w-full animate-scale-in border-2 border-gold/30 shadow-2xl">
+            <h3 className="text-gold font-amiri text-2xl text-center mb-2">
+              من المرسل؟ 💝
+            </h3>
+            <p className="text-cream/60 text-sm text-center mb-6 font-cairo">
+              سيظهر اسمك للمستقبِل مع الهدية
+            </p>
+            
+            <input
+              type="text"
+              value={senderName}
+              onChange={(e) => setSenderName(e.target.value)}
+              placeholder="اكتب اسمك (اختياري)"
+              className="w-full bg-navy/50 border border-gold/30 rounded-2xl p-4 text-cream text-center font-amiri text-lg focus:outline-none focus:border-gold mb-6"
+              dir="rtl"
+              autoFocus
+            />
+            
+            <div className="flex gap-4">
+              <Button
+                onClick={() => {
+                  setShowShareDialog(false);
+                  setSenderName('');
+                }}
+                variant="outline"
+                className="flex-1 border-gold/30 text-cream hover:bg-gold/10"
+              >
+                إلغاء
+              </Button>
+              
+              <Button
+                onClick={confirmShare}
+                className="flex-1 bg-gold text-navy hover:bg-gold-light font-bold"
+              >
+                مشاركة 🎁
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
