@@ -55,4 +55,13 @@ export default async function DuaPage({ params }: Props) {
         <DuaCardClient title={title} dua={duaText} />
         
         {/* نص إضافي لتقوية الكلمات المفتاحية */}
-        <div className="mt-8 max-w-2xl mx-auto text-gray-600 text-center leading-relaxed
+        <div className="mt-8 max-w-2xl mx-auto text-gray-600 text-center leading-relaxed">
+          <p>
+            نقدم لكم في هذا الصفحة <strong>{title}</strong> مكتوباً بالتشكيل الكامل. 
+            المواظبة على قراءة {title} من أعظم القربات التي تريح القلب وتزيل الهم.
+          </p>
+        </div>
+      </article>
+    </main>
+  );
+}
