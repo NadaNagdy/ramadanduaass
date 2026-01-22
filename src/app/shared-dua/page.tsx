@@ -1,5 +1,3 @@
-// ضع هذا الملف في: src/app/shared-dua/shared-dua-content.tsx
-
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -11,19 +9,17 @@ import { useToast } from '@/hooks/use-toast';
 import GiftCard from '@/components/gift-card';
 import html2canvas from 'html2canvas';
 
-type EnhancedDua = {
-  duaText: string;
-  simplifiedMeaning: string;
-  spiritualTouch: string;
-};
-
-export default function SharedDuaPageContent() {
+export default function SharedDuaContent() {
   const searchParams = useSearchParams();
   const [dua, setDua] = useState('');
   const [fromName, setFromName] = useState('');
   const [copied, setCopied] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
-  const [enhancedDua, setEnhancedDua] = useState<EnhancedDua | null>(null);
+  const [enhancedDua, setEnhancedDua] = useState<{
+    duaText: string;
+    simplifiedMeaning: string;
+    spiritualTouch: string;
+  } | null>(null);
   const [isEnhancing, setIsEnhancing] = useState(false);
   const { toast } = useToast();
   const giftRef = useRef<HTMLDivElement>(null);
@@ -64,7 +60,7 @@ export default function SharedDuaPageContent() {
       
       toast({
         title: "✨ تم التحسين!",
-        description: "تم تحسين الدعاء وتجميله بنجاح",
+        description: "تم تحسين الدعاء بنجاح",
       });
     } catch (error) {
       console.error(error);
@@ -284,11 +280,11 @@ export default function SharedDuaPageContent() {
             onClick={enhanceDua}
             disabled={isEnhancing || !!enhancedDua}
             variant="outline"
-            className="py-6 border-2 border-dashed border-gold/30 rounded-2xl text-gold hover:bg-gold/5 transition-all flex flex-col items-center justify-center gap-2 disabled:opacity-50"
+            className="py-6 border-2 border-dashed border-gold/30 rounded-2xl text-gold hover:bg-gold/5 transition-all flex flex-col items-center justify-center gap-2"
           >
             <Sparkles className="w-6 h-6" />
             <span className="text-sm font-bold">
-              {isEnhancing ? '⏳ جاري...' : enhancedDua ? '✓ تم!' : 'تحسين AI'}
+              {isEnhancing ? 'جاري...' : enhancedDua ? 'تم التحسين!' : 'تحسين AI'}
             </span>
           </Button>
         </div>
