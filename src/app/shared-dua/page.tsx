@@ -12,8 +12,6 @@ import html2canvas from 'html2canvas';
 
 export const dynamic = 'force-dynamic';
 
-function SharedDuaContent() {
-  const searchParams = useSearchParams();
 export default function SharedDuaContent() {
   const searchParams = useSearchParams();
   const [dua, setDua] = useState('');
@@ -28,7 +26,6 @@ export default function SharedDuaContent() {
   const [isEnhancing, setIsEnhancing] = useState(false);
   const { toast } = useToast();
   const giftRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     const duaParam = searchParams.get('dua');
     const fromParam = searchParams.get('from');
