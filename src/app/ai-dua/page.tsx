@@ -176,11 +176,7 @@ export default function AiDuaPage() {
               <div className="animate-fade-in space-y-6">
                 <DecorativeDivider />
                 
-                <DuaCard 
-                  title="تهادوا الحب غيباً بالدعاء" 
-                  dua={generatedDua.duaText} 
-                  showActions={true}
-                />
+                <GiftCard dua={generatedDua.duaText} />
                 
                 <div className="bg-gold/10 border border-gold/20 rounded-3xl p-6">
                   <h4 className="font-amiri text-lg text-gold flex items-center gap-2 justify-end mb-3">
