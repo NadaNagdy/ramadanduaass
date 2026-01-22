@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import DuaCard from '@/components/dua-card';
 import ListeningAnimation from '@/components/listening-animation';
+import GiftCard from '@/components/gift-card';
 
 // استيراد مكونات القائمة المنسدلة (تأكد من وجودها في مشروعك)
 import {
@@ -176,7 +177,7 @@ export default function AiDuaPage() {
                 <DecorativeDivider />
                 
                 <DuaCard 
-                  title="الدعاء المصاغ" 
+                  title="تهادوا الحب غيباً بالدعاء" 
                   dua={generatedDua.duaText} 
                   showActions={true}
                 />
