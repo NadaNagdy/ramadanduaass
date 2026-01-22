@@ -52,17 +52,16 @@ export default function AdeyatAlmaredPage() {
 
           {/* Duas Sections */}
           {almaredDuas.sections.map((section, idx) => (
-            
-              
+            <div key={idx} className="mb-12">
+              <h2 className="text-3xl font-amiri text-gold mb-6 text-center">
                 {section.title}
-              
-              
-              
+              </h2>
+              <div className="space-y-6">
                 {section.duas.map((dua) => (
-                  
+                  <DuaCard key={dua.id} dua={dua} />
                 ))}
-              
-            
+              </div>
+            </div>
           ))}
 
           {/* Share Section */}

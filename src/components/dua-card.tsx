@@ -29,62 +29,54 @@ export default function DuaCard({ dua }: DuaCardProps) {
         rounded-3xl overflow-hidden
       `}
     >
-      
+      <CardContent className="p-6">
         {/* Golden Badge */}
         {dua.isGolden && (
-          
-            
-              
+          <div className="mb-4 flex justify-center">
+            <Badge className="bg-gold text-white border-gold">
               دعاء مأثور
-            
-          
+            </Badge>
+          </div>
         )}
 
         {/* Arabic Text */}
-        
-          
+        <div className="mb-6 text-center">
+          <p className="text-2xl font-amiri leading-relaxed text-white">
             {dua.arabic}
-          
-        
+          </p>
+        </div>
 
         {/* Metadata */}
-        
+        <div className="space-y-2 text-sm text-white/80">
           {dua.source && (
-            
-              
-              
-                المصدر: {dua.source}
-              
-            
+            <div className="flex items-center gap-2">
+              <BookOpen className="w-4 h-4" />
+              <span>المصدر: {dua.source}</span>
+            </div>
           )}
 
           {dua.when && (
-            
-              
-              
-                وقت الدعاء: {dua.when}
-              
-            
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4" />
+              <span>وقت الدعاء: {dua.when}</span>
+            </div>
           )}
 
           {dua.benefit && (
-            
-              
-              
-                الفائدة: {dua.benefit}
-              
-            
+            <div className="flex items-center gap-2">
+              <Star className="w-4 h-4" />
+              <span>الفائدة: {dua.benefit}</span>
+            </div>
           )}
 
           {dua.repetition && (
-            
-              
-                🔢 {dua.repetition}
-              
-            
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4" />
+              <span>🔢 {dua.repetition}</span>
+            </div>
           )}
-        
-      
+        </div>
+      </CardContent>
     
   );
 }
