@@ -1,9 +1,17 @@
 import DuaCardClient from './dua-card-client';
 import type { Metadata } from 'next';
 
-// generateMetadata لازم يكون async
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const duaTitle = decodeURIComponent(params.slug.replace(/-/g, ' '));
+// تعريف النوع ليكون Promise
+type Props = {
+  params: Promise<{ slug: string }>;
+};
+
+// 1. تعديل generateMetadata
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  // ننتظر الـ params أولاً
+  const { slug } = await params;
+  
+  const duaTitle = decodeURIComponent(slug.replace(/-/g, ' '));
   return {
     title: `${duaTitle} – دعاء مستجاب`,
     description: `دعاء ${duaTitle} مكتوب، يمكنك نسخه أو مشاركته كهدية روحانية.`,
@@ -11,7 +19,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     openGraph: {
       title: `${duaTitle} – دعاء مستجاب`,
       description: `شارك دعاء ${duaTitle} كهدية روحانية.`,
-      url: `https://YOUR_DOMAIN/duas/${params.slug}`,
+      url: `https://YOUR_DOMAIN/duas/${slug}`,
       siteName: 'منصة الأدعية',
       locale: 'ar_EG',
       type: 'article',
@@ -19,8 +27,17 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default function DuaPage({ params }: { params: { slug: string } }) {
-  const title = decodeURIComponent(params.slug.replace(/-/g, ' '));
+// 2. تعديل مكون الصفحة الرئيسي
+// يجب أن يكون async لكي نستخدم await
+export default async function DuaPage({ params }: Props) {
+  // ننتظر الـ params أولاً
+  const { slug } = await params;
+
+  const title = decodeURIComponent(slug.replace(/-/g, ' '));
+  const duaText = 'اللهم ارزقنا الخير والبركة';
+
+  return <DuaCardClient title={title} dua={duaText} />;
+}ms.slug.replace(/-/g, ' '));
   const duaText = 'اللهم ارزقنا الخير والبركة';
 
   return <DuaCardClient title={title} dua={duaText} />;
