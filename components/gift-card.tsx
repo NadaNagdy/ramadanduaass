@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Gift, Sparkles } from 'lucide-react';
-import DuaCard from './dua-card';
+import DuaCard from '@/components/dua-card';
 
 interface GiftCardProps {
   dua: string;
