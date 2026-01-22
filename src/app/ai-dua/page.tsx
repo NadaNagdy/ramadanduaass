@@ -2,14 +2,14 @@
 
 import React, { useState } from 'react';
 import { FloatingStars, DecorativeDivider, Lantern } from '@/components/islamic-decorations';
-import { Send, Sparkles, RefreshCw, Share2, Copy, FileText, Heart } from 'lucide-react'; // Added icons
+import { Send, Sparkles, RefreshCw, Share2, FileText, Wand2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import DuaCard from '@/components/dua-card';
 import ListeningAnimation from '@/components/listening-animation';
 
-// استيراد مكونات القائمة المنسدلة
+// استيراد مكونات القائمة المنسدلة (تأكد من وجودها في مشروعك)
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -75,52 +75,40 @@ export default function AiDuaPage() {
     setIntention('');
   };
 
-  // تعديل دالة المشاركة لتقبل المحتوى المراد مشاركته
-  const handleShare = (type: 'dua' | 'meaning' | 'all') => {
+  // دالة المشاركة المعدلة لتقبل نوع المشاركة
+  const handleShare = (type: 'original' | 'ai-full') => {
     if (!generatedDua) return;
 
     let textToShare = "";
     let message = "";
 
-    switch (type) {
-      case 'dua':
-        textToShare = generatedDua.duaText;
-        message = "تم نسخ نص الدعاء للمشاركة";
-        break;
-      case 'meaning':
-        textToShare = generatedDua.simplifiedMeaning;
-        message = "تم نسخ المعنى المبسط للمشاركة";
-        break;
-      case 'all':
-        textToShare = `${generatedDua.duaText}\n\nالمعنى:\n${generatedDua.simplifiedMeaning}\n\nلمسة روحانية:\n${generatedDua.spiritualTouch}`;
-        message = "تم نسخ المحتوى بالكامل للمشاركة";
-        break;
+    if (type === 'original') {
+      // الخيار الأول: الدعاء فقط كما هو
+      textToShare = generatedDua.duaText;
+      message = "تم نسخ نص الدعاء للحافظة";
+    } else {
+      // الخيار الثاني: الصياغة الكاملة (الدعاء + المعنى + اللمسة)
+      textToShare = `🤲 *دعاء:* ${generatedDua.duaText}\n\n✨ *المعنى:* ${generatedDua.simplifiedMeaning}\n\n💡 *لمسة روحانية:* ${generatedDua.spiritualTouch}`;
+      message = "تم نسخ الصياغة الكاملة للحافظة";
     }
 
     const shareUrl = window.location.href;
-    
-    // هنا نقوم بنسخ النص للحافظة كخيار أساسي، أو فتح نافذة المشاركة إذا كان متاحاً
+    const fullText = `${textToShare}\n\n🔗 ${shareUrl}`;
+
+    // استخدام Web Share API إذا كانت مدعومة (للموبايل)
     if (navigator.share) {
       navigator.share({
         title: 'دعاء من AiDua',
-        text: textToShare,
-        url: shareUrl,
+        text: fullText,
       }).catch(console.error);
     } else {
-      // Fallback: Copy to clipboard
-      navigator.clipboard.writeText(`${textToShare}\n\n${shareUrl}`);
+      // النسخ للحافظة (للمتصفحات الأخرى)
+      navigator.clipboard.writeText(fullText);
       toast({
         title: "تم النسخ",
         description: message,
       });
     }
-
-    // Optional: Log for analytics
-    const socialMediaLinks = {
-      twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(textToShare)}&url=${encodeURIComponent(shareUrl)}`,
-      whatsapp: `https://api.whatsapp.com/send?text=${encodeURIComponent(textToShare + ' ' + shareUrl)}`,
-    };
-    console.log('Share Links:', socialMediaLinks);
   };
 
   return (
@@ -223,7 +211,7 @@ export default function AiDuaPage() {
                     صياغة دعاء جديد
                   </Button>
 
-                  {/* القائمة المنسدلة لخيارات المشاركة */}
+                  {/* استبدال زر المشاركة العادي بقائمة منسدلة */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button 
@@ -234,29 +222,24 @@ export default function AiDuaPage() {
                         مشاركة
                       </Button>
                     </DropdownMenuTrigger>
+                    
                     <DropdownMenuContent className="w-56 bg-card border-gold/20" align="end">
+                      {/* الخيار الأول: مشاركة الدعاء فقط */}
                       <DropdownMenuItem 
-                        onClick={() => handleShare('dua')}
-                        className="flex items-center gap-2 justify-end cursor-pointer text-right hover:bg-gold/10 focus:bg-gold/10"
+                        onClick={() => handleShare('original')}
+                        className="flex items-center gap-2 justify-end cursor-pointer text-right hover:bg-gold/10 focus:bg-gold/10 py-3"
                       >
-                        <span>مشاركة الدعاء فقط</span>
+                        <span>مشاركة نص الدعاء فقط</span>
                         <FileText className="w-4 h-4 text-gold" />
                       </DropdownMenuItem>
                       
+                      {/* الخيار الثاني: مشاركة الصياغة الكاملة من الـ AI */}
                       <DropdownMenuItem 
-                        onClick={() => handleShare('meaning')}
-                        className="flex items-center gap-2 justify-end cursor-pointer text-right hover:bg-gold/10 focus:bg-gold/10"
+                        onClick={() => handleShare('ai-full')}
+                        className="flex items-center gap-2 justify-end cursor-pointer text-right hover:bg-gold/10 focus:bg-gold/10 py-3"
                       >
-                        <span>مشاركة المعنى واللمسة</span>
-                        <Heart className="w-4 h-4 text-gold" />
-                      </DropdownMenuItem>
-                      
-                      <DropdownMenuItem 
-                        onClick={() => handleShare('all')}
-                        className="flex items-center gap-2 justify-end cursor-pointer text-right hover:bg-gold/10 focus:bg-gold/10"
-                      >
-                        <span>مشاركة الكل</span>
-                        <Copy className="w-4 h-4 text-gold" />
+                        <span>مشاركة الصياغة الكاملة (AI)</span>
+                        <Wand2 className="w-4 h-4 text-gold" />
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
