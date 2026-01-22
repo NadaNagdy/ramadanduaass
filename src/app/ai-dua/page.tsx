@@ -92,7 +92,6 @@ export default function AiDuaPage() {
       setShowShareDialog(false);
       setSenderName('');
       
-      // محاولة فتح نافذة المشاركة إذا كانت متاحة
       if (navigator.share) {
         try {
           await navigator.share({
@@ -177,7 +176,7 @@ export default function AiDuaPage() {
               <div className="animate-fade-in space-y-6">
                 <DecorativeDivider />
                 
-                {/* استبدلنا DuaCard بـ GiftCard */}
+                {/* GiftCard - الهدية الملفوفة */}
                 <GiftCard dua={generatedDua.duaText} />
                 
                 <div className="bg-gold/10 border border-gold/20 rounded-3xl p-6">
