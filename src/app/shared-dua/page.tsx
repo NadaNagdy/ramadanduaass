@@ -1,5 +1,6 @@
 "use client";
-
+import React, { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { FloatingStars, DecorativeDivider } from '@/components/islamic-decorations';
@@ -9,6 +10,10 @@ import { useToast } from '@/hooks/use-toast';
 import GiftCard from '@/components/gift-card';
 import html2canvas from 'html2canvas';
 
+export const dynamic = 'force-dynamic';
+
+function SharedDuaContent() {
+  const searchParams = useSearchParams();
 export default function SharedDuaContent() {
   const searchParams = useSearchParams();
   const [dua, setDua] = useState('');
@@ -301,8 +306,26 @@ export default function SharedDuaContent() {
           <a 
             href="/"
             className="inline-block text-gold/70 hover:text-gold transition-all font-cairo text-lg underline decoration-wavy decoration-gold/30"
-          >
-            ✨ اصنع دعاءك الخاص
+          ✨ 
+            return (
+    // ... JSX
+  );
+}
+
+export default function SharedDuaPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-hero-gradient flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-gold mx-auto mb-4"></div>
+          <p className="text-gold font-amiri text-xl">جاري التحميل...</p>
+        </div>
+      </div>
+    }>
+      <SharedDuaContent />
+    </Suspense>
+  );
+}اصنع دعاءك الخاص
           </a>
         </div>
       </div>
