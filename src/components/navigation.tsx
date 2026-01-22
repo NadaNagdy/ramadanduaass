@@ -1,3 +1,4 @@
+cat > src/components/navigation.tsx << 'EOF'
 "use client";
 
 import React, { useState } from 'react';
@@ -35,7 +36,7 @@ const Navigation: React.FC = () => {
             <CrescentMoon className="w-10 h-10 text-gold glow-gold" />
             <span className="font-amiri text-2xl text-cream font-bold">أدعية رمضان</span>
           </Link>
-          <div className="flex items-center gap-6 overflow-x-auto"hidden md:flex items-center gap-6">
+          <div className="flex items-center gap-6 overflow-x-auto">
             {navLinks.map((link) => (
               <Link key={link.path} href={link.path} className={cn(
                 'font-cairo text-base transition-colors flex items-center gap-2 py-2',
@@ -77,3 +78,4 @@ const Navigation: React.FC = () => {
 };
 
 export default Navigation;
+EOF
