@@ -1,37 +1,36 @@
-import DuaCardClient from './dua-card-client';
+import Link from 'next/link';
 import type { Metadata } from 'next';
 
-// تعريف النوع ليكون Promise (متطلب Next.js 15)
-type Props = {
-  params: Promise<{ slug: string }>;
+export const metadata: Metadata = {
+  title: 'منصة الأدعية - الرئيسية',
+  description: 'تصفح جميع الأدعية المكتوبة والمستجابة',
 };
 
-// دالة الميتا داتا
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
+export default function DuasIndexPage() {
+  // هذه الصفحة لا تستقبل params لأنها الصفحة الرئيسية
   
-  const duaTitle = decodeURIComponent(slug.replace(/-/g, ' '));
-  return {
-    title: `${duaTitle} – دعاء مستجاب`,
-    description: `دعاء ${duaTitle} مكتوب، يمكنك نسخه أو مشاركته كهدية روحانية.`,
-    keywords: ['دعاء', 'أدعية', 'دعاء مستجاب', duaTitle, 'أدعية مكتوبة', 'دعاء قصير'],
-    openGraph: {
-      title: `${duaTitle} – دعاء مستجاب`,
-      description: `شارك دعاء ${duaTitle} كهدية روحانية.`,
-      url: `https://YOUR_DOMAIN/duas/${slug}`,
-      siteName: 'منصة الأدعية',
-      locale: 'ar_EG',
-      type: 'article',
-    },
-  };
-}
+  return (
+    <main className="container mx-auto p-4 rtl">
+      <h1 className="text-2xl font-bold mb-6 text-center">قائمة الأدعية المختارة</h1>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* يمكنك إضافة روابط للأدعية هنا يدوياً أو جلبها من قاعدة بيانات */}
+        
+        <Link href="/duas/morning-dua" className="block p-6 bg-white border rounded-lg hover:shadow-lg transition">
+          <h2 className="text-xl font-semibold mb-2">دعاء الصباح</h2>
+          <p className="text-gray-600">اضغط لقراءة الدعاء...</p>
+        </Link>
 
-// مكون الصفحة الرئيسي
-export default async function DuaPage({ params }: Props) {
-  const { slug } = await params;
-
-  const title = decodeURIComponent(slug.replace(/-/g, ' '));
-  const duaText = 'اللهم ارزقنا الخير والبركة';
-
-  return <DuaCardClient title={title} dua={duaText} />;
+        <Link href="/duas/evening-dua" className="block p-6 bg-white border rounded-lg hover:shadow-lg transition">
+          <h2 className="text-xl font-semibold mb-2">دعاء المساء</h2>
+          <p className="text-gray-600">اضغط لقراءة الدعاء...</p>
+        </Link>
+        
+        <Link href="/duas/travel-dua" className="block p-6 bg-white border rounded-lg hover:shadow-lg transition">
+          <h2 className="text-xl font-semibold mb-2">دعاء السفر</h2>
+          <p className="text-gray-600">اضغط لقراءة الدعاء...</p>
+        </Link>
+      </div>
+    </main>
+  );
 }
