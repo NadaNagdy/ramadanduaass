@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
 
     const response = await chatCompletion(systemPrompt, userPrompt, {
       temperature: 0.7,
-      max_tokens: 1000,
+      maxTokens: 1000,
     });
 
     // محاولة استخراج JSON
