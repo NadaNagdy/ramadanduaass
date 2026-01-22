@@ -1,11 +1,8 @@
-// نزّل المكتبة دي الأول:
-// npm install html2canvas
-
 "use client";
 
 import React, { useState, useRef } from 'react';
 import { FloatingStars, DecorativeDivider, Lantern } from '@/components/islamic-decorations';
-import { Send, Sparkles, RefreshCw, Share2, Download, MessageCircle } from 'lucide-react';
+import { Send, Sparkles, RefreshCw, Share2, Download, MessageCircle, Copy, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -26,6 +23,7 @@ export default function AiDuaPage() {
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [senderName, setSenderName] = useState('');
   const [isCapturing, setIsCapturing] = useState(false);
+  const [copied, setCopied] = useState(false);
   const { toast } = useToast();
   const giftRef = useRef<HTMLDivElement>(null);
 
@@ -63,7 +61,7 @@ export default function AiDuaPage() {
       toast({
         variant: "destructive",
         title: "حدث خطأ",
-        description: "لم نتمكن من إنشاء الدعاء، يرجى التأكد من إعدادات مفتاح API والمحاولة مرة أخرى.",
+        description: "لم نتمكن من إنشاء الدعاء، يرجى المحاولة مرة أخرى.",
       });
     } finally {
       setIsGenerating(false);
@@ -80,7 +78,7 @@ export default function AiDuaPage() {
   };
 
   // تحويل الهدية لصورة
-  const captureGiftAsImage = async () => {
+  const captureGiftAsImage = async (): Promise<Blob | null> => {
     if (!giftRef.current) return null;
     
     setIsCapturing(true);
@@ -88,12 +86,17 @@ export default function AiDuaPage() {
     try {
       const canvas = await html2canvas(giftRef.current, {
         backgroundColor: '#0a1628',
-        scale: 2, // جودة أعلى
+        scale: 2,
         logging: false,
+        useCORS: true,
+        allowTaint: true,
       });
       
-      const blob = await new Promise<Blob>((resolve) => {
-        canvas.toBlob((blob) => resolve(blob!), 'image/png');
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error('Failed to create blob'));
+        }, 'image/png');
       });
       
       setIsCapturing(false);
@@ -101,6 +104,11 @@ export default function AiDuaPage() {
     } catch (error) {
       console.error('Error capturing image:', error);
       setIsCapturing(false);
+      toast({
+        variant: "destructive",
+        title: "خطأ",
+        description: "لم نتمكن من إنشاء الصورة",
+      });
       return null;
     }
   };
@@ -108,26 +116,46 @@ export default function AiDuaPage() {
   // تنزيل الهدية كصورة
   const downloadGiftImage = async () => {
     const blob = await captureGiftAsImage();
-    if (!blob) {
-      toast({
-        variant: "destructive",
-        title: "خطأ",
-        description: "لم نتمكن من إنشاء الصورة",
-      });
-      return;
-    }
+    if (!blob) return;
 
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
     link.download = `هدية-دعاء-${Date.now()}.png`;
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
     URL.revokeObjectURL(url);
 
     toast({
       title: "تم التنزيل! 🎁",
-      description: "تم حفظ الهدية كصورة",
+      description: "تم حفظ الهدية كصورة بنجاح",
     });
+  };
+
+  // نسخ النص
+  const copyDuaText = async () => {
+    if (!generatedDua) return;
+
+    const textToCopy = `${generatedDua.duaText}\n\n${generatedDua.simplifiedMeaning}`;
+    
+    try {
+      await navigator.clipboard.writeText(textToCopy);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+      
+      toast({
+        title: "تم النسخ! 📋",
+        description: "تم نسخ الدعاء بنجاح",
+      });
+    } catch (error) {
+      console.error('Failed to copy:', error);
+      toast({
+        variant: "destructive",
+        title: "خطأ",
+        description: "لم نتمكن من نسخ النص",
+      });
+    }
   };
 
   // مشاركة على واتساب
@@ -135,24 +163,31 @@ export default function AiDuaPage() {
     if (!generatedDua) return;
 
     const fromName = senderName.trim() || 'صديقك';
-    const shareText = `${fromName} أرسل لك هدية روحانية 🎁\n\n${generatedDua.duaText}\n\nتهادوا تحابوا ❤️`;
+    const shareText = `🎁 ${fromName} أرسل لك هدية روحانية\n\n${generatedDua.duaText}\n\n💚 تهادوا تحابوا`;
     
-    // محاولة مشاركة الصورة إذا كان المتصفح يدعم
-    const blob = await captureGiftAsImage();
-    
-    if (blob && navigator.share && navigator.canShare({ files: [new File([blob], 'gift.png', { type: 'image/png' })] })) {
-      try {
-        const file = new File([blob], 'هدية-دعاء.png', { type: 'image/png' });
-        await navigator.share({
-          title: 'هدية دعاء 🎁',
-          text: shareText,
-          files: [file],
-        });
-        setShowShareDialog(false);
-        setSenderName('');
-        return;
-      } catch (error) {
-        console.log('Share cancelled or failed');
+    // محاولة مشاركة الصورة على الهاتف
+    if (navigator.share) {
+      const blob = await captureGiftAsImage();
+      
+      if (blob) {
+        try {
+          const file = new File([blob], 'هدية-دعاء.png', { type: 'image/png' });
+          
+          // التحقق من دعم مشاركة الملفات
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              title: 'هدية دعاء 🎁',
+              text: shareText,
+              files: [file],
+            });
+            
+            setShowShareDialog(false);
+            setSenderName('');
+            return;
+          }
+        } catch (error) {
+          console.log('Share with image failed, falling back to text');
+        }
       }
     }
     
@@ -169,7 +204,33 @@ export default function AiDuaPage() {
     });
   };
 
-  // نسخ الرابط
+  // مشاركة الصورة مباشرة
+  const shareImageDirectly = async () => {
+    const blob = await captureGiftAsImage();
+    if (!blob) return;
+
+    try {
+      const file = new File([blob], 'هدية-دعاء.png', { type: 'image/png' });
+      
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          title: 'هدية دعاء 🎁',
+          text: `${generatedDua?.duaText}\n\nتهادوا تحابوا 💚`,
+          files: [file],
+        });
+        
+        setShowShareDialog(false);
+        setSenderName('');
+      } else {
+        // إذا المتصفح ما يدعم المشاركة، نحمل الصورة
+        await downloadGiftImage();
+      }
+    } catch (error) {
+      console.log('Share cancelled or failed');
+    }
+  };
+
+  // نسخ رابط المشاركة
   const copyShareLink = async () => {
     if (!generatedDua) return;
 
@@ -180,7 +241,7 @@ export default function AiDuaPage() {
       await navigator.clipboard.writeText(shareUrl);
       
       toast({
-        title: "تم نسخ الرابط! 🎁",
+        title: "تم نسخ الرابط! 🔗",
         description: "شارك الهدية الروحانية مع من تحب",
       });
       
@@ -256,7 +317,6 @@ export default function AiDuaPage() {
               <div className="animate-fade-in space-y-6">
                 <DecorativeDivider />
                 
-                {/* الهدية مع ref عشان نقدر ناخد screenshot */}
                 <div ref={giftRef}>
                   <GiftCard dua={generatedDua.duaText} />
                 </div>
@@ -292,19 +352,28 @@ export default function AiDuaPage() {
                   </Button>
 
                   <Button 
+                    onClick={copyDuaText}
+                    variant="outline"
+                    className="py-6 border-2 border-dashed border-purple-500/30 rounded-2xl text-purple-400 hover:bg-purple-500/5 transition-all flex items-center justify-center gap-2"
+                  >
+                    {copied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
+                    {copied ? 'تم النسخ!' : 'نسخ النص'}
+                  </Button>
+
+                  <Button 
                     onClick={downloadGiftImage}
                     disabled={isCapturing}
                     variant="outline"
                     className="py-6 border-2 border-dashed border-blue-500/30 rounded-2xl text-blue-400 hover:bg-blue-500/5 transition-all flex items-center justify-center gap-2"
                   >
                     <Download className="w-5 h-5" />
-                    {isCapturing ? 'جاري...' : 'تنزيل صورة'}
+                    {isCapturing ? 'جاري...' : 'حفظ كصورة'}
                   </Button>
 
                   <Button 
                     onClick={handleShare}
                     variant="outline"
-                    className="col-span-2 py-6 border-2 border-dashed border-green-500/30 rounded-2xl text-green-500 hover:bg-green-500/5 transition-all flex items-center justify-center gap-2"
+                    className="py-6 border-2 border-dashed border-green-500/30 rounded-2xl text-green-500 hover:bg-green-500/5 transition-all flex items-center justify-center gap-2"
                   >
                     <Share2 className="w-5 h-5" />
                     مشاركة الهدية
@@ -345,17 +414,27 @@ export default function AiDuaPage() {
             <div className="space-y-3">
               <Button
                 onClick={shareToWhatsApp}
-                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4"
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-2xl"
+                disabled={isCapturing}
               >
-                <MessageCircle className="w-5 h-5 mr-2" />
+                <MessageCircle className="w-5 h-5 ml-2" />
                 مشاركة على واتساب
+              </Button>
+
+              <Button
+                onClick={shareImageDirectly}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl"
+                disabled={isCapturing}
+              >
+                <Share2 className="w-5 h-5 ml-2" />
+                {isCapturing ? 'جاري الإعداد...' : 'مشاركة الصورة'}
               </Button>
               
               <Button
                 onClick={copyShareLink}
-                className="w-full bg-gold text-navy hover:bg-gold-light font-bold py-4"
+                className="w-full bg-gold text-navy hover:bg-gold-light font-bold py-4 rounded-2xl"
               >
-                <Share2 className="w-5 h-5 mr-2" />
+                <Copy className="w-5 h-5 ml-2" />
                 نسخ رابط المشاركة
               </Button>
               
@@ -365,7 +444,7 @@ export default function AiDuaPage() {
                   setSenderName('');
                 }}
                 variant="outline"
-                className="w-full border-gold/30 text-cream hover:bg-gold/10"
+                className="w-full border-gold/30 text-cream hover:bg-gold/10 rounded-2xl"
               >
                 إلغاء
               </Button>
