@@ -2,7 +2,7 @@
 import React from 'react';
 import { Metadata } from 'next';
 import { generateDuaMetadata } from '@/lib/metadata';
-import { StructuredData } from '@/components/seo/structured-data';
+import StructuredData from '@/components/seo/structured-data';
 import { almaredDuas } from '@/lib/duas-data/almared-duas';
 import { FloatingStars, CrescentMoon, DecorativeDivider } from '@/components/islamic-decorations';
 import DuaCard from '@/components/dua-card';
