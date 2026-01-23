@@ -1,26 +1,32 @@
 import { MetadataRoute } from 'next';
+import { categories } from '@/lib/duas';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://ramadanduaass.com';
-  
-  const routes = [
+  const lastModified = new Date();
+
+  /* -------- Static Routes -------- */
+  const staticRoutes: MetadataRoute.Sitemap = [
     '',
-    '/categories/adeyat-almared',
-    '/categories/adeyat-alrezq',
-    '/categories/adeyat-alzawaj',
-    '/categories/adeyat-alabnaa',
-    '/categories/adeyat-alsafar',
     '/ramadan',
     '/ramadan/laylat-alqadr',
     '/yawm-aljumaa',
     '/share',
     '/community',
-  ];
-
-  return routes.map((route) => ({
+  ].map(route => ({
     url: `${baseUrl}${route}`,
-    lastModified: new Date(),
+    lastModified,
     changeFrequency: 'weekly',
     priority: route === '' ? 1 : 0.8,
   }));
+
+  /* -------- Category Routes (Dynamic) -------- */
+  const categoryRoutes: MetadataRoute.Sitemap = categories.map(cat => ({
+    url: `${baseUrl}/categories/${cat.id}`,
+    lastModified,
+    changeFrequency: 'weekly',
+    priority: 0.8,
+  }));
+
+  return [...staticRoutes, ...categoryRoutes];
 }
