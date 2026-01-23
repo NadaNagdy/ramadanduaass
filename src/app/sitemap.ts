@@ -24,24 +24,3 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: route === '' ? 1 : 0.8,
   }));
 }
-```
-
----
-
-## خطوة 5: إنشاء robots.txt
-
-```typescript
-// src/app/robots.ts
-
-import { MetadataRoute } from 'next';
-
-export default function robots(): MetadataRoute.Robots {
-  return {
-    rules: {
-      userAgent: '*',
-      allow: '/',
-      disallow: ['/api/', '/admin/'],
-    },
-    sitemap: 'https://ramadanduaass.com/sitemap.xml',
-  };
-}
