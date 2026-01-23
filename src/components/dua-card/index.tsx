@@ -2,10 +2,12 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Copy, Share2, Volume2, Heart, VolumeX } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Copy, Share2, Volume2, Save, Check, Printer, Heart, VolumeX } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 interface DuaCardProps {
   day?: number;
@@ -19,6 +21,7 @@ interface DuaCardProps {
 }
 
 const DuaCard: React.FC<DuaCardProps> = ({ 
+  day,
   title, 
   dua, 
   audioUrl,
@@ -30,48 +33,25 @@ const DuaCard: React.FC<DuaCardProps> = ({
   const { toast } = useToast();
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
   const [savedDuas, setSavedDuas] = useLocalStorage<any[]>('saved_duas', []);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
-
-  const isSaved = isInitiallySaved || (isMounted && savedDuas.some(savedDua => savedDua.dua === dua));
+  const isSaved = isInitiallySaved || savedDuas.some(savedDua => savedDua.dua === dua);
   
   useEffect(() => {
-    setIsMounted(true);
-    
     const loadVoices = () => {
-      if (typeof window !== 'undefined' && window.speechSynthesis) {
-        const availableVoices = window.speechSynthesis.getVoices();
-        setVoices(availableVoices);
-      }
+      const availableVoices = window.speechSynthesis.getVoices();
+      setVoices(availableVoices);
     };
 
     loadVoices();
-    if (typeof window !== 'undefined' && window.speechSynthesis && window.speechSynthesis.onvoiceschanged !== undefined) {
+    if (window.speechSynthesis.onvoiceschanged !== undefined) {
       window.speechSynthesis.onvoiceschanged = loadVoices;
     }
   }, []);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(`${title}\n\n${dua}\n\nتم النسخ من منصة الأدعية`);
-    toast({ title: '✅ تم نسخ الدعاء', description: "يمكنك لصقه الآن في أي مكان." });
-  };
-
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: title,
-          text: `${title}\n\n${dua.substring(0, 100)}...\n\nلقراءة الدعاء كاملاً:`,
-          url: window.location.href,
-        });
-      } catch (error) {
-        console.log('User cancelled share');
-      }
-    } else {
-      handleCopy();
-      toast({ title: 'تم نسخ الرابط للمشاركة' });
-    }
+    navigator.clipboard.writeText(dua);
+    toast({ title: 'تم نسخ الدعاء' });
   };
 
   const handlePlayPause = () => {
@@ -85,7 +65,7 @@ const DuaCard: React.FC<DuaCardProps> = ({
       return;
     }
 
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    if ('speechSynthesis' in window) {
       if (isPlaying) {
         window.speechSynthesis.cancel();
         setIsPlaying(false);
@@ -94,42 +74,59 @@ const DuaCard: React.FC<DuaCardProps> = ({
         
         const utterance = new SpeechSynthesisUtterance(dua);
         
-        const arabicVoices = voices.filter(voice => voice.lang.includes('ar'));
-        const preferredVoice = arabicVoices.find(voice => {
-            const name = voice.name.toLowerCase();
-            return name.includes('google') || name.includes('leila') || name.includes('mariam');
-        }) || arabicVoices[0];
+        // --- منطق اختيار الصوت النسائي ---
+        const arabicVoices = voices.filter(voice => voice.lang.startsWith('ar'));
+        
+        // البحث عن كلمات دلالية للأصوات النسائية المشهورة
+        const femaleVoice = arabicVoices.find(voice => {
+          const name = voice.name.toLowerCase();
+          return (
+            name.includes('female') || 
+            name.includes('leila') ||   // macOS/iOS
+            name.includes('mariam') ||  // Windows/Google
+            name.includes('zira') ||    // Windows
+            name.includes('muna') ||    // macOS
+            name.includes('hoda')       // Google
+          );
+        });
 
-        if (preferredVoice) {
-          utterance.voice = preferredVoice;
+        // إذا لم نجد صوتاً نسائياً محدداً، نأخذ أول صوت عربي متاح
+        const finalVoice = femaleVoice || arabicVoices[0];
+        
+        if (finalVoice) {
+          utterance.voice = finalVoice;
         }
         
         utterance.lang = 'ar-SA';
-        utterance.rate = 0.9;
+        utterance.rate = 0.85; // سرعة هادئة ووقورة
         utterance.pitch = 1.0;
+        utterance.volume = 1.0;
         
         utterance.onstart = () => setIsPlaying(true);
         utterance.onend = () => setIsPlaying(false);
-        utterance.onerror = () => setIsPlaying(false);
+        utterance.onerror = (event) => {
+          console.error('Speech error:', event);
+          setIsPlaying(false);
+        };
         
         window.speechSynthesis.speak(utterance);
       }
     } else {
       toast({
         variant: "destructive",
-        title: "عذراً",
-        description: "جهازك لا يدعم قراءة النصوص العربية.",
+        title: "غير مدعوم",
+        description: "المتصفح لا يدعم قراءة النصوص.",
       });
     }
   };
 
   useEffect(() => {
     return () => {
-      if (typeof window !== 'undefined' && window.speechSynthesis) {
+      if (isPlaying) {
         window.speechSynthesis.cancel();
       }
     };
-  }, []);
+  }, [isPlaying]);
   
   const handleSave = () => {
     if (onSaveToggle) {
@@ -138,61 +135,53 @@ const DuaCard: React.FC<DuaCardProps> = ({
     }
     if (isSaved) {
       setSavedDuas(savedDuas.filter(d => d.dua !== dua));
-      toast({ title: 'تمت الإزالة من المفضلة' });
+      toast({ title: 'تمت الإزالة من أدعيتك' });
     } else {
       setSavedDuas([...savedDuas, { title, dua }]);
-      toast({ title: '❤️ تم الحفظ في أدعيتك' });
+      toast({ title: 'تم الحفظ في أدعيتك' });
     }
   };
 
+  const shareLink = `/generate-card?title=${encodeURIComponent(title)}&dua=${encodeURIComponent(dua)}`;
+
   return (
-    <Card className="bg-white border-none shadow-xl rounded-3xl overflow-hidden font-amiri ring-1 ring-gray-100 my-4" dir="rtl">
-      <CardHeader className="text-center bg-gray-50/50 pb-6 pt-8">
-        <CardTitle className="text-emerald-700 text-3xl font-bold">{title}</CardTitle>
-        {author && <p className="text-gray-400 text-sm mt-2">المصدر: {author}</p>}
+    <Card className="bg-card-gradient text-white border-gold/30 rounded-3xl shadow-2xl font-amiri overflow-hidden">
+      <CardHeader className="text-center">
+        <CardTitle className="text-gold text-2xl">{title}</CardTitle>
+        {author && <p className="text-cream/70 text-sm mt-1">بواسطة: {author}</p>}
       </CardHeader>
-
-      <CardContent className="text-center px-6 sm:px-12 py-8">
-        <p className="text-2xl sm:text-3xl leading-[2.2] text-gray-800 font-medium whitespace-pre-line selection:bg-emerald-100 selection:text-emerald-900">
-            {dua}
-        </p>
+      <CardContent className="text-center text-3xl leading-loose px-6 sm:px-12 py-8">
+        <p className="whitespace-pre-line">{dua}</p>
       </CardContent>
-
       {showActions && (
-        <CardFooter className="bg-gray-50/80 p-6 flex justify-center items-center gap-4 sm:gap-8 border-t border-gray-100 flex-wrap">
-          
-          <button onClick={handleCopy} className="group flex flex-col items-center gap-2 text-gray-500 hover:text-emerald-600 transition-all min-w-[60px]">
-            <div className="p-3 bg-white rounded-full shadow-sm group-hover:shadow-md border border-gray-100 group-hover:border-emerald-200 transition-all">
-                <Copy className="w-5 h-5" />
-            </div>
-            <span className="text-xs font-semibold">نسخ</span>
+        <CardFooter className="bg-black/20 p-4 flex justify-center items-center gap-6">
+          <button onClick={handleCopy} className="flex flex-col items-center gap-1 text-[#f8f1e7]/60 hover:text-[#d4af37] transition-colors">
+            <Copy className="w-5 h-5" />
+            <span className="text-[10px]">نسخ</span>
           </button>
           
-          <button onClick={handleShare} className="group flex flex-col items-center gap-2 text-gray-500 hover:text-blue-600 transition-all min-w-[60px]">
-            <div className="p-3 bg-white rounded-full shadow-sm group-hover:shadow-md border border-gray-100 group-hover:border-blue-200 transition-all">
-                <Share2 className="w-5 h-5" />
-            </div>
-            <span className="text-xs font-semibold">مشاركة</span>
-          </button>
+          <Link href={shareLink} legacyBehavior>
+            <a className="flex flex-col items-center gap-1 text-[#f8f1e7]/60 hover:text-[#d4af37] transition-colors">
+              <Share2 className="w-5 h-5" />
+              <span className="text-[10px]">مشاركة</span>
+            </a>
+          </Link>
 
-          <button onClick={handleSave} className="group flex flex-col items-center gap-2 text-gray-500 hover:text-red-500 transition-all min-w-[60px]">
-            <div className="p-3 bg-white rounded-full shadow-sm group-hover:shadow-md border border-gray-100 group-hover:border-red-200 transition-all">
-                 <Heart className={cn("w-5 h-5 transition-all", isSaved && "fill-red-500 text-red-500 scale-110")} />
-            </div>
-            <span className="text-xs font-semibold">{isSaved ? 'محفوظ' : 'حفظ'}</span>
+          <button onClick={handleSave} className="flex flex-col items-center gap-1 text-[#f8f1e7]/60 hover:text-[#d4af37] transition-colors">
+             <Heart className={cn("w-5 h-5", isSaved && "fill-current text-gold")} />
+            <span className="text-[10px]">حفظ</span>
           </button>
           
           <button 
             onClick={handlePlayPause} 
-            className="group flex flex-col items-center gap-2 text-gray-500 hover:text-emerald-600 transition-all min-w-[60px]"
+            className="flex flex-col items-center gap-1 text-[#f8f1e7]/60 hover:text-[#d4af37] transition-colors" 
           >
-            <div className="p-3 bg-white rounded-full shadow-sm group-hover:shadow-md border border-gray-100 group-hover:border-emerald-200 transition-all relative">
-                {isPlaying ? (
-                    <span className="absolute inset-0 rounded-full animate-ping bg-emerald-100 opacity-75"></span>
-                ) : null}
-                {isPlaying ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-            </div>
-            <span className="text-xs font-semibold">{isPlaying ? 'إيقاف' : 'استماع'}</span>
+            {isPlaying ? (
+              <VolumeX className="w-5 h-5 text-gold animate-pulse" />
+            ) : (
+              <Volume2 className="w-5 h-5" />
+            )}
+            <span className="text-[10px]">{isPlaying ? 'إيقاف' : 'استماع'}</span>
           </button>
           
           {audioUrl && <audio ref={audioRef} src={audioUrl} onEnded={() => setIsPlaying(false)} />}
