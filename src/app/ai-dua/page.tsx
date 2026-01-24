@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { FloatingStars, DecorativeDivider, Lantern } from '@/components/islamic-decorations';
-import { Send, Sparkles, RefreshCw, Share2, Download, MessageCircle, Copy, Check } from 'lucide-react';
+import { Send, Sparkles, RefreshCw, Share2, Download, MessageCircle, Copy, Check, Link2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -24,6 +24,8 @@ export default function AiDuaPage() {
   const [senderName, setSenderName] = useState('');
   const [isCapturing, setIsCapturing] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [shortUrl, setShortUrl] = useState('');
+  const [isGeneratingUrl, setIsGeneratingUrl] = useState(false);
   const { toast } = useToast();
   const giftRef = useRef<HTMLDivElement>(null);
 
@@ -71,10 +73,42 @@ export default function AiDuaPage() {
   const handleReset = () => {
     setGeneratedDua(null);
     setIntention('');
+    setShortUrl('');
   };
 
   const handleShare = () => {
     setShowShareDialog(true);
+    // Generate short URL when dialog opens
+    if (!shortUrl) {
+      generateShortUrl();
+    }
+  };
+
+  // توليد رابط مختصر
+  const generateShortUrl = async () => {
+    if (!generatedDua || shortUrl) return;
+
+    setIsGeneratingUrl(true);
+    
+    try {
+      const fromName = senderName.trim() || 'صديقك';
+      const longUrl = `${window.location.origin}/shared-dua?dua=${encodeURIComponent(generatedDua.duaText)}&from=${encodeURIComponent(fromName)}`;
+      
+      const response = await fetch('/api/shorten-url', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ longUrl }),
+      });
+
+      const data = await response.json();
+      setShortUrl(data.shortUrl);
+    } catch (error) {
+      console.error('Error generating short URL:', error);
+    } finally {
+      setIsGeneratingUrl(false);
+    }
   };
 
   // تحويل الهدية لصورة
@@ -163,40 +197,21 @@ export default function AiDuaPage() {
     if (!generatedDua) return;
 
     const fromName = senderName.trim() || 'صديقك';
-    const shareText = `🎁 ${fromName} أرسل لك هدية روحانية\n\n${generatedDua.duaText}\n\n💚 تهادوا تحابوا`;
     
-    // محاولة مشاركة الصورة على الهاتف
-    if (navigator.share) {
-      const blob = await captureGiftAsImage();
-      
-      if (blob) {
-        try {
-          const file = new File([blob], 'هدية-دعاء.png', { type: 'image/png' });
-          
-          // التحقق من دعم مشاركة الملفات
-          if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({
-              title: 'هدية دعاء 🎁',
-              text: shareText,
-              files: [file],
-            });
-            
-            setShowShareDialog(false);
-            setSenderName('');
-            return;
-          }
-        } catch (error) {
-          console.log('Share with image failed, falling back to text');
-        }
-      }
+    // استخدام الرابط المختصر إذا كان متاحاً
+    let shareLink = shortUrl;
+    if (!shareLink) {
+      await generateShortUrl();
+      shareLink = shortUrl || `${window.location.origin}/shared-dua?dua=${encodeURIComponent(generatedDua.duaText)}&from=${encodeURIComponent(fromName)}`;
     }
+    
+    const shareText = `🎁 ${fromName} أرسل لك هدية روحانية\n\n🤲 ${generatedDua.duaText}\n\n✨ شاهد الهدية كاملة:\n${shareLink}\n\n💚 تهادوا تحابوا`;
     
     // البديل: رابط واتساب بالنص
     const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
     window.open(whatsappUrl, '_blank');
     
     setShowShareDialog(false);
-    setSenderName('');
     
     toast({
       title: "تم فتح واتساب! 📱",
@@ -220,7 +235,6 @@ export default function AiDuaPage() {
         });
         
         setShowShareDialog(false);
-        setSenderName('');
       } else {
         // إذا المتصفح ما يدعم المشاركة، نحمل الصورة
         await downloadGiftImage();
@@ -234,11 +248,20 @@ export default function AiDuaPage() {
   const copyShareLink = async () => {
     if (!generatedDua) return;
 
-    const fromName = senderName.trim() || 'صديقك';
-    const shareUrl = `${window.location.origin}/shared-dua?dua=${encodeURIComponent(generatedDua.duaText)}&from=${encodeURIComponent(fromName)}`;
+    let linkToCopy = shortUrl;
+    
+    if (!linkToCopy) {
+      await generateShortUrl();
+      linkToCopy = shortUrl;
+    }
+    
+    if (!linkToCopy) {
+      const fromName = senderName.trim() || 'صديقك';
+      linkToCopy = `${window.location.origin}/shared-dua?dua=${encodeURIComponent(generatedDua.duaText)}&from=${encodeURIComponent(fromName)}`;
+    }
     
     try {
-      await navigator.clipboard.writeText(shareUrl);
+      await navigator.clipboard.writeText(linkToCopy);
       
       toast({
         title: "تم نسخ الرابط! 🔗",
@@ -246,11 +269,10 @@ export default function AiDuaPage() {
       });
       
       setShowShareDialog(false);
-      setSenderName('');
     } catch (error) {
       toast({
         title: "رابط المشاركة",
-        description: shareUrl,
+        description: linkToCopy,
       });
     }
   };
@@ -318,7 +340,7 @@ export default function AiDuaPage() {
                 <DecorativeDivider />
                 
                 <div ref={giftRef}>
-                  <GiftCard dua={generatedDua.duaText} />
+                  <GiftCard dua={generatedDua.duaText} senderName={senderName} />
                 </div>
                 
                 <div className="bg-gold/10 border border-gold/20 rounded-3xl p-6">
@@ -406,10 +428,29 @@ export default function AiDuaPage() {
               value={senderName}
               onChange={(e) => setSenderName(e.target.value)}
               placeholder="اكتب اسمك (اختياري)"
-              className="w-full bg-navy/50 border border-gold/30 rounded-2xl p-4 text-cream text-center font-amiri text-lg focus:outline-none focus:border-gold mb-6"
+              className="w-full bg-navy/50 border border-gold/30 rounded-2xl p-4 text-cream text-center font-amiri text-lg focus:outline-none focus:border-gold mb-4"
               dir="rtl"
               autoFocus
             />
+
+            {/* عرض الرابط المختصر */}
+            {shortUrl && (
+              <div className="bg-gold/10 border border-gold/30 rounded-2xl p-4 mb-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Link2 className="w-4 h-4 text-gold" />
+                  <span className="text-xs font-cairo text-gold">رابط مختصر:</span>
+                </div>
+                <code className="block bg-navy/50 px-3 py-2 rounded-lg text-xs text-cream break-all font-mono">
+                  {shortUrl}
+                </code>
+              </div>
+            )}
+
+            {isGeneratingUrl && (
+              <div className="text-center mb-4">
+                <p className="text-gold/60 text-sm animate-pulse">جاري إنشاء رابط مختصر...</p>
+              </div>
+            )}
             
             <div className="space-y-3">
               <Button
@@ -441,7 +482,6 @@ export default function AiDuaPage() {
               <Button
                 onClick={() => {
                   setShowShareDialog(false);
-                  setSenderName('');
                 }}
                 variant="outline"
                 className="w-full border-gold/30 text-cream hover:bg-gold/10 rounded-2xl"
