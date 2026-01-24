@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Heart, User, Calendar } from 'lucide-react';
 
@@ -16,36 +16,54 @@ type CommunityDua = {
 interface CommunityDuaCardProps {
   dua: CommunityDua;
   onLikeChange: (id: number, currentLikes: number) => void;
+  highlight?: boolean; // جديد: لتسليط الضوء على الدعاء الجديد
 }
 
-export default function CommunityDuaCard({ dua, onLikeChange }: CommunityDuaCardProps) {
-  const [isLiked, setIsLiked] = React.useState(false);
-  const [likeCount, setLikeCount] = React.useState(dua.likes);
+export default function CommunityDuaCard({ dua, onLikeChange, highlight }: CommunityDuaCardProps) {
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(dua.likes);
+  const [isHighlighted, setIsHighlighted] = useState(highlight || false);
+
+  useEffect(() => {
+    if (highlight) {
+      setIsHighlighted(true);
+      const timer = setTimeout(() => setIsHighlighted(false), 3000); // تمييز 3 ثواني
+      return () => clearTimeout(timer);
+    }
+  }, [highlight]);
 
   const handleLike = () => {
     if (!isLiked) {
       setIsLiked(true);
-      setLikeCount(likeCount + 1);
-      onLikeChange(dua.id, dua.likes);
+      setLikeCount(prev => prev + 1);
+      onLikeChange(dua.id, likeCount);
     }
   };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    
-    if (diffInHours < 1) return 'منذ لحظات';
+    const diffInMs = now.getTime() - date.getTime();
+    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+
+    if (diffInMinutes < 1) return 'منذ لحظات';
+    if (diffInMinutes < 60) return `منذ ${diffInMinutes} دقيقة`;
     if (diffInHours < 24) return `منذ ${diffInHours} ساعة`;
     const diffInDays = Math.floor(diffInHours / 24);
     if (diffInDays === 1) return 'منذ يوم';
     if (diffInDays < 7) return `منذ ${diffInDays} أيام`;
-    return date.toLocaleDateString('ar-SA');
+    return date.toLocaleDateString('ar-SA', { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
   return (
-    <Card className="bg-white/5 backdrop-blur-md border-2 border-gold/30 rounded-3xl overflow-hidden hover:border-gold/50 transition-all hover:shadow-lg hover:shadow-gold/20 animate-fade-in">
+    <Card
+      className={`transition-all border-2 rounded-3xl overflow-hidden hover:border-gold/50 
+        ${isHighlighted ? 'border-gold/80 bg-gold/10 animate-pulse' : 'border-gold/30 bg-white/5'} 
+        hover:shadow-lg hover:shadow-gold/20 animate-fade-in`}
+    >
       <CardContent className="p-8">
+        {/* Header */}
         <div className="flex items-center justify-between mb-6 pb-4 border-b border-gold/20">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-gold/20 rounded-full flex items-center justify-center border-2 border-gold/40">
@@ -61,7 +79,7 @@ export default function CommunityDuaCard({ dua, onLikeChange }: CommunityDuaCard
               </div>
             </div>
           </div>
-          
+
           {dua.isGolden && (
             <div className="bg-gold/20 text-gold px-3 py-1 rounded-full text-xs font-cairo border border-gold/40">
               ⭐ دعاء مميز
@@ -69,28 +87,28 @@ export default function CommunityDuaCard({ dua, onLikeChange }: CommunityDuaCard
           )}
         </div>
 
+        {/* Text */}
         <div className="bg-gold/5 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-gold/20">
           <p className="text-cream text-xl leading-loose text-right font-amiri">
             {dua.text}
           </p>
         </div>
 
+        {/* Footer: Like + Message */}
         <div className="flex items-center justify-between">
           <button
             onClick={handleLike}
             disabled={isLiked}
-            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-cairo font-semibold transition-all ${
-              isLiked 
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-cairo font-semibold transition-all 
+              ${isLiked 
                 ? 'bg-red-500/20 text-red-400 border-2 border-red-500/40 cursor-not-allowed' 
-                : 'bg-gold/20 text-gold border-2 border-gold/40 hover:bg-gold/30 hover:scale-105 active:scale-95'
-            }`}
+                : 'bg-gold/20 text-gold border-2 border-gold/40 hover:bg-gold/30 hover:scale-105 active:scale-95'} 
+            `}
           >
             <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
             <span>{isLiked ? 'أمّنت على الدعاء' : 'آمين'}</span>
             {likeCount > 0 && (
-              <span className="bg-white/10 px-2 py-0.5 rounded-full text-sm">
-                {likeCount}
-              </span>
+              <span className="bg-white/10 px-2 py-0.5 rounded-full text-sm">{likeCount}</span>
             )}
           </button>
 
