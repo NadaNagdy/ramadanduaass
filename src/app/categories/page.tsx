@@ -25,7 +25,9 @@ type DuaItem = string | {
 };
 
 export default function CategoriesPage() {
-  const [activeCategory, setActiveCategory] = useState<string>(categories.filter(c => !specialCategoryLinks[c.id])[0].id);
+  const [activeCategory, setActiveCategory] = useState<string>(
+    categories.filter(c => !specialCategoryLinks[c.id])[0].id
+  );
   const [isGenerating, setIsGenerating] = useState(false);
   const [categoryDuas, setCategoryDuas] = useState<Record<string, DuaItem[]>>(initialCategoryDuas);
   const { toast } = useToast();
@@ -65,10 +67,10 @@ export default function CategoriesPage() {
   const renderCategoryButton = (cat: typeof categories[0]) => {
     const isLink = !!specialCategoryLinks[cat.id];
     const baseClassName = cn(
-      'flex items-center gap-2 px-6 py-3 rounded-2xl transition-all',
+      'flex items-center gap-2 px-6 py-3 rounded-2xl transition-all font-cairo',
       activeCategory === cat.id
         ? 'bg-gold text-navy font-bold shadow-lg shadow-gold/20'
-        : 'bg-card text-cream/60 border border-gold/20 hover:border-gold/50'
+        : 'bg-white/5 text-cream/80 border border-gold/20 hover:border-gold/50 hover:bg-white/10'
     );
 
     if (isLink) {
@@ -78,7 +80,7 @@ export default function CategoriesPage() {
           href={specialCategoryLinks[cat.id]}
           className={baseClassName}
         >
-          <span>{cat.icon}</span>
+          <span className="text-xl">{cat.icon}</span>
           <span>{cat.arabicName}</span>
         </Link>
       );
@@ -90,7 +92,7 @@ export default function CategoriesPage() {
         onClick={() => setActiveCategory(cat.id)}
         className={baseClassName}
       >
-        <span>{cat.icon}</span>
+        <span className="text-xl">{cat.icon}</span>
         <span>{cat.arabicName}</span>
       </button>
     );
@@ -100,47 +102,101 @@ export default function CategoriesPage() {
   const currentDuas = categoryDuas[activeCategory] || [];
 
   return (
-    <div className="min-h-screen bg-hero-gradient pt-24 pb-16 px-4">
+    <div className="min-h-screen bg-hero-gradient pt-32 pb-20 px-4">
       <FloatingStars />
+      
       <div className="container mx-auto max-w-4xl text-center animate-fade-in">
-        <CrescentMoon className="w-16 h-16 text-gold mx-auto mb-4" />
-        <h1 className="font-amiri text-4xl text-cream mb-4">أدعية بالنية</h1>
-        <DecorativeDivider className="mb-12" />
+        {/* Header */}
+        <div className="mb-12">
+          <CrescentMoon className="w-16 h-16 text-gold mx-auto mb-4 animate-float" />
+          <h1 className="font-amiri text-4xl md:text-5xl text-cream mb-4">
+            أدعية بالنية
+          </h1>
+          <p className="text-cream/70 text-lg font-cairo">
+            اختر نية دعائك واستكشف أدعية مكتوبة من القرآن والسنة
+          </p>
+          <DecorativeDivider className="mt-8" />
+        </div>
         
+        {/* Category Buttons */}
         <div className="flex flex-wrap justify-center gap-3 mb-12">
           {categories.map(renderCategoryButton)}
         </div>
 
+        {/* Duas List */}
         {activeCategoryInfo && !specialCategoryLinks[activeCategoryInfo.id] && (
-          <div className="space-y-8 animate-fade-in text-left">
-            {currentDuas.map((dua, index) => {
-              const duaText = typeof dua === 'string' ? dua : dua.dua;
-              return (
-                <DuaCard 
-                  key={`${activeCategory}-${index}`} 
-                  title={`${activeCategoryInfo.arabicName} - ${index + 1}`} 
-                  dua={duaText}
-                  showActions={true}
-                />
-              );
-            })}
+          <div className="animate-fade-in">
+            {currentDuas.length > 0 ? (
+              <>
+                <div className="space-y-6 text-left mb-12">
+                  {currentDuas.map((dua, index) => {
+                    const duaText = typeof dua === 'string' ? dua : dua.dua;
+                    return (
+                      <DuaCard 
+                        key={`${activeCategory}-${index}`} 
+                        title={`${activeCategoryInfo.arabicName} - ${index + 1}`} 
+                        dua={duaText}
+                        showActions={true}
+                      />
+                    );
+                  })}
+                </div>
 
-            <div className="mt-12 text-center pt-8">
-              <Button
-                onClick={handleGenerateDua}
-                disabled={isGenerating || currentDuas.length >= 50}
-                variant="outline"
-                className="group flex items-center justify-center gap-3 mx-auto px-8 py-6 border-2 border-dashed border-gold/30 rounded-2xl text-gold hover:border-gold hover:bg-gold/5 transition-all disabled:opacity-50 text-lg"
-              >
-                {isGenerating ? <Loader2 className="w-6 h-6 animate-spin" /> : <PlusCircle className="w-6 h-6" />}
-                <span className="font-bold">
-                  {currentDuas.length >= 50 ? 'تم الوصول للحد الأقصى' : 'استكشف المزيد من الأدعية بالذكاء الاصطناعي'}
-                </span>
-              </Button>
-               <p className="mt-4 text-cream/30 text-sm italic">
-                {`يمكنك استكشاف ما يصل إلى 50 دعاءً في كل قسم`}
-              </p>
-            </div>
+                {/* AI Generate Button */}
+                <div className="text-center pt-8 border-t border-gold/20">
+                  <Button
+                    onClick={handleGenerateDua}
+                    disabled={isGenerating || currentDuas.length >= 50}
+                    className={cn(
+                      "group flex items-center justify-center gap-3 mx-auto px-8 py-6 rounded-2xl transition-all font-cairo font-bold text-lg",
+                      isGenerating || currentDuas.length >= 50
+                        ? "bg-gray-500/20 text-gray-400 cursor-not-allowed"
+                        : "bg-gold/20 text-gold border-2 border-gold/40 hover:bg-gold/30 hover:border-gold hover:scale-105"
+                    )}
+                  >
+                    {isGenerating ? (
+                      <Loader2 className="w-6 h-6 animate-spin" />
+                    ) : (
+                      <PlusCircle className="w-6 h-6" />
+                    )}
+                    <span>
+                      {currentDuas.length >= 50 
+                        ? 'تم الوصول للحد الأقصى' 
+                        : 'استكشف المزيد من الأدعية بالذكاء الاصطناعي'}
+                    </span>
+                  </Button>
+                  
+                  <p className="mt-4 text-cream/40 text-sm font-cairo">
+                    {currentDuas.length >= 50 
+                      ? 'لقد وصلت للحد الأقصى من الأدعية في هذا القسم'
+                      : `يمكنك استكشاف ما يصل إلى 50 دعاءً في كل قسم`}
+                  </p>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-20">
+                <p className="text-cream/60 text-xl font-amiri mb-6">
+                  لا توجد أدعية في هذا القسم حالياً
+                </p>
+                <Button
+                  onClick={handleGenerateDua}
+                  disabled={isGenerating}
+                  className="bg-gold text-navy hover:bg-gold-light font-cairo font-bold px-8 py-4"
+                >
+                  {isGenerating ? (
+                    <>
+                      <Loader2 className="ml-2 w-5 h-5 animate-spin" />
+                      جاري الإنشاء...
+                    </>
+                  ) : (
+                    <>
+                      <PlusCircle className="ml-2 w-5 h-5" />
+                      إنشاء أدعية بالذكاء الاصطناعي
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>
