@@ -1,21 +1,156 @@
 "use client";
 
-import { useState } from "react";
-import { Gift, Sparkles } from "lucide-react";
+import { useState, useRef } from "react";
+import { Gift, Sparkles, Download, Share2, MessageCircle, Twitter, Facebook, Copy, Check, Link2 } from "lucide-react";
 import DuaCard from "@/components/dua-card";
+import html2canvas from 'html2canvas';
 
 interface GiftCardProps {
   dua: string;
+  senderName?: string;
 }
 
-export default function GiftCard({ dua }: GiftCardProps) {
+export default function GiftCard({ dua, senderName }: GiftCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [shortUrl, setShortUrl] = useState('');
+  const [copied, setCopied] = useState(false);
+  const [showShareMenu, setShowShareMenu] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   const handleOpen = () => {
     setIsOpen(true);
     setShowConfetti(true);
     setTimeout(() => setShowConfetti(false), 2000);
+  };
+
+  // Generate shortened URL
+  const generateShortUrl = async () => {
+    if (shortUrl) return shortUrl;
+
+    const baseUrl = window.location.origin;
+    const duaEncoded = encodeURIComponent(dua);
+    const nameEncoded = senderName ? encodeURIComponent(senderName) : '';
+    const longUrl = `${baseUrl}/shared-dua?dua=${duaEncoded}${nameEncoded ? `&from=${nameEncoded}` : ''}`;
+
+    try {
+      const response = await fetch('/api/shorten-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ longUrl }),
+      });
+
+      const data = await response.json();
+      setShortUrl(data.shortUrl);
+      return data.shortUrl;
+    } catch (error) {
+      console.error('Error generating short URL:', error);
+      return longUrl;
+    }
+  };
+
+  // Copy link to clipboard
+  const copyLink = async () => {
+    const url = await generateShortUrl();
+    await navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  // Generate and download image
+  const downloadImage = async () => {
+    if (!cardRef.current) return;
+
+    setIsGenerating(true);
+    try {
+      const shareButtons = cardRef.current.querySelector('.share-buttons-container');
+      if (shareButtons) (shareButtons as HTMLElement).style.display = 'none';
+
+      const canvas = await html2canvas(cardRef.current, {
+        scale: 2,
+        backgroundColor: null,
+        logging: false,
+        useCORS: true,
+      });
+
+      if (shareButtons) (shareButtons as HTMLElement).style.display = '';
+
+      const link = document.createElement('a');
+      link.download = `dua-gift-${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (error) {
+      console.error('Error generating image:', error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  // Share to WhatsApp (text)
+  const shareToWhatsApp = async () => {
+    const url = await generateShortUrl();
+    const text = `🎁 ${senderName ? `${senderName} أرسل لك هدية روحانية:\n\n` : ''}🤲 ${dua}\n\n✨ شاهد الهدية كاملة: ${url}`;
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+  };
+
+  // Share to Twitter
+  const shareToTwitter = async () => {
+    const url = await generateShortUrl();
+    const text = `🎁 هدية روحانية\n🤲 ${dua.substring(0, 150)}...\n\n`;
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+  };
+
+  // Share to Facebook
+  const shareToFacebook = async () => {
+    const url = await generateShortUrl();
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+  };
+
+  // Share image to WhatsApp
+  const shareImageToWhatsApp = async () => {
+    if (!cardRef.current) return;
+
+    setIsGenerating(true);
+    try {
+      const shareButtons = cardRef.current.querySelector('.share-buttons-container');
+      if (shareButtons) (shareButtons as HTMLElement).style.display = 'none';
+
+      const canvas = await html2canvas(cardRef.current, {
+        scale: 2,
+        backgroundColor: null,
+        useCORS: true,
+      });
+
+      if (shareButtons) (shareButtons as HTMLElement).style.display = '';
+
+      canvas.toBlob(async (blob) => {
+        if (blob) {
+          const file = new File([blob], 'dua-gift.png', { type: 'image/png' });
+          
+          if (navigator.share && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              title: 'هدية روحانية 🎁',
+              text: dua,
+            });
+          } else {
+            const link = document.createElement('a');
+            link.download = `dua-gift-${Date.now()}.png`;
+            link.href = URL.createObjectURL(blob);
+            link.click();
+            
+            setTimeout(() => {
+              window.open('https://wa.me/', '_blank');
+            }, 500);
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Error sharing image:', error);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   // 🔹 الكونفيتي
@@ -49,19 +184,109 @@ export default function GiftCard({ dua }: GiftCardProps) {
       <div className="relative">
         {showConfetti && <Confetti />}
 
-        <div className="animate-scale-in">
+        <div className="animate-scale-in" ref={cardRef}>
           <DuaCard 
             title="تهادوا الحب غيباً بالدعاء" 
             dua={dua} 
-            showActions={true}
+            showActions={false}
           />
 
-          <button
-            onClick={() => setIsOpen(false)}
-            className="mt-4 w-full py-3 bg-gold/10 border border-gold/30 rounded-2xl text-gold hover:bg-gold/20 transition-all text-sm font-cairo"
-          >
-            إعادة لف الهدية 🎁
-          </button>
+          {/* Share Buttons */}
+          <div className="share-buttons-container mt-6 space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              {/* Download Image */}
+              <button
+                onClick={downloadImage}
+                disabled={isGenerating}
+                className="flex items-center justify-center gap-2 bg-gold/20 hover:bg-gold/30 text-gold py-3 px-4 rounded-xl transition-all disabled:opacity-50 border border-gold/40"
+              >
+                <Download className="w-4 h-4" />
+                <span className="text-sm font-cairo font-semibold">
+                  {isGenerating ? 'جاري...' : 'حفظ صورة'}
+                </span>
+              </button>
+
+              {/* Copy Link */}
+              <button
+                onClick={copyLink}
+                className="flex items-center justify-center gap-2 bg-gold/20 hover:bg-gold/30 text-gold py-3 px-4 rounded-xl transition-all border border-gold/40"
+              >
+                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                <span className="text-sm font-cairo font-semibold">
+                  {copied ? 'تم النسخ!' : 'نسخ الرابط'}
+                </span>
+              </button>
+
+              {/* Share Image to WhatsApp */}
+              <button
+                onClick={shareImageToWhatsApp}
+                disabled={isGenerating}
+                className="flex items-center justify-center gap-2 bg-green-500/20 hover:bg-green-500/30 text-green-300 py-3 px-4 rounded-xl transition-all disabled:opacity-50 border border-green-500/40"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span className="text-sm font-cairo font-semibold">شارك صورة</span>
+              </button>
+
+              {/* More Options */}
+              <button
+                onClick={() => setShowShareMenu(!showShareMenu)}
+                className="flex items-center justify-center gap-2 bg-gold/20 hover:bg-gold/30 text-gold py-3 px-4 rounded-xl transition-all border border-gold/40"
+              >
+                <Share2 className="w-4 h-4" />
+                <span className="text-sm font-cairo font-semibold">المزيد</span>
+              </button>
+            </div>
+
+            {/* Extended Share Menu */}
+            {showShareMenu && (
+              <div className="bg-white/5 backdrop-blur-md rounded-2xl p-4 space-y-2 border border-gold/30 animate-fade-in">
+                <button
+                  onClick={shareToWhatsApp}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/10 transition-all text-right"
+                >
+                  <MessageCircle className="w-5 h-5 text-green-400" />
+                  <span className="text-cream font-cairo">واتساب (نص)</span>
+                </button>
+
+                <button
+                  onClick={shareToTwitter}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/10 transition-all text-right"
+                >
+                  <Twitter className="w-5 h-5 text-blue-400" />
+                  <span className="text-cream font-cairo">تويتر</span>
+                </button>
+
+                <button
+                  onClick={shareToFacebook}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/10 transition-all text-right"
+                >
+                  <Facebook className="w-5 h-5 text-blue-500" />
+                  <span className="text-cream font-cairo">فيسبوك</span>
+                </button>
+              </div>
+            )}
+
+            {/* Short URL Display */}
+            {shortUrl && (
+              <div className="bg-gold/10 border border-gold/30 rounded-xl p-4 animate-fade-in">
+                <div className="flex items-center gap-2 mb-2">
+                  <Link2 className="w-4 h-4 text-gold" />
+                  <span className="text-sm font-cairo font-semibold text-gold">الرابط المختصر:</span>
+                </div>
+                <code className="block bg-white/5 px-3 py-2 rounded text-sm text-cream break-all font-mono">
+                  {shortUrl}
+                </code>
+              </div>
+            )}
+
+            {/* Close/Rewrap Button */}
+            <button
+              onClick={() => setIsOpen(false)}
+              className="w-full py-3 bg-gold/10 border border-gold/30 rounded-2xl text-gold hover:bg-gold/20 transition-all text-sm font-cairo"
+            >
+              إعادة لف الهدية 🎁
+            </button>
+          </div>
         </div>
 
         <style jsx>{`
