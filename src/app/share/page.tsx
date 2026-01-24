@@ -18,8 +18,6 @@ function ShareContent() {
       const duaParam = searchParams.get('dua');
       const nameParam = searchParams.get('from');
       
-      console.log('URL Params:', { duaParam, nameParam });
-      
       if (duaParam) {
         setDua(decodeURIComponent(duaParam));
       } else {
@@ -56,15 +54,8 @@ function ShareContent() {
           <h1 className="text-2xl font-bold text-gold mb-4 font-amiri">
             {error || 'لم يتم العثور على الدعاء'}
           </h1>
-          <p className="text-cream/60 mb-6 font-cairo">
-            تأكد من صحة الرابط أو حاول مرة أخرى
-          </p>
-          
-            href="/ai-dua"
-            className="inline-block bg-gold text-navy py-3 px-6 rounded-2xl font-bold hover:bg-gold-light transition-all"
-          >
-            إنشاء دعاء جديد
-          </a>
+          <p className="text-cream/60 mb-6 font-cairo">تأكد من صحة الرابط أو حاول مرة أخرى</p>
+          <a href="/ai-dua" className="inline-block bg-gold text-navy py-3 px-6 rounded-2xl font-bold hover:bg-gold-light transition-all">إنشاء دعاء جديد</a>
         </div>
       </div>
     );
@@ -73,44 +64,26 @@ function ShareContent() {
   return (
     <div className="min-h-screen bg-hero-gradient pt-20 pb-20 px-4">
       <FloatingStars />
-      
       <div className="max-w-3xl mx-auto relative z-10">
         <div className="text-center mb-12 animate-fade-in">
           <div className="inline-block p-4 bg-gold/10 rounded-full mb-6 animate-float">
             <Sparkles className="w-12 h-12 text-gold" />
           </div>
-          
           {senderName && (
             <h1 className="font-amiri text-3xl md:text-4xl text-gold mb-4">
               {senderName} أرسل لك هدية روحانية 🎁
             </h1>
           )}
-          
-          <p className="text-cream/70 text-lg font-cairo">
-            دعاء خاص من القلب
-          </p>
+          <p className="text-cream/70 text-lg font-cairo">دعاء خاص من القلب</p>
         </div>
-
-        <div className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
+        <div className="animate-fade-in">
           <GiftCard dua={dua} senderName={senderName} />
         </div>
-
-        <div className="text-center mt-12 animate-fade-in" style={{ animationDelay: '0.6s' }}>
-          <p className="text-cream/60 font-amiri text-lg italic mb-4">
-            "تهادوا تحابوا"
-          </p>
-          <p className="text-gold/40 text-sm mt-2 font-cairo mb-6">
-            شارك الخير مع من تحب
-          </p>
-          
-          
-            href="/ai-dua"
-            className="inline-block bg-gold/20 border-2 border-gold/40 text-gold py-3 px-6 rounded-2xl font-bold hover:bg-gold/30 transition-all"
-          >
-            إنشاء دعاء جديد
-          </a>
+        <div className="text-center mt-12 animate-fade-in">
+          <p className="text-cream/60 font-amiri text-lg italic mb-4">"تهادوا تحابوا"</p>
+          <p className="text-gold/40 text-sm mt-2 font-cairo mb-6">شارك الخير مع من تحب</p>
+          <a href="/ai-dua" className="inline-block bg-gold/20 border-2 border-gold/40 text-gold py-3 px-6 rounded-2xl font-bold hover:bg-gold/30 transition-all">إنشاء دعاء جديد</a>
         </div>
-
         <div className="mt-20 opacity-30 pointer-events-none flex justify-center gap-20">
           <Lantern className="w-16 h-16 text-gold animate-float" />
           <Lantern className="w-16 h-16 text-gold animate-float" style={{ animationDelay: '1.5s' }} />
