@@ -3,20 +3,25 @@
 import { Suspense, useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { FloatingStars, DecorativeDivider } from '@/components/islamic-decorations';
-import { Heart, Download, Share2, Copy, Check, Sparkles } from 'lucide-react';
+import { Heart, Download, Share2, Copy, Check, Sparkles, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import GiftCard from '@/components/gift-card';
 import html2canvas from 'html2canvas';
+import { supabase } from '@/lib/supabase';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
 function SharedDuaContent() {
   const searchParams = useSearchParams();
+  const duaId = searchParams?.get('id');
+  
   const [dua, setDua] = useState('');
   const [fromName, setFromName] = useState('');
   const [copied, setCopied] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [enhancedDua, setEnhancedDua] = useState<{
     duaText: string;
     simplifiedMeaning: string;
@@ -27,12 +32,49 @@ function SharedDuaContent() {
   const giftRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const duaParam = searchParams.get('dua');
-    const fromParam = searchParams.get('from');
-    
-    if (duaParam) setDua(decodeURIComponent(duaParam));
-    if (fromParam) setFromName(decodeURIComponent(fromParam));
-  }, [searchParams]);
+    if (duaId) {
+      loadDuaById(duaId);
+    } else {
+      // Fallback: لو في دعاء في الـ URL القديم
+      const duaParam = searchParams.get('dua');
+      const fromParam = searchParams.get('from');
+      
+      if (duaParam) {
+        setDua(decodeURIComponent(duaParam));
+        if (fromParam) setFromName(decodeURIComponent(fromParam));
+        setLoading(false);
+      } else {
+        setLoading(false);
+      }
+    }
+  }, [duaId, searchParams]);
+
+  const loadDuaById = async (id: string) => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('shared_duas')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+      
+      if (data) {
+        setDua(data.text || data.dua || '');
+        setFromName(data.from_name || data.author || '');
+      }
+    } catch (error) {
+      console.error('Error loading dua:', error);
+      toast({
+        variant: "destructive",
+        title: "خطأ",
+        description: "لم نتمكن من تحميل الدعاء"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const enhanceDua = async () => {
     if (!dua.trim()) return;
@@ -50,7 +92,9 @@ function SharedDuaContent() {
     } catch (error) {
       console.error(error);
       toast({ variant: "destructive", title: "حدث خطأ", description: "لم نتمكن من تحسين الدعاء" });
-    } finally { setIsEnhancing(false); }
+    } finally { 
+      setIsEnhancing(false); 
+    }
   };
 
   const copyDua = async () => {
@@ -72,7 +116,11 @@ function SharedDuaContent() {
     setIsCapturing(true);
     try {
       const canvas = await html2canvas(giftRef.current, {
-        backgroundColor: '#0a1628', scale: 2, logging: false, useCORS: true, allowTaint: true
+        backgroundColor: '#0a1628', 
+        scale: 2, 
+        logging: false, 
+        useCORS: true, 
+        allowTaint: true
       });
       const blob = await new Promise<Blob>((resolve, reject) => {
         canvas.toBlob((b) => (b ? resolve(b) : reject('Failed')), 'image/png');
@@ -88,7 +136,9 @@ function SharedDuaContent() {
       toast({ title: "تم التنزيل! 🎁", description: "تم حفظ الهدية كصورة" });
     } catch (error) {
       toast({ variant: "destructive", title: "خطأ", description: "لم نتمكن من إنشاء الصورة" });
-    } finally { setIsCapturing(false); }
+    } finally { 
+      setIsCapturing(false); 
+    }
   };
 
   const shareDua = async () => {
@@ -97,8 +147,15 @@ function SharedDuaContent() {
       : `🎁 هدية روحانية\n\n${dua}\n\n💚 تهادوا تحابوا`;
 
     if (navigator.share) {
-      try { await navigator.share({ title: 'هدية دعاء 🎁', text: shareText, url: window.location.href }); }
-      catch { console.log('Share cancelled'); }
+      try { 
+        await navigator.share({ 
+          title: 'هدية دعاء 🎁', 
+          text: shareText, 
+          url: window.location.href 
+        }); 
+      } catch { 
+        console.log('Share cancelled'); 
+      }
     } else {
       await navigator.clipboard.writeText(window.location.href);
       toast({ title: "تم نسخ الرابط! 🔗", description: "يمكنك مشاركته مع من تحب" });
@@ -107,10 +164,32 @@ function SharedDuaContent() {
 
   const displayDua = enhancedDua?.duaText || dua;
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-hero-gradient flex items-center justify-center p-4">
+        <FloatingStars />
+        <div className="text-center">
+          <Loader2 className="w-16 h-16 text-gold animate-spin mx-auto mb-4" />
+          <p className="text-gold font-amiri text-2xl">جاري تحميل الدعاء...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!dua) {
     return (
       <div className="min-h-screen bg-hero-gradient flex items-center justify-center p-4">
-        <div className="text-center text-gold font-amiri text-2xl">⚠️ لم يتم العثور على الدعاء</div>
+        <FloatingStars />
+        <div className="text-center">
+          <div className="text-8xl mb-6">😔</div>
+          <h2 className="text-gold font-amiri text-3xl mb-4">لم يتم العثور على الدعاء</h2>
+          <p className="text-cream/70 font-cairo mb-8">قد يكون الرابط غير صحيح أو الدعاء غير موجود</p>
+          <Link href="/">
+            <Button className="bg-gold text-navy hover:bg-gold-light font-cairo font-bold">
+              العودة للرئيسية
+            </Button>
+          </Link>
+        </div>
       </div>
     );
   }
@@ -140,37 +219,90 @@ function SharedDuaContent() {
           <GiftCard dua={displayDua} />
         </div>
 
+        {/* Enhanced Dua Details */}
+        {enhancedDua && (
+          <div className="mb-8 bg-white/5 backdrop-blur-md border-2 border-gold/30 rounded-3xl p-6 animate-fade-in">
+            {enhancedDua.simplifiedMeaning && (
+              <div className="mb-4">
+                <h3 className="text-gold font-amiri text-xl mb-2 text-right">💡 المعنى المبسط:</h3>
+                <p className="text-cream/90 font-cairo text-lg leading-relaxed text-right">
+                  {enhancedDua.simplifiedMeaning}
+                </p>
+              </div>
+            )}
+            {enhancedDua.spiritualTouch && (
+              <div>
+                <h3 className="text-gold font-amiri text-xl mb-2 text-right">✨ لمسة روحانية:</h3>
+                <p className="text-cream/90 font-cairo text-lg leading-relaxed text-right">
+                  {enhancedDua.spiritualTouch}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* أزرار التفاعل */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Button onClick={copyDua} variant="outline" className="py-6 flex flex-col items-center gap-2">
-            {copied ? <Check className="w-6 h-6"/> : <Copy className="w-6 h-6"/>}
-            <span className="text-sm font-bold">{copied ? 'تم النسخ!' : 'نسخ النص'}</span>
+          <Button 
+            onClick={copyDua} 
+            variant="outline" 
+            className="py-6 flex flex-col items-center gap-2 bg-white/5 border-gold/30 hover:bg-gold/10 text-cream"
+          >
+            {copied ? <Check className="w-6 h-6 text-green-400"/> : <Copy className="w-6 h-6"/>}
+            <span className="text-sm font-bold font-cairo">{copied ? 'تم النسخ!' : 'نسخ النص'}</span>
           </Button>
 
-          <Button onClick={downloadAsImage} disabled={isCapturing} variant="outline" className="py-6 flex flex-col items-center gap-2">
-            <Download className="w-6 h-6"/>
-            <span className="text-sm font-bold">{isCapturing ? 'جاري...' : 'حفظ صورة'}</span>
+          <Button 
+            onClick={downloadAsImage} 
+            disabled={isCapturing} 
+            variant="outline" 
+            className="py-6 flex flex-col items-center gap-2 bg-white/5 border-gold/30 hover:bg-gold/10 text-cream disabled:opacity-50"
+          >
+            {isCapturing ? <Loader2 className="w-6 h-6 animate-spin"/> : <Download className="w-6 h-6"/>}
+            <span className="text-sm font-bold font-cairo">{isCapturing ? 'جاري...' : 'حفظ صورة'}</span>
           </Button>
 
-          <Button onClick={shareDua} variant="outline" className="py-6 flex flex-col items-center gap-2">
+          <Button 
+            onClick={shareDua} 
+            variant="outline" 
+            className="py-6 flex flex-col items-center gap-2 bg-white/5 border-gold/30 hover:bg-gold/10 text-cream"
+          >
             <Share2 className="w-6 h-6"/>
-            <span className="text-sm font-bold">مشاركة</span>
+            <span className="text-sm font-bold font-cairo">مشاركة</span>
           </Button>
 
-          <Button onClick={enhanceDua} disabled={isEnhancing || !!enhancedDua} variant="outline" className="py-6 flex flex-col items-center gap-2">
-            <Sparkles className="w-6 h-6"/>
-            <span className="text-sm font-bold">{isEnhancing ? 'جاري...' : enhancedDua ? 'تم التحسين!' : 'تحسين AI'}</span>
+          <Button 
+            onClick={enhanceDua} 
+            disabled={isEnhancing || !!enhancedDua} 
+            variant="outline" 
+            className="py-6 flex flex-col items-center gap-2 bg-white/5 border-gold/30 hover:bg-gold/10 text-cream disabled:opacity-50"
+          >
+            {isEnhancing ? <Loader2 className="w-6 h-6 animate-spin"/> : <Sparkles className="w-6 h-6"/>}
+            <span className="text-sm font-bold font-cairo">
+              {isEnhancing ? 'جاري...' : enhancedDua ? 'تم التحسين!' : 'تحسين AI'}
+            </span>
           </Button>
         </div>
 
+        {/* رسالة آمين */}
+        <div className="bg-gold/10 backdrop-blur-sm rounded-2xl p-6 border border-gold/20 mb-8 text-center">
+          <p className="text-cream/80 text-lg font-amiri leading-relaxed">
+            🤲 آمين على الدعاء
+            <br />
+            <span className="text-sm text-cream/60">
+              من دعا لأخيه بظهر الغيب، قالت الملائكة: ولك بمثل
+            </span>
+          </p>
+        </div>
+
         {/* رابط الصفحة الرئيسية */}
-        <div className="text-center mt-12">
-          <a 
+        <div className="text-center">
+          <Link 
             href="/"
             className="inline-block text-gold/70 hover:text-gold transition-all font-cairo text-lg underline decoration-wavy decoration-gold/30"
           >
             🌟 اصنع دعاءك الخاص
-          </a>
+          </Link>
         </div>
 
       </div>
@@ -182,8 +314,9 @@ export default function SharedDuaPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-hero-gradient flex items-center justify-center">
+        <FloatingStars />
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-gold mx-auto mb-4"></div>
+          <Loader2 className="w-16 h-16 text-gold animate-spin mx-auto mb-4" />
           <p className="text-gold font-amiri text-xl">جاري التحميل...</p>
         </div>
       </div>
