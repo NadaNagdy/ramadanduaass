@@ -7,7 +7,6 @@ import { FloatingStars, CrescentMoon, DecorativeDivider } from '@/components/isl
 import DuaCard from '@/components/dua-card';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ShareSection } from '../adeyat-almared/share-section';
 
 export const metadata: Metadata = generateDuaMetadata(alrezqDuas.seo);
 
@@ -57,11 +56,6 @@ export default function AdeyatAlrezqPage() {
               </div>
             ))}
           </div>
-
-          <ShareSection
-            title={alrezqDuas.seo.title}
-            description={alrezqDuas.seo.description}
-          />
 
           <div className="mt-16">
             <h3 className="text-2xl font-amiri text-cream mb-6">
