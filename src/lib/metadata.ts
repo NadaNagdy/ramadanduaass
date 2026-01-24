@@ -31,21 +31,21 @@ export const siteConfig = {
     'دعاء الجمعة',
     'ادعية الجمعة',
     
-    // الزواج (NEW - 5000 searches)
+    // الزواج
     'أدعية الزواج',
     'دعاء الزواج',
     'دعاء الزواج من شخص معين',
     'دعاء تيسير الزواج',
     'دعاء الزوج الصالح',
     
-    // الأبناء (NEW - 5000 searches)
+    // الأبناء
     'أدعية الأبناء',
     'دعاء للأبناء',
     'دعاء للأولاد',
     'دعاء حفظ الأبناء',
     'دعاء صلاح الأبناء',
     
-    // السفر (NEW - 500,000 searches!)
+    // السفر
     'أدعية السفر',
     'دعاء السفر',
     'دعاء السفر الكامل',
@@ -129,9 +129,8 @@ export const defaultMetadata: Metadata = {
     },
   },
   verification: {
-    google: 'your-google-verification-code', // Add your Google Search Console verification code
-    yandex: 'your-yandex-verification-code', // Add if you want Yandex verification
-    // bing: 'your-bing-verification-code', // Add if you want Bing verification
+    google: 'your-google-verification-code',
+    yandex: 'your-yandex-verification-code',
   },
   category: 'religion',
   classification: 'Islamic Duas and Prayers',
@@ -188,4 +187,21 @@ export function generatePageMetadata({
       canonical: url,
     },
   };
+}
+
+// Compatibility helper for existing pages (fix build errors)
+export function generateDuaMetadata(seo: {
+  title: string;
+  description: string;
+  canonicalPath: string;
+  keywords?: string[];
+  image?: string;
+}): Metadata {
+  return generatePageMetadata({
+    title: seo.title,
+    description: seo.description,
+    keywords: seo.keywords,
+    path: seo.canonicalPath,
+    image: seo.image,
+  });
 }
