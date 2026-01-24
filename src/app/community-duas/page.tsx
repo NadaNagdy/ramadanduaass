@@ -11,7 +11,7 @@ import CommunityDuaCard from '@/components/community-dua-card';
 type CommunityDua = {
   id: number;
   text: string;
-  author?: string; // اختياري عشان نعرض "زائر كريم" لو الاسم فاضي
+  author?: string;
   likes: number;
   created_at: string;
   isGolden?: boolean;
@@ -109,18 +109,18 @@ export default function CommunityDuasPage() {
       <FloatingStars />
       
       <div className="container mx-auto max-w-3xl text-center animate-fade-in">
-        <CrescentMoon className="w-16 h-16 text-gold mx-auto mb-4" />
+        <CrescentMoon className="w-16 h-16 text-gold mx-auto mb-4 animate-float" />
         
-        <h1 className="font-amiri text-4xl text-cream mb-2">مجتمع الدعاء</h1>
+        <h1 className="font-amiri text-4xl text-gold mb-2">مجتمع الدعاء</h1>
         
-        <p className="text-cream/60 mb-6">
+        <p className="text-cream/60 mb-6 font-cairo">
           أدعية يشاركها إخوة وأخوات لك. أمّن على دعائهم وشارك بدعاء من قلبك.
         </p>
         
         <DecorativeDivider className="mb-8" />
         
         <div className="text-center mb-12">
-          <Link href="/share">
+          <Link href="/ai-dua">
             <Button className="bg-gold text-navy font-bold py-6 px-10 rounded-2xl text-lg hover:bg-gold-light shadow-lg shadow-gold/20 transform hover:scale-105 transition-transform">
               <Feather className="ml-3" />
               شارك بدعاءٍ ليؤمِّن عليه غيرُك
@@ -130,11 +130,11 @@ export default function CommunityDuasPage() {
         
         {duas.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-cream/50 text-xl mb-6">
+            <p className="text-cream/50 text-xl mb-6 font-amiri">
               لا توجد أدعية بعد. كن أول من يشارك! 🤲
             </p>
-            <Link href="/share">
-              <Button className="bg-gold/20 text-gold border border-gold/30 hover:bg-gold/30">
+            <Link href="/ai-dua">
+              <Button className="bg-gold/20 text-gold border border-gold/30 hover:bg-gold/30 font-cairo">
                 شارك أول دعاء
               </Button>
             </Link>
@@ -146,7 +146,7 @@ export default function CommunityDuasPage() {
                 key={dua.id}
                 dua={{
                   ...dua,
-                  author: dua.author || 'زائر كريم' // fallback لو الاسم فاضي
+                  author: dua.author || 'زائر كريم'
                 }}
                 onLikeChange={handleLike}
               />
