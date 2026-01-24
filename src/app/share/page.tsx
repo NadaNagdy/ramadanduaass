@@ -18,7 +18,7 @@ function ShareContent() {
       const duaParam = searchParams.get('dua');
       const nameParam = searchParams.get('from');
       
-      console.log('URL Params:', { duaParam, nameParam }); // للتشخيص
+      console.log('URL Params:', { duaParam, nameParam });
       
       if (duaParam) {
         setDua(decodeURIComponent(duaParam));
@@ -75,7 +75,6 @@ function ShareContent() {
       <FloatingStars />
       
       <div className="max-w-3xl mx-auto relative z-10">
-        {/* Header */}
         <div className="text-center mb-12 animate-fade-in">
           <div className="inline-block p-4 bg-gold/10 rounded-full mb-6 animate-float">
             <Sparkles className="w-12 h-12 text-gold" />
@@ -92,12 +91,10 @@ function ShareContent() {
           </p>
         </div>
 
-        {/* Gift Card */}
         <div className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
           <GiftCard dua={dua} senderName={senderName} />
         </div>
 
-        {/* Footer Message */}
         <div className="text-center mt-12 animate-fade-in" style={{ animationDelay: '0.6s' }}>
           <p className="text-cream/60 font-amiri text-lg italic mb-4">
             "تهادوا تحابوا"
@@ -114,7 +111,6 @@ function ShareContent() {
           </a>
         </div>
 
-        {/* Decorative Lanterns */}
         <div className="mt-20 opacity-30 pointer-events-none flex justify-center gap-20">
           <Lantern className="w-16 h-16 text-gold animate-float" />
           <Lantern className="w-16 h-16 text-gold animate-float" style={{ animationDelay: '1.5s' }} />
