@@ -44,44 +44,71 @@ export default function CommunityDuaCard({ dua, onLikeChange }: CommunityDuaCard
   const authorName = dua.author && dua.author.trim() !== "" ? dua.author : "زائر كريم";
 
   return (
-    <div className={cn(
-      "relative bg-gradient-to-br from-cream via-white to-cream/50 rounded-3xl p-6 border-2 transition-all duration-500 shadow-xl hover:shadow-2xl hover:scale-[1.02] overflow-hidden",
-      dua.isGolden ? "border-gold shadow-gold/30" : "border-gold/30"
-    )}>
-      {/* خلفية زخرفية */}
-      <div className="absolute top-0 right-0 text-gold/5 text-8xl -mt-6 -mr-6">☪</div>
-      <div className="absolute bottom-0 left-0 text-navy/5 text-6xl -mb-4 -ml-4">✦</div>
-      
-      {/* شريط علوي زخرفي */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-gold to-transparent"></div>
-      
-      {/* شارة الدعاء الذهبي */}
-      {dua.isGolden && (
-        <div className="absolute -top-4 -right-4 p-3 bg-gradient-to-br from-gold to-yellow-600 rounded-full shadow-2xl border-4 border-white animate-pulse">
-          <Star className="w-6 h-6 text-white fill-current drop-shadow-lg" />
-        </div>
-      )}
-      
-      <div className="flex items-start gap-4 relative z-10">
-        {/* صورة المستخدم بشكل جميل */}
-        <div className="relative">
-          <div className="w-14 h-14 bg-gradient-to-br from-gold/20 to-navy/10 rounded-full flex items-center justify-center border-2 border-gold/40 shadow-lg shrink-0">
-            <span className="text-gold font-bold text-2xl font-amiri">{authorName.charAt(0)}</span>
-          </div>
-          {/* زخرفة دائرية */}
-          <div className="absolute -top-1 -right-1 w-4 h-4 bg-gold rounded-full border-2 border-white"></div>
-        </div>
-        
-        <div className="flex-1 text-right">
-          {/* الاسم مع زخرفة */}
-          <div className="flex items-center justify-end gap-2 mb-2">
-            <Sparkles className="w-4 h-4 text-gold" />
-            <span className="text-sm text-gold font-bold font-cairo">
-              {authorName}
-            </span>
-            <span className="text-navy/40">—</span>
-          </div>
+    return (
+  <Card className="bg-white/5 backdrop-blur-md border-2 border-gold/30 rounded-3xl overflow-hidden hover:border-gold/50 transition-all hover:shadow-lg hover:shadow-gold/20 animate-fade-in">
+    <CardContent className="p-8">
 
+      {/* Header - Author & Date */}
+      <div className="flex flex-col items-center text-center mb-6 pb-4 border-b border-gold/20 gap-3">
+        
+        <div className="w-14 h-14 bg-gold/20 rounded-full flex items-center justify-center border-2 border-gold/40">
+          <User className="w-7 h-7 text-gold" />
+        </div>
+
+        <p className="text-gold font-amiri text-xl font-semibold">
+          {dua.author || 'زائر كريم'}
+        </p>
+
+        <div className="flex items-center gap-2 text-cream/50 text-sm font-cairo">
+          <Calendar className="w-3 h-3" />
+          <span>{formatDate(dua.created_at)}</span>
+        </div>
+
+        {dua.isGolden && (
+          <div className="mt-2 bg-gold/20 text-gold px-4 py-1 rounded-full text-xs font-cairo border border-gold/40">
+            ⭐ دعاء مميز
+          </div>
+        )}
+      </div>
+
+      {/* Dua Text */}
+      <div className="bg-gold/5 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-gold/20">
+        <p className="text-cream text-2xl leading-relaxed text-center font-amiri">
+          {dua.text}
+        </p>
+      </div>
+
+      {/* Footer - Like Button */}
+      <div className="flex flex-col items-center gap-4">
+        <button
+          onClick={handleLike}
+          disabled={isLiked}
+          className={`
+            flex items-center gap-2 px-8 py-3 rounded-xl font-cairo font-semibold transition-all
+            ${isLiked 
+              ? 'bg-red-500/20 text-red-400 border-2 border-red-500/40 cursor-not-allowed' 
+              : 'bg-gold/20 text-gold border-2 border-gold/40 hover:bg-gold/30 hover:scale-105 active:scale-95'
+            }
+          `}
+        >
+          <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
+          <span>{isLiked ? 'أمّنت على الدعاء' : 'آمين'}</span>
+
+          {likeCount > 0 && (
+            <span className="bg-white/10 px-2 py-0.5 rounded-full text-sm">
+              {likeCount}
+            </span>
+          )}
+        </button>
+
+        <div className="text-cream/40 text-sm font-cairo">
+          🤲 اللهم استجب
+        </div>
+      </div>
+
+    </CardContent>
+  </Card>
+);
           {/* نص الدعاء مع إطار جميل */}
           <div className="relative bg-gradient-to-br from-navy/5 to-transparent rounded-2xl p-4 border border-dashed border-gold/30">
             <p className="font-amiri text-navy text-xl leading-relaxed" dir="rtl">
