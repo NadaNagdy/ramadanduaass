@@ -86,7 +86,7 @@ export default function AlsafarPage() {
           
           <div className="prose prose-lg max-w-none text-amber-900 space-y-6">
             <p>
-              <strong>أدعية السفر</strong> من السنن المؤكدة التي حافظ عليها النبي ﷺ. 
+              <strong>أدعية السفر</strong> من السنن المؤكدة التي حافظ عليها النبي صلى الله عليه وسلم. 
               نقدم لكم <strong>دعاء السفر الكامل مكتوب</strong> و<strong>دعاء الاستيداع</strong> 
               و<strong>أدعية حفظ المسافر</strong> من القرآن والسنة النبوية.
             </p>
@@ -95,8 +95,7 @@ export default function AlsafarPage() {
               دعاء السفر عند ركوب السيارة أو الطائرة
             </h3>
             <p>
-              عند <strong>ركوب السيارة</strong> أو <strong>ركوب الطائرة</strong>، يُسن قول: 
-              "سُبْحَانَ الَّذِي سَخَّرَ لَنَا هَٰذَا وَمَا كُنَّا لَهُ مُقْرِنِينَ، وَإِنَّا إِلَىٰ رَبِّنَا لَمُنقَلِبُونَ". 
+              عند <strong>ركوب السيارة</strong> أو <strong>ركوب الطائرة</strong>، يُسن قول دعاء السفر من القرآن. 
               هذا <strong>دعاء السفر الصحيح</strong> من القرآن الكريم.
             </p>
 
@@ -104,26 +103,7 @@ export default function AlsafarPage() {
               دعاء تيسير السفر وتسهيل الطريق
             </h3>
             <p>
-              لـ<strong>تيسير السفر</strong> و<strong>تسهيل الطريق</strong>، ادعُ: 
-              "اللَّهُمَّ إِنَّا نَسْأَلُكَ فِي سَفَرِنَا هَٰذَا البِرَّ وَالتَّقْوَىٰ، اللَّهُمَّ هَوِّنْ عَلَيْنَا سَفَرَنَا". 
-              هذا من أعظم <strong>أدعية تيسير السفر</strong> الواردة في السنة.
-            </p>
-
-            <h3 className="text-2xl font-bold text-amber-800 mt-8">
-              دعاء الاستيداع للمسافر
-            </h3>
-            <p>
-              عند <strong>وداع المسافر</strong>، قل: "أَسْتَوْدِعُكُمُ اللَّهَ الَّذِي لَا تَضِيعُ وَدَائِعُهُ". 
-              هذا <strong>دعاء الاستيداع</strong> الذي يُقال عند توديع المسافرين. كما يمكن قول: 
-              "اللَّهُمَّ إِنِّي أَسْتَوْدِعُكَ (الاسم) وَدِينَهُ وَأَمَانَتَهُ" لـ<strong>حفظ المسافر</strong>.
-            </p>
-
-            <h3 className="text-2xl font-bold text-amber-800 mt-8">
-              دعاء الرجوع من السفر
-            </h3>
-            <p>
-              عند <strong>العودة من السفر</strong>، يُسن قول: "آيِبُونَ تَائِبُونَ عَابِدُونَ لِرَبِّنَا حَامِدُونَ". 
-              هذا <strong>دعاء الرجوع من السفر</strong> الذي كان النبي ﷺ يقوله عند رجوعه.
+              لتيسير السفر وتسهيل الطريق، ادع بأدعية تيسير السفر الواردة في السنة النبوية.
             </p>
 
             <h3 className="text-2xl font-bold text-amber-800 mt-8">
@@ -132,22 +112,10 @@ export default function AlsafarPage() {
             <ul className="list-disc pr-6 space-y-2">
               <li><strong>حفظ المسافر</strong> من كل مكروه وأذى</li>
               <li><strong>تيسير السفر</strong> وتسهيل الطريق</li>
-              <li><strong>الأمان في السفر</strong> براً وبحراً وجواً</li>
+              <li><strong>الأمان في السفر</strong> برا وبحرا وجوا</li>
               <li><strong>حفظ الأهل</strong> والأولاد أثناء السفر</li>
               <li><strong>العودة بالسلامة</strong> إلى الأهل</li>
               <li><strong>البركة في السفر</strong> والرزق</li>
-            </ul>
-
-            <h3 className="text-2xl font-bold text-amber-800 mt-8">
-              آداب السفر في الإسلام
-            </h3>
-            <ul className="list-disc pr-6 space-y-2">
-              <li>قول <strong>دعاء السفر</strong> عند بداية الرحلة</li>
-              <li><strong>استودع الأهل</strong> عند الله قبل السفر</li>
-              <li>الإكثار من <strong>الذكر والدعاء</strong> أثناء السفر</li>
-              <li>الحفاظ على <strong>الصلوات</strong> في أوقاتها</li>
-              <li><strong>دعاء الرجوع</strong> عند العودة من السفر</li>
-              <li>شكر الله على <strong>السلامة</strong> بعد الوصول</li>
             </ul>
           </div>
         </article>
@@ -216,17 +184,16 @@ export default function AlsafarPage() {
                 ما هو دعاء السفر الكامل؟
               </h3>
               <p className="text-amber-700">
-                "سُبْحَانَ الَّذِي سَخَّرَ لَنَا هَٰذَا وَمَا كُنَّا لَهُ مُقْرِنِينَ" ثم تكمل بالدعاء: 
-                "اللَّهُمَّ إِنَّا نَسْأَلُكَ فِي سَفَرِنَا هَٰذَا البِرَّ وَالتَّقْوَىٰ".
+                دعاء السفر الكامل يبدأ بالبسملة ثم يقال عند ركوب السيارة أو الطائرة.
               </p>
             </div>
 
             <div className="border-r-4 border-amber-400 pr-4">
               <h3 className="text-xl font-bold text-amber-800 mb-2">
-                متى يُقال دعاء السفر؟
+                متى يقال دعاء السفر؟
               </h3>
               <p className="text-amber-700">
-                يُقال عند ركوب السيارة أو الطائرة أو أي وسيلة نقل في بداية السفر.
+                يقال عند ركوب السيارة أو الطائرة أو أي وسيلة نقل في بداية السفر.
               </p>
             </div>
 
@@ -235,7 +202,7 @@ export default function AlsafarPage() {
                 ما هو دعاء الاستيداع؟
               </h3>
               <p className="text-amber-700">
-                "أَسْتَوْدِعُكُمُ اللَّهَ الَّذِي لَا تَضِيعُ وَدَائِعُهُ" - يُقال عند توديع المسافر.
+                دعاء الاستيداع يقال عند توديع المسافر لحفظه في سفره.
               </p>
             </div>
           </div>
@@ -246,3 +213,13 @@ export default function AlsafarPage() {
             شارك أدعية السفر
           </h3>
           <p className="text-xl mb-6">
+            ساعد المسافرين في حفظ أدعية السفر
+          </p>
+          <button className="bg-white text-amber-600 px-8 py-3 rounded-full font-bold text-lg hover:shadow-xl transition-all duration-300">
+            شارك الآن
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
