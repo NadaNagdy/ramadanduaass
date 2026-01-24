@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useRef } from 'react';
 import { FloatingStars, DecorativeDivider, Lantern } from '@/components/islamic-decorations';
 import { Send, Sparkles, RefreshCw, Share2, Download, MessageCircle, Copy, Check, Link2 } from 'lucide-react';
@@ -9,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import GiftCard from '@/components/gift-card';
 import ListeningAnimation from '@/components/listening-animation';
 import html2canvas from 'html2canvas';
+import { supabase } from '@/lib/supabase';
 
 type RephraseDuaOutput = {
   duaText: string;
@@ -78,13 +77,12 @@ export default function AiDuaPage() {
 
   const handleShare = () => {
     setShowShareDialog(true);
-    // Generate short URL when dialog opens
     if (!shortUrl) {
       generateShortUrl();
     }
   };
 
-  // توليد رابط مختصر
+  // توليد رابط مختصر باستخدام ID
   const generateShortUrl = async () => {
     if (!generatedDua || shortUrl) return;
 
@@ -92,20 +90,39 @@ export default function AiDuaPage() {
     
     try {
       const fromName = senderName.trim() || 'صديقك';
-      const longUrl = `${window.location.origin}/shared-dua?dua=${encodeURIComponent(generatedDua.duaText)}&from=${encodeURIComponent(fromName)}`;
       
-      const response = await fetch('/api/shorten-url', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ longUrl }),
-      });
+      // حفظ الدعاء في قاعدة البيانات
+      const { data, error } = await supabase
+        .from('shared_duas')
+        .insert([{
+          text: generatedDua.duaText,
+          dua: generatedDua.duaText,
+          from_name: fromName,
+          author: fromName,
+          simplified_meaning: generatedDua.simplifiedMeaning,
+          spiritual_touch: generatedDua.spiritualTouch,
+        }])
+        .select()
+        .single();
 
-      const data = await response.json();
-      setShortUrl(data.shortUrl);
+      if (error) throw error;
+
+      // إنشاء رابط قصير باستخدام الـ ID
+      const newShortUrl = `${window.location.origin}/shared-dua?id=${data.id}`;
+      setShortUrl(newShortUrl);
+      
     } catch (error) {
-      console.error('Error generating short URL:', error);
+      console.error('Error saving dua to database:', error);
+      // Fallback للطريقة القديمة لو فشل
+      const fromName = senderName.trim() || 'صديقك';
+      const fallbackUrl = `${window.location.origin}/shared-dua?dua=${encodeURIComponent(generatedDua.duaText)}&from=${encodeURIComponent(fromName)}`;
+      setShortUrl(fallbackUrl);
+      
+      toast({
+        variant: "destructive",
+        title: "تنبيه",
+        description: "تم استخدام رابط احتياطي",
+      });
     } finally {
       setIsGeneratingUrl(false);
     }
@@ -202,12 +219,16 @@ export default function AiDuaPage() {
     let shareLink = shortUrl;
     if (!shareLink) {
       await generateShortUrl();
-      shareLink = shortUrl || `${window.location.origin}/shared-dua?dua=${encodeURIComponent(generatedDua.duaText)}&from=${encodeURIComponent(fromName)}`;
+      shareLink = shortUrl;
+    }
+    
+    // لو لسه مفيش رابط، استخدم fallback
+    if (!shareLink) {
+      shareLink = `${window.location.origin}/shared-dua?dua=${encodeURIComponent(generatedDua.duaText)}&from=${encodeURIComponent(fromName)}`;
     }
     
     const shareText = `🎁 ${fromName} أرسل لك هدية روحانية\n\n🤲 ${generatedDua.duaText}\n\n✨ شاهد الهدية كاملة:\n${shareLink}\n\n💚 تهادوا تحابوا`;
     
-    // البديل: رابط واتساب بالنص
     const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
     window.open(whatsappUrl, '_blank');
     
@@ -236,7 +257,6 @@ export default function AiDuaPage() {
         
         setShowShareDialog(false);
       } else {
-        // إذا المتصفح ما يدعم المشاركة، نحمل الصورة
         await downloadGiftImage();
       }
     } catch (error) {
@@ -255,6 +275,7 @@ export default function AiDuaPage() {
       linkToCopy = shortUrl;
     }
     
+    // fallback للطريقة القديمة لو فشل
     if (!linkToCopy) {
       const fromName = senderName.trim() || 'صديقك';
       linkToCopy = `${window.location.origin}/shared-dua?dua=${encodeURIComponent(generatedDua.duaText)}&from=${encodeURIComponent(fromName)}`;
@@ -265,7 +286,7 @@ export default function AiDuaPage() {
       
       toast({
         title: "تم نسخ الرابط! 🔗",
-        description: "شارك الهدية الروحانية مع من تحب",
+        description: "رابط قصير وسهل المشاركة",
       });
       
       setShowShareDialog(false);
@@ -438,7 +459,7 @@ export default function AiDuaPage() {
               <div className="bg-gold/10 border border-gold/30 rounded-2xl p-4 mb-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Link2 className="w-4 h-4 text-gold" />
-                  <span className="text-xs font-cairo text-gold">رابط مختصر:</span>
+                  <span className="text-xs font-cairo text-gold">رابط قصير:</span>
                 </div>
                 <code className="block bg-navy/50 px-3 py-2 rounded-lg text-xs text-cream break-all font-mono">
                   {shortUrl}
@@ -448,7 +469,7 @@ export default function AiDuaPage() {
 
             {isGeneratingUrl && (
               <div className="text-center mb-4">
-                <p className="text-gold/60 text-sm animate-pulse">جاري إنشاء رابط مختصر...</p>
+                <p className="text-gold/60 text-sm animate-pulse">جاري إنشاء رابط قصير...</p>
               </div>
             )}
             
@@ -480,9 +501,7 @@ export default function AiDuaPage() {
               </Button>
               
               <Button
-                onClick={() => {
-                  setShowShareDialog(false);
-                }}
+                onClick={() => setShowShareDialog(false)}
                 variant="outline"
                 className="w-full border-gold/30 text-cream hover:bg-gold/10 rounded-2xl"
               >
