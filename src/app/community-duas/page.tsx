@@ -119,8 +119,9 @@ export default function CommunityDuasPage() {
         
         <DecorativeDivider className="mb-8" />
         
+        {/* زر إضافة دعاء */}
         <div className="text-center mb-12">
-          <Link href="/ai-dua">
+          <Link href="/add-community-dua">
             <Button className="bg-gold text-navy font-bold py-6 px-10 rounded-2xl text-lg hover:bg-gold-light shadow-lg shadow-gold/20 transform hover:scale-105 transition-transform">
               <Feather className="ml-3" />
               شارك بدعاءٍ ليؤمِّن عليه غيرُك
@@ -128,12 +129,13 @@ export default function CommunityDuasPage() {
           </Link>
         </div>
         
+        {/* إذا لا توجد أدعية */}
         {duas.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-cream/50 text-xl mb-6 font-amiri">
               لا توجد أدعية بعد. كن أول من يشارك! 🤲
             </p>
-            <Link href="/ai-dua">
+            <Link href="/add-community-dua">
               <Button className="bg-gold/20 text-gold border border-gold/30 hover:bg-gold/30 font-cairo">
                 شارك أول دعاء
               </Button>
