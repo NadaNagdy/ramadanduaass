@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { Share2, Heart } from 'lucide-react';
 
-import { generateDuaMetadata } from '@/lib/metadata';
+import { generatePageMetadata } from '@/lib/metadata';
 import { StructuredData } from '@/components/seo/structured-data';
 import { almaredDuas } from '@/lib/duas-data/almared-duas';
 
@@ -16,8 +16,13 @@ import {
 import DuaCard from '@/components/dua-card';
 import { Button } from '@/components/ui/button';
 
-// SEO Metadata
-export const metadata: Metadata = generateDuaMetadata(almaredDuas.seo);
+/* ✅ SEO Metadata */
+export const metadata: Metadata = generatePageMetadata({
+  title: almaredDuas.seo.title,
+  description: almaredDuas.seo.description,
+  keywords: almaredDuas.seo.keywords,
+  path: almaredDuas.seo.canonicalPath,
+});
 
 export default function AdeyatAlmaredPage() {
   return (
@@ -111,3 +116,4 @@ export default function AdeyatAlmaredPage() {
     </>
   );
 }
+
