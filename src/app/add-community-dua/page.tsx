@@ -7,8 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { Send, Sparkles, ArrowRight } from 'lucide-react';
-import Link from 'next/link';
+import { Sparkles } from 'lucide-react';
 
 export default function AddCommunityDuaPage() {
   const [duaText, setDuaText] = useState('');
@@ -51,20 +50,22 @@ export default function AddCommunityDuaPage() {
             created_at: new Date().toISOString(),
           }
         ])
-        .select(); // مهم لإرجاع الـ ID
+        .select();
 
       if (error) throw error;
 
       const insertedDuaId = data?.[0].id;
 
+      // رسالة النجاح
       toast({
-        title: "تم النشر! 🎉",
-        description: "تم إضافة دعائك إلى حائط المجتمع",
+        title: "تقبل الله دعاءكم 🤲",
+        description: "تم نشر دعائك بنجاح. جزاك الله خيراً",
+        duration: 3000,
       });
 
-      // إعادة التوجيه مع ID الدعاء الجديد
+      // الانتقال إلى صفحة المجتمع مع تمييز الدعاء الجديد
       setTimeout(() => {
-        router.push(`/community?newDua=${insertedDuaId}`);
+        router.push(`/community-duas?newDua=${insertedDuaId}`);
       }, 1500);
 
     } catch (error) {
@@ -97,6 +98,7 @@ export default function AddCommunityDuaPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          {/* حقل الاسم */}
           <div className="bg-white/5 backdrop-blur-md border-2 border-gold/30 rounded-3xl p-6">
             <label className="block text-gold font-amiri text-lg mb-3 text-right">
               <Sparkles className="w-5 h-5 inline ml-2" />
@@ -116,6 +118,7 @@ export default function AddCommunityDuaPage() {
             </p>
           </div>
 
+          {/* حقل الدعاء */}
           <div className="bg-white/5 backdrop-blur-md border-2 border-gold/30 rounded-3xl p-6">
             <label className="block text-gold font-amiri text-lg mb-3 text-right">
               <span className="text-2xl ml-2">🤲</span>
@@ -135,13 +138,34 @@ export default function AddCommunityDuaPage() {
             </div>
           </div>
 
+          {/* رسالة تشجيعية */}
+          <div className="bg-gold/10 backdrop-blur-sm rounded-2xl p-6 border border-gold/20 text-right">
+            <p className="text-cream/80 text-lg font-amiri leading-relaxed">
+              💚 دعاءك قد يكون سبباً في استجابة دعاء أخيك المسلم
+              <br />
+              🤲 من دعا لأخيه بظهر الغيب، قالت الملائكة: ولك بمثل
+            </p>
+          </div>
+
+          {/* زر النشر */}
           <Button
             type="submit"
             disabled={isSubmitting || !duaText.trim()}
             className="flex-1 bg-gold text-navy font-bold py-6 text-lg rounded-2xl hover:bg-gold-light shadow-lg shadow-gold/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105 active:scale-95 w-full"
           >
-            {isSubmitting ? <>⏳ جاري النشر...</> : <>📤 نشر الدعاء</>}
+            {isSubmitting ? (
+              <>⏳ جاري النشر...</>
+            ) : (
+              <>
+                📤 نشر الدعاء
+              </>
+            )}
           </Button>
+
+          {/* ملاحظة */}
+          <p className="text-center text-cream/50 text-sm font-cairo">
+            بنشرك للدعاء، أنت توافق على مشاركته مع جميع زوار الموقع
+          </p>
         </form>
       </div>
     </div>
