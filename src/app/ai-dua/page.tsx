@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useRef } from 'react';
 import { FloatingStars, DecorativeDivider, Lantern } from '@/components/islamic-decorations';
 import { Send, Sparkles, RefreshCw, Share2, Download, MessageCircle, Copy, Check, Link2 } from 'lucide-react';
