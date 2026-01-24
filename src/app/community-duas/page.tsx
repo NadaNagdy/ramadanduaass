@@ -1,149 +1,151 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { FloatingStars, CrescentMoon, DecorativeDivider } from '@/components/islamic-decorations';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+import CommunityDuaCard from '@/components/community-dua-card';
 import { supabase } from '@/lib/supabase';
-import { useRouter } from 'next/navigation';
-import { useToast } from '@/hooks/use-toast';
-import { Sparkles } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { Loader2, PlusCircle } from 'lucide-react';
+import Link from 'next/link';
 
-export default function AddCommunityDuaPage() {
-  const [duaText, setDuaText] = useState('');
-  const [authorName, setAuthorName] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const router = useRouter();
-  const { toast } = useToast();
+type CommunityDua = {
+  id: number;
+  text: string;
+  author?: string;
+  likes: number;
+  created_at: string;
+  isGolden?: boolean;
+};
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+function CommunityContent() {
+  const [duas, setDuas] = useState<CommunityDua[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const searchParams = useSearchParams();
+  const newDuaId = searchParams?.get('newDua');
 
-    if (!duaText.trim()) {
-      toast({
-        variant: "destructive",
-        title: "خطأ",
-        description: "الرجاء كتابة الدعاء أولاً",
-      });
-      return;
-    }
+  useEffect(() => {
+    fetchDuas();
+  }, []);
 
-    if (duaText.trim().length < 10) {
-      toast({
-        variant: "destructive",
-        title: "خطأ",
-        description: "الدعاء قصير جداً. اكتب على الأقل 10 أحرف",
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
-
+  const fetchDuas = async () => {
+    setIsLoading(true);
     try {
       const { data, error } = await supabase
         .from('community_duas')
-        .insert([
-          {
-            text: duaText.trim(),
-            author: authorName.trim() || 'زائر كريم',
-            likes: 0,
-            created_at: new Date().toISOString(),
-          }
-        ])
-        .select();
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setDuas(data || []);
+    } catch (error) {
+      console.error('Error fetching duas:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLikeChange = async (id: number, currentLikes: number) => {
+    try {
+      const { error } = await supabase
+        .from('community_duas')
+        .update({ likes: currentLikes + 1 })
+        .eq('id', id);
 
       if (error) throw error;
 
-      const insertedDuaId = data?.[0].id;
-
-      toast({
-        title: "تم النشر! 🎉",
-        description: "تم إضافة دعائك إلى حائط المجتمع",
-      });
-
-      // Fixed redirect - now goes to /community-duas
-      setTimeout(() => {
-        router.push(`/community-duas?newDua=${insertedDuaId}`);
-      }, 1500);
-
+      setDuas(duas.map(dua => 
+        dua.id === id ? { ...dua, likes: currentLikes + 1 } : dua
+      ));
     } catch (error) {
-      console.error('Error adding dua:', error);
-      toast({
-        variant: "destructive",
-        title: "حدث خطأ",
-        description: "لم نتمكن من نشر الدعاء. حاول مرة أخرى",
-      });
-    } finally {
-      setIsSubmitting(false);
+      console.error('Error updating likes:', error);
     }
   };
 
   return (
+    <>
+      <div className="mb-12 text-center">
+        <Link href="/add-community-dua">
+          <Button
+            size="lg"
+            className="bg-gold hover:bg-gold-light text-navy font-cairo font-bold text-lg rounded-xl shadow-lg shadow-gold/20 transform hover:scale-105 transition-transform"
+          >
+            <PlusCircle className="ml-2 w-5 h-5" />
+            شارك دعاءك
+          </Button>
+        </Link>
+      </div>
+
+      {isLoading && (
+        <div className="flex justify-center items-center py-20">
+          <Loader2 className="w-12 h-12 text-gold animate-spin" />
+        </div>
+      )}
+
+      {!isLoading && duas.length === 0 && (
+        <div className="text-center py-20">
+          <p className="text-cream/60 text-xl font-amiri mb-6">
+            لا توجد أدعية بعد. كن أول من يشارك دعاءه! 🤲
+          </p>
+          <Link href="/add-community-dua">
+            <Button
+              variant="outline"
+              className="text-gold border-gold/50 hover:bg-gold/10"
+            >
+              أضف أول دعاء
+            </Button>
+          </Link>
+        </div>
+      )}
+
+      {!isLoading && duas.length > 0 && (
+        <div className="space-y-6">
+          {duas.map((dua) => (
+            <CommunityDuaCard
+              key={dua.id}
+              dua={dua}
+              onLikeChange={handleLikeChange}
+              highlight={newDuaId ? dua.id === parseInt(newDuaId) : false}
+            />
+          ))}
+        </div>
+      )}
+
+      {newDuaId && (
+        <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-gold text-navy px-6 py-3 rounded-full shadow-lg animate-bounce font-cairo font-bold z-50">
+          ✅ تم نشر دعائك بنجاح!
+        </div>
+      )}
+    </>
+  );
+}
+
+export default function CommunityDuasPage() {
+  return (
     <div className="min-h-screen bg-hero-gradient pt-32 pb-20 px-4">
       <FloatingStars />
-      <div className="max-w-3xl mx-auto relative z-10">
+      <div className="max-w-4xl mx-auto relative z-10">
         <div className="text-center mb-12 animate-fade-in">
           <div className="inline-block p-4 bg-gold/10 rounded-full mb-6 animate-float">
             <CrescentMoon className="w-12 h-12 text-gold" />
           </div>
           <h1 className="font-amiri text-4xl md:text-5xl font-bold text-gold mb-4">
-            شارك دعاءك مع المجتمع
+            حائط الأدعية المجتمعي
           </h1>
           <p className="text-cream/70 text-lg font-cairo max-w-2xl mx-auto">
-            اكتب دعاءً من قلبك ليؤمّن عليه إخوتك وأخواتك في الله
+            أدعية مشتركة من قلوب المؤمنين - أمّن على دعاء أخيك يستجاب لك
           </p>
           <DecorativeDivider className="mt-8" />
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-          <div className="bg-white/5 backdrop-blur-md border-2 border-gold/30 rounded-3xl p-6">
-            <label className="block text-gold font-amiri text-lg mb-3 text-right">
-              <Sparkles className="w-5 h-5 inline ml-2" />
-              اسمك (اختياري)
-            </label>
-            <input
-              type="text"
-              value={authorName}
-              onChange={(e) => setAuthorName(e.target.value)}
-              placeholder="مثلاً: أحمد، فاطمة... أو اتركه فارغاً"
-              className="w-full bg-navy/50 border-2 border-gold/30 rounded-2xl px-6 py-4 text-cream text-lg font-cairo text-right focus:outline-none focus:border-gold transition-all placeholder:text-cream/30"
-              maxLength={50}
-              dir="rtl"
-            />
-            <p className="text-cream/40 text-sm mt-2 text-right font-cairo">
-              إذا لم تكتب اسماً، سيظهر "زائر كريم"
-            </p>
+        <Suspense fallback={
+          <div className="flex justify-center items-center py-20">
+            <Loader2 className="w-12 h-12 text-gold animate-spin" />
           </div>
-
-          <div className="bg-white/5 backdrop-blur-md border-2 border-gold/30 rounded-3xl p-6">
-            <label className="block text-gold font-amiri text-lg mb-3 text-right">
-              <span className="text-2xl ml-2">🤲</span>
-              الدعاء
-            </label>
-            <Textarea
-              value={duaText}
-              onChange={(e) => setDuaText(e.target.value)}
-              placeholder="مثلاً: اللهم ارزقنا الصحة والعافية، واجعل أيامنا مليئة بالسكينة والبركة..."
-              className="w-full min-h-[200px] bg-navy/50 border-2 border-gold/30 rounded-2xl px-6 py-4 text-cream text-xl leading-loose font-amiri text-right focus:outline-none focus:border-gold transition-all placeholder:text-cream/30 resize-none"
-              maxLength={500}
-              dir="rtl"
-            />
-            <div className="flex items-center justify-between mt-3">
-              <p className="text-cream/40 text-sm font-cairo">الحد الأقصى: 500 حرف</p>
-              <p className="text-gold/60 text-sm font-cairo">{duaText.length} / 500</p>
-            </div>
-          </div>
-
-          <Button
-            type="submit"
-            disabled={isSubmitting || !duaText.trim()}
-            className="flex-1 bg-gold text-navy font-bold py-6 text-lg rounded-2xl hover:bg-gold-light shadow-lg shadow-gold/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105 active:scale-95 w-full"
-          >
-            {isSubmitting ? <>⏳ جاري النشر...</> : <>📤 نشر الدعاء</>}
-          </Button>
-        </form>
+        }>
+          <CommunityContent />
+        </Suspense>
       </div>
     </div>
   );
-}
 }
