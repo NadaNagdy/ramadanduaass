@@ -41,7 +41,7 @@ export default function AddCommunityDuaPage() {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('community_duas')
         .insert([
           {
@@ -50,21 +50,21 @@ export default function AddCommunityDuaPage() {
             likes: 0,
             created_at: new Date().toISOString(),
           }
-        ]);
+        ])
+        .select(); // مهم لإرجاع الـ ID
 
-      if (error) {
-        console.error('Supabase error:', error);
-        throw error;
-      }
+      if (error) throw error;
+
+      const insertedDuaId = data?.[0].id;
 
       toast({
         title: "تم النشر! 🎉",
         description: "تم إضافة دعائك إلى حائط المجتمع",
       });
 
-      // الانتقال لصفحة المجتمع بعد ثانيتين
+      // إعادة التوجيه مع ID الدعاء الجديد
       setTimeout(() => {
-        router.push('/community');
+        router.push(`/community?newDua=${insertedDuaId}`);
       }, 1500);
 
     } catch (error) {
@@ -82,28 +82,21 @@ export default function AddCommunityDuaPage() {
   return (
     <div className="min-h-screen bg-hero-gradient pt-32 pb-20 px-4">
       <FloatingStars />
-      
       <div className="max-w-3xl mx-auto relative z-10">
-        {/* Header */}
         <div className="text-center mb-12 animate-fade-in">
           <div className="inline-block p-4 bg-gold/10 rounded-full mb-6 animate-float">
             <CrescentMoon className="w-12 h-12 text-gold" />
           </div>
-          
           <h1 className="font-amiri text-4xl md:text-5xl font-bold text-gold mb-4">
             شارك دعاءك مع المجتمع
           </h1>
-          
           <p className="text-cream/70 text-lg font-cairo max-w-2xl mx-auto">
             اكتب دعاءً من قلبك ليؤمّن عليه إخوتك وأخواتك في الله
           </p>
-          
           <DecorativeDivider className="mt-8" />
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-          {/* Author Name Input */}
           <div className="bg-white/5 backdrop-blur-md border-2 border-gold/30 rounded-3xl p-6">
             <label className="block text-gold font-amiri text-lg mb-3 text-right">
               <Sparkles className="w-5 h-5 inline ml-2" />
@@ -123,7 +116,6 @@ export default function AddCommunityDuaPage() {
             </p>
           </div>
 
-          {/* Dua Text Area */}
           <div className="bg-white/5 backdrop-blur-md border-2 border-gold/30 rounded-3xl p-6">
             <label className="block text-gold font-amiri text-lg mb-3 text-right">
               <span className="text-2xl ml-2">🤲</span>
@@ -138,66 +130,19 @@ export default function AddCommunityDuaPage() {
               dir="rtl"
             />
             <div className="flex items-center justify-between mt-3">
-              <p className="text-cream/40 text-sm font-cairo">
-                الحد الأقصى: 500 حرف
-              </p>
-              <p className="text-gold/60 text-sm font-cairo">
-                {duaText.length} / 500
-              </p>
+              <p className="text-cream/40 text-sm font-cairo">الحد الأقصى: 500 حرف</p>
+              <p className="text-gold/60 text-sm font-cairo">{duaText.length} / 500</p>
             </div>
           </div>
 
-          {/* Tips Box */}
-          <div className="bg-gold/10 border-2 border-gold/30 rounded-2xl p-6">
-            <h3 className="text-gold font-amiri text-lg mb-3 text-right">
-              💡 نصائح لدعاء مؤثر:
-            </h3>
-            <ul className="space-y-2 text-cream/70 text-right font-cairo">
-              <li>✨ اكتب من القلب بصدق ونية خالصة</li>
-              <li>🌙 استخدم لغة جميلة ومؤثرة</li>
-              <li>💚 ادعُ لنفسك وللمسلمين جميعاً</li>
-              <li>🕌 استلهم من أدعية القرآن والسنة</li>
-            </ul>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex gap-4">
-            <Button
-              type="submit"
-              disabled={isSubmitting || !duaText.trim()}
-              className="flex-1 bg-gold text-navy font-bold py-6 text-lg rounded-2xl hover:bg-gold-light shadow-lg shadow-gold/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105 active:scale-95"
-            >
-              {isSubmitting ? (
-                <>
-                  <span className="animate-spin ml-2">⏳</span>
-                  جاري النشر...
-                </>
-              ) : (
-                <>
-                  <Send className="w-5 h-5 ml-2" />
-                  نشر الدعاء
-                </>
-              )}
-            </Button>
-
-            <Link href="/community" className="flex-shrink-0">
-              <Button
-                type="button"
-                variant="outline"
-                className="border-2 border-gold/30 text-gold hover:bg-gold/10 py-6 px-6 rounded-2xl"
-              >
-                <ArrowRight className="w-5 h-5" />
-              </Button>
-            </Link>
-          </div>
+          <Button
+            type="submit"
+            disabled={isSubmitting || !duaText.trim()}
+            className="flex-1 bg-gold text-navy font-bold py-6 text-lg rounded-2xl hover:bg-gold-light shadow-lg shadow-gold/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105 active:scale-95 w-full"
+          >
+            {isSubmitting ? <>⏳ جاري النشر...</> : <>📤 نشر الدعاء</>}
+          </Button>
         </form>
-
-        {/* Footer Message */}
-        <div className="text-center mt-12 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-          <p className="text-cream/50 font-amiri text-lg italic">
-            "خير الدعاء دعاء يوم عرفة، وخير ما قلت أنا والنبيون من قبلي: لا إله إلا الله وحده لا شريك له"
-          </p>
-        </div>
       </div>
     </div>
   );
