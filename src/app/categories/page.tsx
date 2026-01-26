@@ -7,7 +7,7 @@ import DuaCard from '@/components/dua-card';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Loader2, PlusCircle } from 'lucide-react';
+import { Loader2, PlusCircle, ArrowRight } from 'lucide-react';
 import { generateCategoryDuas } from '@/ai/flows/generate-category-duas-flow';
 import { useToast } from '@/hooks/use-toast';
 
@@ -66,33 +66,27 @@ export default function CategoriesPage() {
 
   const renderCategoryButton = (cat: typeof categories[0]) => {
     const isLink = !!specialCategoryLinks[cat.id];
+    const isActive = activeCategory === cat.id;
+    
     const baseClassName = cn(
-      'flex items-center gap-2 px-6 py-3 rounded-2xl transition-all font-cairo',
-      activeCategory === cat.id
-        ? 'bg-gold text-navy font-bold shadow-lg shadow-gold/20'
-        : 'bg-white/5 text-cream/80 border border-gold/20 hover:border-gold/50 hover:bg-white/10'
+      'flex items-center gap-2 px-6 py-3 rounded-2xl transition-all font-amiri text-lg border',
+      isActive
+        ? 'bg-gold text-navy font-bold shadow-lg shadow-gold/20 border-gold'
+        : 'bg-white/5 text-cream/80 border-white/10 hover:border-gold/50 hover:bg-white/10'
     );
 
     if (isLink) {
       return (
-        <Link
-          key={cat.id}
-          href={specialCategoryLinks[cat.id]}
-          className={baseClassName}
-        >
-          <span className="text-xl">{cat.icon}</span>
+        <Link key={cat.id} href={specialCategoryLinks[cat.id]} className={baseClassName}>
+          <span>{cat.icon}</span>
           <span>{cat.arabicName}</span>
         </Link>
       );
     }
 
     return (
-      <button
-        key={cat.id}
-        onClick={() => setActiveCategory(cat.id)}
-        className={baseClassName}
-      >
-        <span className="text-xl">{cat.icon}</span>
+      <button key={cat.id} onClick={() => setActiveCategory(cat.id)} className={baseClassName}>
+        <span>{cat.icon}</span>
         <span>{cat.arabicName}</span>
       </button>
     );
@@ -102,97 +96,108 @@ export default function CategoriesPage() {
   const currentDuas = categoryDuas[activeCategory] || [];
 
   return (
-    <div className="min-h-screen bg-hero-gradient pt-32 pb-20 px-4">
+    <div className="min-h-screen bg-hero-gradient pt-32 pb-20 px-4 relative overflow-hidden">
       <FloatingStars />
       
-      <div className="container mx-auto max-w-4xl text-center animate-fade-in">
-        {/* Header */}
-        <div className="mb-12">
-          <CrescentMoon className="w-16 h-16 text-gold mx-auto mb-4 animate-float" />
-          <h1 className="font-amiri text-4xl md:text-5xl text-cream mb-4">
+      <div className="container mx-auto max-w-4xl relative z-10 animate-fade-in">
+        {/* Navigation Back */}
+        <Link 
+          href="/" 
+          className="inline-flex items-center text-gold/70 hover:text-gold mb-8 transition-colors font-amiri text-lg group"
+        >
+          <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
+          العودة للرئيسية
+        </Link>
+
+        {/* Header Section */}
+        <div className="text-center mb-16">
+          <CrescentMoon className="w-20 h-20 text-gold mx-auto mb-6 animate-float" />
+          <h1 className="font-amiri text-5xl md:text-6xl text-cream mb-4 drop-shadow-lg">
             أدعية بالنية
           </h1>
-          <p className="text-cream/70 text-lg font-cairo">
-            اختر نية دعائك واستكشف أدعية مكتوبة من القرآن والسنة
+          <p className="text-cream/70 text-xl font-cairo max-w-2xl mx-auto">
+            اختر نية دعائك واستكشف أدعية مختارة بعناية لترافقك في رحلتك الروحانية
           </p>
-          <DecorativeDivider className="mt-8" />
+          <DecorativeDivider className="mt-10 opacity-50" />
         </div>
         
-        {/* Category Buttons */}
-        <div className="flex flex-wrap justify-center gap-3 mb-12">
+        {/* Category Tabs/Buttons */}
+        <div className="flex flex-wrap justify-center gap-4 mb-16">
           {categories.map(renderCategoryButton)}
         </div>
 
-        {/* Duas List */}
+        {/* Duas Content */}
         {activeCategoryInfo && !specialCategoryLinks[activeCategoryInfo.id] && (
           <div className="animate-fade-in">
-            {currentDuas.length > 0 ? (
-              <>
-                <div className="space-y-6 text-left mb-12">
-                  {currentDuas.map((dua, index) => {
-                    const duaText = typeof dua === 'string' ? dua : dua.dua;
-                    return (
-                      <DuaCard 
-                        key={`${activeCategory}-${index}`} 
-                        title={`${activeCategoryInfo.arabicName} - ${index + 1}`} 
-                        dua={duaText}
-                        showActions={true}
-                      />
-                    );
-                  })}
-                </div>
+            <div className="text-center mb-10">
+               <div className="text-5xl mb-4 opacity-80">{activeCategoryInfo.icon}</div>
+               <h2 className="text-3xl font-bold text-gold font-amiri mb-2">
+                 {activeCategoryInfo.arabicName}
+               </h2>
+               <p className="text-cream/50 font-cairo text-sm tracking-widest">
+                 {currentDuas.length} دعاء متوفر حالياً
+               </p>
+            </div>
 
-                {/* AI Generate Button */}
-                <div className="text-center pt-8 border-t border-gold/20">
+            {currentDuas.length > 0 ? (
+              <div className="space-y-8 mb-16">
+                {currentDuas.map((dua, index) => {
+                  const duaText = typeof dua === 'string' ? dua : dua.dua;
+                  return (
+                    <DuaCard 
+                      key={`${activeCategory}-${index}`} 
+                      title={`دعاء ${index + 1}`} 
+                      dua={duaText}
+                      category={activeCategoryInfo.arabicName}
+                      showActions={true}
+                    />
+                  );
+                })}
+
+                {/* AI Generate Section at Bottom */}
+                <div className="text-center pt-12 border-t border-gold/10">
                   <Button
                     onClick={handleGenerateDua}
                     disabled={isGenerating || currentDuas.length >= 50}
+                    variant="outline"
                     className={cn(
-                      "group flex items-center justify-center gap-3 mx-auto px-8 py-6 rounded-2xl transition-all font-cairo font-bold text-lg",
+                      "group flex items-center justify-center gap-3 mx-auto px-10 py-8 border-2 border-dashed rounded-3xl transition-all text-xl font-amiri",
                       isGenerating || currentDuas.length >= 50
-                        ? "bg-gray-500/20 text-gray-400 cursor-not-allowed"
-                        : "bg-gold/20 text-gold border-2 border-gold/40 hover:bg-gold/30 hover:border-gold hover:scale-105"
+                        ? "border-white/10 text-white/30 cursor-not-allowed"
+                        : "border-gold/30 text-gold hover:border-gold hover:bg-gold/5"
                     )}
                   >
                     {isGenerating ? (
-                      <Loader2 className="w-6 h-6 animate-spin" />
+                      <Loader2 className="w-7 h-7 animate-spin" />
                     ) : (
-                      <PlusCircle className="w-6 h-6" />
+                      <PlusCircle className="w-7 h-7" />
                     )}
-                    <span>
+                    <span className="font-bold">
                       {currentDuas.length >= 50 
                         ? 'تم الوصول للحد الأقصى' 
-                        : 'استكشف المزيد من الأدعية بالذكاء الاصطناعي'}
+                        : 'إنشاء المزيد من الأدعية بالذكاء الاصطناعي'}
                     </span>
                   </Button>
-                  
-                  <p className="mt-4 text-cream/40 text-sm font-cairo">
-                    {currentDuas.length >= 50 
-                      ? 'لقد وصلت للحد الأقصى من الأدعية في هذا القسم'
-                      : `يمكنك استكشاف ما يصل إلى 50 دعاءً في كل قسم`}
+                  <p className="mt-4 text-cream/30 text-sm font-cairo italic">
+                    يمكنك استكشاف وتوليد ما يصل إلى 50 دعاءً لكل قسم
                   </p>
                 </div>
-              </>
+              </div>
             ) : (
-              <div className="text-center py-20">
-                <p className="text-cream/60 text-xl font-amiri mb-6">
-                  لا توجد أدعية في هذا القسم حالياً
+              /* Empty State */
+              <div className="text-center py-24 bg-white/5 rounded-3xl border border-white/10 backdrop-blur-sm">
+                <p className="text-cream/60 text-2xl font-amiri mb-8">
+                  هذا القسم فارغ حالياً، هل تود إنشاء أدعية له؟
                 </p>
                 <Button
                   onClick={handleGenerateDua}
                   disabled={isGenerating}
-                  className="bg-gold text-navy hover:bg-gold-light font-cairo font-bold px-8 py-4"
+                  className="bg-gold text-navy hover:bg-gold/90 font-cairo font-bold px-10 py-6 text-lg rounded-2xl shadow-xl transition-all active:scale-95"
                 >
                   {isGenerating ? (
-                    <>
-                      <Loader2 className="ml-2 w-5 h-5 animate-spin" />
-                      جاري الإنشاء...
-                    </>
+                    <><Loader2 className="ml-3 w-6 h-6 animate-spin" /> جاري الإنشاء... </>
                   ) : (
-                    <>
-                      <PlusCircle className="ml-2 w-5 h-5" />
-                      إنشاء أدعية بالذكاء الاصطناعي
-                    </>
+                    <><PlusCircle className="ml-3 w-6 h-6" /> إنشاء أدعية الآن </>
                   )}
                 </Button>
               </div>
