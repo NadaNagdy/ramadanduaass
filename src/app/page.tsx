@@ -19,7 +19,7 @@ export const metadata: Metadata = generateDuaMetadata({
     'أدعية ليلة القدر',
     'أدعية إسلامية',
     'دعاء الشفاء',
-    'دعاء الرزق ,
+    'دعاء الرزق',
     'ادعية رمضان 2026',
     'دعاء رمضان 1447',
     'أدعية مكتوبة 2026',
@@ -80,58 +80,6 @@ export default function HomePage() {
             تصفح الأدعية حسب الموضوع
           </h2>
           <div className="h-1 w-24 bg-gold mx-auto rounded-full mb-6"></div>
-          <p className="text-white/70 text-lg font-amiri">
-            اختر النية التي تود الدعاء بها واستكشف كنوز الأدعية المأثورة
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-10">
-          {categories.map((cat) => {
-            const href = specialCategoryLinks[cat.id] || `/categories?active=${cat.id}`;
-            const color = colorMap[cat.id] || 'from-gray-500/20 to-slate-500/20';
-
-            return (
-              <Link key={cat.id} href={href}>
-                <div
-                  className={`
-                    group relative bg-gradient-to-br ${color}
-                    backdrop-blur-xl rounded-[2rem] p-8
-                    border border-white/10
-                    hover:border-gold/40 hover:scale-[1.03]
-                    transition-all duration-500 ease-out
-                    cursor-pointer min-h-[220px]
-                    flex flex-col items-center justify-center
-                    shadow-xl hover:shadow-gold/10
-                  `}
-                >
-                  {/* تأثير لمعان عند الحوم (Hover) */}
-                  <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 rounded-[2rem] transition-opacity"></div>
-                  
-                  <div className="text-6xl mb-4 transform group-hover:scale-110 group-hover:-rotate-12 transition-transform duration-500">
-                    {cat.icon}
-                  </div>
-                  
-                  <h3 className="text-2xl font-bold text-white font-amiri group-hover:text-gold transition-colors">
-                    {cat.arabicName}
-                  </h3>
-                  
-                  <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <span className="text-gold text-sm font-cairo">استكشف الأدعية ←</span>
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* قسم خواطر رمضانية */}
-      <div className="pb-20">
-        <RamadanReflection />
-      </div>
-    </div>
-  );
-}g-gold mx-auto rounded-full mb-6"></div>
           <p className="text-white/70 text-lg font-amiri">
             اختر النية التي تود الدعاء بها واستكشف كنوز الأدعية المأثورة
           </p>
