@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import HeroSection from '@/components/hero-section';
 import DuaOfTheDay from '@/components/DuaOfTheDay';
 import RamadanReflection from '@/components/ramadan-reflections';
-import { dailyDuas, categories } from '@/lib/duas';
+import { dailyDuas, categories as importedCategories } from '@/lib/duas';
 import { getRamadanDay, isRamadan } from '@/lib/date-helper';
 import { generateDuaMetadata } from '@/lib/metadata';
 import Link from 'next/link';
@@ -59,7 +59,63 @@ export default function HomePage() {
     'quranic-duas': 'from-green-500/20 to-emerald-500/20',
     'healing': 'from-cyan-500/20 to-blue-500/20',
     'country': 'from-red-500/20 to-orange-500/20',
+    'sick': 'from-emerald-500/20 to-teal-500/20',
+    'wealth': 'from-amber-500/20 to-yellow-500/20',
+    'marriage': 'from-pink-500/20 to-rose-500/20',
+    'children': 'from-blue-500/20 to-indigo-500/20',
+    'travel': 'from-purple-500/20 to-violet-500/20',
   };
+
+  // الفئات الإضافية (أدعية الشفاء، الرزق، السفر، إلخ)
+  const additionalCategories = [
+    {
+      id: 'sick',
+      arabicName: 'أدعية المريض',
+      description: 'أدعية الشفاء والعافية',
+      icon: '🤲',
+      href: '/categories?active=healing',
+    },
+    {
+      id: 'wealth',
+      arabicName: 'أدعية الرزق',
+      description: 'أدعية جلب الرزق والبركة',
+      icon: '💰',
+      href: '/categories?active=myself',
+    },
+    {
+      id: 'marriage',
+      arabicName: 'أدعية الزواج',
+      description: 'أدعية تيسير الزواج وفتح النصيب',
+      icon: '💍',
+      href: '/categories?active=family',
+    },
+    {
+      id: 'children',
+      arabicName: 'أدعية للأبناء',
+      description: 'أدعية حفظ الأولاد وصلاحهم',
+      icon: '👨‍👩‍👧‍👦',
+      href: '/categories?active=family',
+    },
+    {
+      id: 'travel',
+      arabicName: 'أدعية السفر',
+      description: 'أدعية السفر والعودة بالسلامة',
+      icon: '✈️',
+      href: '/categories?active=myself',
+    },
+  ];
+
+  // دمج الفئات من duas.ts مع الفئات الإضافية
+  const allCategories = [
+    ...importedCategories.map((cat) => ({
+      id: cat.id,
+      arabicName: cat.arabicName,
+      description: '',
+      icon: cat.icon,
+      href: specialCategoryLinks[cat.id] || `/categories?active=${cat.id}`,
+    })),
+    ...additionalCategories,
+  ];
 
   return (
     <div className="bg-hero-gradient min-h-screen">
@@ -86,12 +142,11 @@ export default function HomePage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-10">
-          {categories.map((cat) => {
-            const href = specialCategoryLinks[cat.id] || `/categories?active=${cat.id}`;
+          {allCategories.map((cat) => {
             const color = colorMap[cat.id] || 'from-gray-500/20 to-slate-500/20';
 
             return (
-              <Link key={cat.id} href={href}>
+              <Link key={cat.id} href={cat.href}>
                 <div
                   className={`
                     group relative bg-gradient-to-br ${color}
@@ -114,6 +169,12 @@ export default function HomePage() {
                   <h3 className="text-2xl font-bold text-white font-amiri group-hover:text-gold transition-colors">
                     {cat.arabicName}
                   </h3>
+                  
+                  {cat.description && (
+                    <p className="text-white/60 text-sm font-cairo mt-2">
+                      {cat.description}
+                    </p>
+                  )}
                   
                   <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <span className="text-gold text-sm font-cairo">استكشف الأدعية ←</span>
