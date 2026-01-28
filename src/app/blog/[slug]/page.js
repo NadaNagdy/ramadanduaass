@@ -1,6 +1,5 @@
 // src/app/blog/[slug]/page.js
-import { getPostData } from '../../lib/posts'; // تأكدي من صحة المسار لملف posts
-
+import { getPostData } from '@/lib/posts';
 export default async function Post({ params }) {
   // 👇 الخطوة دي إجبارية في Next.js 15
   const { slug } = await params; 
