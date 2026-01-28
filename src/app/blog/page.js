@@ -1,6 +1,4 @@
-import { getSortedPostsData } from '@/lib/posts';
-import Link from 'next/link';
-
+import { getSortedPostsData } from '../../lib/posts';import Link from 'next/link';
 export default function BlogPage() {
   const allPosts = getSortedPostsData();
 
