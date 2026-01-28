@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { CrescentMoon } from './islamic-decorations';
-import { Menu, X, BookOpen, Calendar, Heart, Users, FolderHeart, Info } from 'lucide-react';
+// تم إضافة Newspaper هنا
+import { Menu, X, BookOpen, Calendar, Heart, Users, FolderHeart, Info, Newspaper } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const Navigation: React.FC = () => {
@@ -15,6 +16,7 @@ const Navigation: React.FC = () => {
     { path: '/', label: 'الرئيسية' },
     { path: '/daily-duas', label: 'أدعية الأيام', icon: Calendar },
     { path: '/categories', label: 'أدعية بالنية', icon: BookOpen },
+    { path: '/blog', label: 'مقالات رمضان', icon: Newspaper }, // ✅ الرابط الجديد للمقالات
     { path: '/ai-dua', label: 'اصنع دعاءك', icon: Heart },
     { path: '/community-duas', label: 'دعاء المشاركين', icon: Users },
     { path: '/my-duas', label: 'أدعيتي', icon: FolderHeart },
@@ -35,7 +37,8 @@ const Navigation: React.FC = () => {
             <span className="font-amiri text-2xl text-cream font-bold">أدعية رمضان</span>
           </Link>
           
-          <nav className="hidden md:flex items-center gap-6">
+          {/* Desktop Navigation */}
+          <nav className="hidden xl:flex items-center gap-4">
             {navLinks.map((link) => {
               const Icon = link.icon;
               return (
@@ -43,7 +46,7 @@ const Navigation: React.FC = () => {
                   key={link.path} 
                   href={link.path} 
                   className={cn(
-                    'font-cairo text-base transition-colors flex items-center gap-2 py-2 whitespace-nowrap',
+                    'font-cairo text-sm transition-colors flex items-center gap-1.5 py-2 whitespace-nowrap',
                     isActive(link.path) 
                       ? 'text-gold font-semibold border-b-2 border-gold' 
                       : 'text-cream/70 hover:text-gold border-b-2 border-transparent'
@@ -66,9 +69,10 @@ const Navigation: React.FC = () => {
         </div>
       </div>
 
+      {/* Mobile Navigation */}
       {isOpen && (
-        <div className="md:hidden bg-navy border-t border-gold/10 p-4 absolute top-full left-0 right-0 shadow-lg">
-          <nav className="container mx-auto flex flex-col gap-2">
+        <div className="md:hidden bg-navy border-t border-gold/10 p-4 absolute top-full left-0 right-0 shadow-lg max-h-[80vh] overflow-y-auto">
+          <nav className="container mx-auto flex flex-col gap-1">
             {navLinks.map((link) => (
               <Link 
                 key={link.path} 
