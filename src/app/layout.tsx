@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { Cairo, Amiri } from 'next/font/google'; // ✅ استيراد الخطوط بطريقة Next.js الحديثة
+import { Cairo, Amiri } from 'next/font/google';
 import Navigation from '@/components/navigation';
 import Footer from '@/components/footer';
 import { Toaster } from "@/components/ui/toaster";
@@ -20,11 +20,16 @@ const amiri = Amiri({
   display: 'swap',
 });
 
+// التعديل هنا: إضافة الـ Verification لربط الموقع بجوجل
 export const metadata: Metadata = {
   title: 'أدعية رمضان – 30 يوم',
   description: 'مساحة هادئة للتأمل والدعاء والمشاركة في أيام شهر رمضان المبارك',
   icons: {
-    icon: '/favicon.ico', // تأكدي من وجود ملف favicon
+    icon: '/favicon.ico',
+  },
+  // 👇 هذا الجزء هو المسؤول عن تفعيل "HTML tag" في Google Search Console
+  verification: {
+    google: '<meta name="google-site-verification" content="04Iz04z7UnvFr6OP_sUBi1tOuxHrfvcxF2iTOKyNLNY" />', 
   },
 };
 
@@ -36,12 +41,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         suppressHydrationWarning
       >
         <div className="min-h-screen flex flex-col relative">
-          {/* خلفية جمالية خفيفة تليق بأجواء رمضان (اختياري) */}
+          {/* خلفية جمالية خفيفة تليق بأجواء رمضان */}
           <div className="fixed inset-0 bg-[url('/bg-pattern.png')] opacity-5 pointer-events-none -z-10" />
           
           <Navigation />
           
-          {/* إضافة padding علوي بسيط للتأكد من أن المحتوى لا يختفي خلف الـ Navigation الثابت */}
           <main className="flex-grow pt-4">
             {children}
           </main>
