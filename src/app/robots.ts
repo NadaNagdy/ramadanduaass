@@ -1,5 +1,4 @@
 // app/robots.ts
-
 import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
@@ -11,26 +10,20 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: '*',
         allow: '/',
         disallow: [
-          '/api/',
-          '/admin/',
-          '/_next/',
-          '/private/',
+          '/api/',      // منع أرشفة روابط العمليات الخلفية
+          '/admin/',    // حماية مسارات الإدارة
+          '/_next/',    // تجاهل ملفات النظام الخاصة بـ Next.js
+          '/private/',  // أي ملفات خاصة بالتطوير
+          '/*.json$',   // منع أرشفة ملفات البيانات الخام
         ],
       },
-      // Special crawl rules for high-priority pages
+      // توجيهات خاصة لمحرك بحث جوجل لتحسين الأرشفة
       {
         userAgent: 'Googlebot',
         allow: '/',
-        crawlDelay: 0,
-      },
-      {
-        userAgent: 'Bingbot',
-        allow: '/',
-        crawlDelay: 0,
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
-    // Additional sitemaps for better organization (optional)
     host: baseUrl,
   };
 }
