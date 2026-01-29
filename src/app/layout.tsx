@@ -6,7 +6,7 @@ import Footer from '@/components/footer';
 import { Toaster } from "@/components/ui/toaster";
 import GoogleAnalytics from '@/components/GoogleAnalytics';
 
-// إعداد الخطوط لضمان سرعة التحميل وعدم حدوث Layout Shift
+// إعداد الخطوط لضمان سرعة التحميل
 const cairo = Cairo({ 
   subsets: ['arabic'], 
   variable: '--font-cairo',
@@ -20,16 +20,16 @@ const amiri = Amiri({
   display: 'swap',
 });
 
-// التعديل هنا: إضافة الـ Verification لربط الموقع بجوجل
+// إعداد الـ Metadata مع حل مشكلة التحقق (Verification)
 export const metadata: Metadata = {
   title: 'أدعية رمضان – 30 يوم',
   description: 'مساحة هادئة للتأمل والدعاء والمشاركة في أيام شهر رمضان المبارك',
+  verification: {
+    // ✅ ضع هنا فقط الجزء الموجود داخل content="..." من الكود الذي أعطاك إياه جوجل
+    google: '04Iz04z7UnvFr6OP_sUBi1tOuxHrfvcxF2iTOKyNLNY', 
+  },
   icons: {
     icon: '/favicon.ico',
-  },
-  // 👇 هذا الجزء هو المسؤول عن تفعيل "HTML tag" في Google Search Console
-  verification: {
-    google: '<meta name="google-site-verification" content="04Iz04z7UnvFr6OP_sUBi1tOuxHrfvcxF2iTOKyNLNY" />', 
   },
 };
 
@@ -41,7 +41,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         suppressHydrationWarning
       >
         <div className="min-h-screen flex flex-col relative">
-          {/* خلفية جمالية خفيفة تليق بأجواء رمضان */}
           <div className="fixed inset-0 bg-[url('/bg-pattern.png')] opacity-5 pointer-events-none -z-10" />
           
           <Navigation />
