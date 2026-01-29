@@ -5,7 +5,7 @@ import { categories } from '@/lib/duas';
 import { getSortedPostsData } from '@/lib/posts'; // ✅ استيراد دالة جلب المقالات
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://ramadanduaass.com';
+  const baseUrl = 'https://ramadanduaass.vercel.app';
   const lastModified = new Date();
 
   /* -------- Static Routes -------- */
