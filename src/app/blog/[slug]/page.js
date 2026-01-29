@@ -1,45 +1,116 @@
 import { getPostData } from '../../../lib/posts';
 import Link from 'next/link';
 
+/**
+ * 1. توليد الـ Metadata الديناميكية لجوجل ومنصات التواصل
+ */
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+  try {
+    const post = await getPostData(slug);
+    return {
+      title: `${post.title} | أدعية رمضان`,
+      description: post.description,
+      openGraph: {
+        title: post.title,
+        description: post.description,
+        type: 'article',
+        publishedTime: post.date,
+        url: `https://ramadanduaass.vercel.app/blog/${slug}`,
+        siteName: 'أدعية رمضان',
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: post.title,
+        description: post.description,
+      },
+    };
+  } catch (e) {
+    return { title: 'مقال غير موجود | أدعية رمضان' };
+  }
+}
+
 export default async function Post({ params }) {
   const { slug } = await params;
   
   try {
     const postData = await getPostData(slug);
 
+    // 2. إعداد البيانات المنظمة (Schema.org) لمحركات البحث
+    const jsonLd = {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": postData.title,
+      "datePublished": postData.date,
+      "description": postData.description,
+      "author": [{ "@type": "Person", "name": "أدعية رمضان" }],
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": `https://ramadanduaass.vercel.app/blog/${slug}`
+      }
+    };
+
     return (
       <div className="min-h-screen text-white p-6 md:p-12" dir="rtl">
+        {/* إضافة الـ JSON-LD للكود */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+
         {/* رابط العودة - Navigation */}
         <div className="max-w-3xl mx-auto mb-8">
-          <Link href="/blog" className="text-yellow-500 hover:text-yellow-400 flex items-center gap-2 text-sm font-bold">
+          <Link href="/blog" className="text-yellow-500 hover:text-yellow-400 flex items-center gap-2 text-sm font-bold transition-colors">
             <span>←</span> العودة لقائمة المقالات
           </Link>
         </div>
 
-        <article className="max-w-3xl mx-auto bg-slate-900/50 p-8 rounded-3xl border border-slate-800 shadow-2xl">
-          <header className="mb-10 border-b border-slate-800 pb-6">
-            <span className="text-yellow-500 text-xs font-bold uppercase tracking-widest bg-yellow-500/10 px-3 py-1 rounded-full">
+        <article className="max-w-3xl mx-auto bg-slate-900/50 p-8 rounded-3xl border border-slate-800 shadow-2xl relative overflow-hidden">
+          {/* لمسة جمالية خلفية */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-500/5 rounded-full -mr-16 -mt-16 blur-3xl" />
+          
+          <header className="mb-10 border-b border-slate-800 pb-6 relative">
+            <span className="text-yellow-500 text-[10px] font-bold uppercase tracking-widest bg-yellow-500/10 px-3 py-1 rounded-full border border-yellow-500/20">
               {postData.category}
             </span>
-            <h1 className="text-4xl md:text-5xl font-black mt-4 mb-4 text-white leading-tight">
+            <h1 className="font-amiri text-4xl md:text-5xl font-bold mt-4 mb-4 text-white leading-tight">
               {postData.title}
             </h1>
-            <p className="text-slate-400 text-sm">{postData.date}</p>
+            <div className="flex items-center gap-4 text-slate-400 text-xs font-medium">
+               <time datetime={postData.date}>{postData.date}</time>
+               <span>•</span>
+               <span>بقلم فريق أدعية رمضان</span>
+            </div>
           </header>
           
-          {/* المحتوى مع ضمان ظهور النص باللون الأبيض */}
+          {/* المحتوى المنسق */}
           <div 
-            className="prose prose-invert prose-yellow lg:prose-xl max-w-none leading-relaxed text-slate-200"
+            className="prose prose-invert prose-yellow lg:prose-xl max-w-none leading-relaxed text-slate-200 font-cairo"
             dangerouslySetInnerHTML={{ __html: postData.contentHtml }} 
           />
+
+          <footer className="mt-12 pt-8 border-t border-slate-800 text-center">
+            <p className="text-slate-500 text-sm mb-4 italic">أنشر هذه المقالة لتشارك في الأجر والثواب</p>
+            <div className="flex justify-center gap-4">
+               {/* زر مشاركة واتساب */}
+               <a 
+                 href={`https://wa.me/?text=${encodeURIComponent(`${postData.title} \n https://ramadanduaass.vercel.app/blog/${slug}`)}`}
+                 target="_blank" 
+                 rel="noopener noreferrer"
+                 className="bg-green-600/20 text-green-500 px-6 py-2 rounded-full text-sm font-bold border border-green-600/30 hover:bg-green-600/30 transition-all"
+               >
+                 مشاركة عبر واتساب
+               </a>
+            </div>
+          </footer>
         </article>
       </div>
     );
   } catch (error) {
     return (
       <div className="text-center py-20 text-white">
-        <h2 className="text-2xl font-bold">المقال غير موجود حالياً</h2>
-        <Link href="/blog" className="text-yellow-500 underline mt-4 inline-block">العودة للمدونة</Link>
+        <h2 className="text-2xl font-bold font-amiri">المقال غير موجود حالياً</h2>
+        <Link href="/blog" className="text-yellow-500 underline mt-4 inline-block font-cairo">العودة للمدونة</Link>
       </div>
     );
   }
