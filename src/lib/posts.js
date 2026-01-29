@@ -4,53 +4,62 @@ import matter from 'gray-matter';
 import { remark } from 'remark';
 import html from 'remark-html';
 
-// تحديد مسار مجلد المقالات (جذر المشروع + content/articles)
+// تحديد مسار مجلد المقالات باستخدام جذر المشروع لضمان الوصول إليه في Vercel
 const postsDirectory = path.join(process.cwd(), 'content/articles');
 
-// 1. وظيفة لجلب كل المقالات مرتبة بالتاريخ (لصفحة الـ Blog الرئيسية)
+/**
+ * 1. وظيفة جلب وترتيب المقالات
+ * تقوم بعرض المقالات التي يوافق تاريخها اليوم أو ما قبله فقط
+ */
 export function getSortedPostsData() {
+  // التأكد من وجود المجلد لتجنب انهيار التطبيق
   if (!fs.existsSync(postsDirectory)) {
     return [];
   }
 
   const fileNames = fs.readdirSync(postsDirectory);
   
-  // فلترة الملفات التي تنتهي بـ .md فقط وتجاهل الملفات المخفية مثل .gitkeep
   const allPostsData = fileNames
-    .filter((fileName) => fileName.endsWith('.md'))
+    .filter((fileName) => fileName.endsWith('.md')) // تجاهل أي ملفات غير مدعومة
     .map((fileName) => {
       const slug = fileName.replace(/\.md$/, '');
       const fullPath = path.join(postsDirectory, fileName);
       const fileContents = fs.readFileSync(fullPath, 'utf8');
-      const medicalResult = matter(fileContents);
+      
+      // استخدام gray-matter لاستخراج البيانات الوصفية (Front-matter)
+      const matterResult = matter(fileContents);
 
       return {
         slug,
-        ...medicalResult.data,
+        ...matterResult.data,
       };
     });
 
-  // ترتيب المقالات حسب التاريخ (الأحدث أولاً)
-  // يمكنك أيضاً تفعيل نظام "مقال كل يوم" هنا بإضافة filter للتاريخ الحالي
+  // الحصول على تاريخ اليوم بتنسيق YYYY-MM-DD (مثلاً: 2026-01-29)
   const today = new Date().toISOString().split('T')[0];
   
   return allPostsData
-    .filter(post => post.date <= today) // عرض المقالات التي حل موعدها فقط
+    // نظام النشر التلقائي: يظهر المقال فقط إذا كان تاريخه قد حان
+    .filter(post => post.date <= today) 
+    // ترتيب تنازلي (الأحدث يظهر أولاً)
     .sort((a, b) => (a.date < b.date ? 1 : -1));
 }
 
-// 2. وظيفة لجلب بيانات مقال واحد بالاسم (لصفحة الـ [slug])
+/**
+ * 2. وظيفة جلب بيانات مقال واحد
+ * تحول محتوى الـ Markdown إلى HTML للعرض في صفحة [slug]
+ */
 export async function getPostData(slug) {
   const fullPath = path.join(postsDirectory, `${slug}.md`);
   
   if (!fs.existsSync(fullPath)) {
-    throw new Error(`Post not found: ${slug}`);
+    throw new Error(`المقال المطلوب غير موجود: ${slug}`);
   }
 
   const fileContents = fs.readFileSync(fullPath, 'utf8');
   const matterResult = matter(fileContents);
 
-  // تحويل الـ Markdown إلى HTML
+  // معالجة المحتوى لتحويله من Markdown إلى HTML
   const processedContent = await remark()
     .use(html)
     .process(matterResult.content);
