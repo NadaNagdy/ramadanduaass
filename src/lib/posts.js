@@ -14,9 +14,10 @@ const postsDirectory = path.join(process.cwd(), 'content/articles');
 export function getSortedPostsData() {
   // التأكد من وجود المجلد لتجنب انهيار التطبيق
   if (!fs.existsSync(postsDirectory)) {
+    console.warn('⚠️ مجلد المقالات غير موجود:', postsDirectory);
     return [];
   }
-
+  
   const fileNames = fs.readdirSync(postsDirectory);
   
   const allPostsData = fileNames
@@ -28,21 +29,32 @@ export function getSortedPostsData() {
       
       // استخدام gray-matter لاستخراج البيانات الوصفية (Front-matter)
       const matterResult = matter(fileContents);
-
+      
       return {
         slug,
         ...matterResult.data,
       };
     });
-
-  // الحصول على تاريخ اليوم بتنسيق YYYY-MM-DD (مثلاً: 2026-01-29)
+  
+  // الحصول على تاريخ اليوم بتنسيق YYYY-MM-DD (مثلاً: 2026-01-31)
   const today = new Date().toISOString().split('T')[0];
   
-  return allPostsData
+  console.log('📅 تاريخ اليوم:', today);
+  console.log('📝 عدد المقالات الكلي:', allPostsData.length);
+  
+  const filteredPosts = allPostsData
     // نظام النشر التلقائي: يظهر المقال فقط إذا كان تاريخه قد حان
-    .filter(post => post.date <= today) 
+    .filter(post => {
+      const shouldShow = post.date <= today;
+      console.log(`${shouldShow ? '✅' : '❌'} ${post.slug}: ${post.date}`);
+      return shouldShow;
+    })
     // ترتيب تنازلي (الأحدث يظهر أولاً)
     .sort((a, b) => (a.date < b.date ? 1 : -1));
+  
+  console.log('✨ عدد المقالات المعروضة:', filteredPosts.length);
+  
+  return filteredPosts;
 }
 
 /**
@@ -53,18 +65,20 @@ export async function getPostData(slug) {
   const fullPath = path.join(postsDirectory, `${slug}.md`);
   
   if (!fs.existsSync(fullPath)) {
+    // ✅ تم تصليح السطر ده
     throw new Error(`المقال المطلوب غير موجود: ${slug}`);
   }
-
+  
   const fileContents = fs.readFileSync(fullPath, 'utf8');
   const matterResult = matter(fileContents);
-
+  
   // معالجة المحتوى لتحويله من Markdown إلى HTML
   const processedContent = await remark()
     .use(html)
     .process(matterResult.content);
+  
   const contentHtml = processedContent.toString();
-
+  
   return {
     slug,
     contentHtml,
