@@ -64,10 +64,19 @@ export default function HomePage() {
     'marriage': 'from-pink-500/20 to-rose-500/20',
     'children': 'from-blue-500/20 to-indigo-500/20',
     'travel': 'from-purple-500/20 to-violet-500/20',
+    'nisf-shaban': 'from-violet-500/20 to-purple-500/20',
+
   };
 
   // الفئات الإضافية (أدعية الشفاء، الرزق، السفر، إلخ)
   const additionalCategories = [
+   {
+      id: 'nisf-shaban',
+      arabicName: 'أدعية النصف من شعبان',
+      description: 'ليلة العفو والغفران والستر',
+      icon: '🌙',
+      href: '/categories/adeyat-nisf-shaban',
+    },
     {
       id: 'sick',
       arabicName: 'أدعية المريض',
