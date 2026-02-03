@@ -150,64 +150,64 @@ export default function AlabnaaPage() {
         </div>
       </section>
 
-     {/* Share Section */}
-<section className="py-8 px-4">
-  <div className="container mx-auto max-w-4xl">
-    <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-amber-500/20">
-      <div className="text-center mb-6">
-        <h3 className="text-2xl font-bold text-amber-400 mb-2">شارك هذه الصفحة</h3>
-        <p className="text-slate-300 text-sm">انشر الخير وشارك الأدعية مع من تحب</p>
-      </div>
+      {/* Share Section */}
+      <section className="py-8 px-4">
+        <div className="container mx-auto max-w-4xl">
+          <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-amber-500/20">
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-amber-400 mb-2">شارك هذه الصفحة</h3>
+              <p className="text-slate-300 text-sm">انشر الخير وشارك الأدعية مع من تحب</p>
+            </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {/* WhatsApp */}
-        
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {/* WhatsApp */}
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(`${pageTitle}\n\n${pageUrl}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-green-600 hover:bg-green-700 text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2 transition-colors"
+              >
+                <span className="text-xl">💬</span>
+                <span>واتساب</span>
+              </a>
 
-  href={`https://wa.me/?text=${encodeURIComponent(`${pageTitle}\n\n${pageUrl}`)}`}
-  target="_blank"
-  rel="noopener noreferrer"
-  className="bg-green-600 hover:bg-green-700 text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2 transition-colors"
->
-  <span className="text-xl">💬</span>
-  <span>واتساب</span>
-</a>
-        {/* Facebook */}
-        
-          href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2 transition-colors"
-        >
-          <span className="text-xl">📘</span>
-          <span>فيسبوك</span>
-        </a>
+              {/* Facebook */}
+              <a
+                href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2 transition-colors"
+              >
+                <span className="text-xl">📘</span>
+                <span>فيسبوك</span>
+              </a>
 
-        {/* Twitter/X */}
-        
-          href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(pageTitle)}&url=${encodeURIComponent(pageUrl)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-slate-900 hover:bg-black text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2 transition-colors"
-        >
-          <span className="text-xl">𝕏</span>
-          <span>تويتر</span>
-        </a>
+              {/* Twitter/X */}
+              <a
+                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(pageTitle)}&url=${encodeURIComponent(pageUrl)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-slate-900 hover:bg-black text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2 transition-colors"
+              >
+                <span className="text-xl">𝕏</span>
+                <span>تويتر</span>
+              </a>
 
-        {/* Telegram */}
-        
-          href={`https://t.me/share/url?url=${encodeURIComponent(pageUrl)}&text=${encodeURIComponent(pageTitle)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-sky-500 hover:bg-sky-600 text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2 transition-colors"
-        >
-          <span className="text-xl">✈️</span>
-          <span>تليجرام</span>
-        </a>
-      </div>
-    </div>
-  </div>
-</section>
-    
+              {/* Telegram */}
+              <a
+                href={`https://t.me/share/url?url=${encodeURIComponent(pageUrl)}&text=${encodeURIComponent(pageTitle)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-sky-500 hover:bg-sky-600 text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2 transition-colors"
+              >
+                <span className="text-xl">✈️</span>
+                <span>تليجرام</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Other Categories */}
       <section className="py-12 px-4 bg-slate-800/30">
         <div className="container mx-auto max-w-6xl">
