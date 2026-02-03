@@ -12,7 +12,7 @@ import {
 } from '@/components/islamic-decorations';
 import DuaCard from '@/components/dua-card';
 import { Button } from '@/components/ui/button';
-// ✅ تم تعديل الاستيراد هنا ليطابق اسم ملفك الفعلي
+// تأكد أن المسار والاسم صحيحان في مشروعك
 import RamadanCountdown from '@/components/ramadan-countdown'; 
 
 export default function AdeyatNisfShabanClient() {
@@ -43,7 +43,6 @@ export default function AdeyatNisfShabanClient() {
           </p>
           
           <div className="max-w-md mx-auto pt-4">
-             {/* ✅ استخدام المكون بالاسم الجديد وتمرير تاريخ ليلة النصف */}
              <RamadanCountdown targetDate="2026-02-13T18:00:00" />
           </div>
         </section>
@@ -76,7 +75,7 @@ export default function AdeyatNisfShabanClient() {
           </section>
         ))}
 
-        {/* روابط الأرشفة الداخلية */}
+        {/* الروابط الداخلية للأرشفة */}
         <section className="max-w-4xl mx-auto space-y-8 bg-card-gradient p-10 rounded-[2rem] border border-gold/20 shadow-2xl">
           <h3 className="text-2xl font-amiri font-bold text-center text-gold">
              استعد لرمضان 2026 مع هذه الأدعية
@@ -117,5 +116,4 @@ export default function AdeyatNisfShabanClient() {
       </main>
     </>
   );
-}
 }
