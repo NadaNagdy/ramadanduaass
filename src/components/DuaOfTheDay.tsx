@@ -66,32 +66,90 @@ const DuaOfTheDay: React.FC<DuaOfTheDayProps> = ({ dua }) => {
 
   // وظيفة النسخ
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(dua.dua);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(dua.dua);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error('Error copying:', error);
+      // Fallback للمتصفحات القديمة
+      const textArea = document.createElement('textarea');
+      textArea.value = dua.dua;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
-  // وظيفة المشاركة
+  // وظيفة المشاركة المحسنة
   const handleShare = async () => {
     setSharing(true);
     try {
-      const siteUrl = typeof window !== 'undefined' ? window.location.origin : '';
+      const siteUrl = typeof window !== 'undefined' ? window.location.origin : 'https://ramadanduaass.vercel.app';
+      const shareText = `${dua.arabicTitle || 'دعاء اليوم'}\n\n${dua.dua}\n\n`;
       
-      if (navigator.share) {
-        await navigator.share({
-          title: dua.arabicTitle || 'دعاء اليوم',
-          text: dua.dua,
-          url: siteUrl,
-        });
+      // محاولة استخدام Web Share API إذا كان متاحاً
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        try {
+          await navigator.share({
+            title: dua.arabicTitle || 'دعاء اليوم',
+            text: shareText,
+            url: siteUrl,
+          });
+        } catch (err) {
+          // إذا ألغى المستخدم المشاركة أو حدث خطأ
+          if ((err as Error).name !== 'AbortError') {
+            // استخدام fallback
+            await fallbackShare(shareText, siteUrl);
+          }
+        }
       } else {
-        const shareText = `${dua.dua}\n\n🌐 ${siteUrl}`;
-        await navigator.clipboard.writeText(shareText);
-        alert('تم نسخ الدعاء مع رابط الموقع! يمكنك مشاركته الآن 📋');
+        // استخدام fallback مباشرة
+        await fallbackShare(shareText, siteUrl);
       }
     } catch (error) {
       console.error('Error sharing:', error);
     } finally {
       setSharing(false);
+    }
+  };
+
+  // دالة مساعدة للمشاركة البديلة
+  const fallbackShare = async (text: string, url: string) => {
+    const fullText = `${text}🌐 ${url}`;
+    
+    // فتح قائمة خيارات المشاركة
+    const shareOptions = [
+      { name: 'واتساب', url: `https://wa.me/?text=${encodeURIComponent(fullText)}` },
+      { name: 'تويتر', url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}` },
+      { name: 'فيسبوك', url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}` },
+      { name: 'تليجرام', url: `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}` },
+    ];
+
+    // إنشاء نافذة منبثقة للاختيار
+    const choice = confirm('اختر منصة للمشاركة:\n1. واتساب\n2. انسخ النص\n\nاضغط OK للواتساب أو Cancel للنسخ');
+    
+    if (choice) {
+      // فتح واتساب
+      window.open(shareOptions[0].url, '_blank', 'noopener,noreferrer');
+    } else {
+      // نسخ النص
+      try {
+        await navigator.clipboard.writeText(fullText);
+        alert('تم نسخ الدعاء مع رابط الموقع! 📋');
+      } catch (err) {
+        // Fallback للنسخ
+        const textArea = document.createElement('textarea');
+        textArea.value = fullText;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        alert('تم نسخ الدعاء مع رابط الموقع! 📋');
+      }
     }
   };
 
@@ -128,16 +186,18 @@ const DuaOfTheDay: React.FC<DuaOfTheDayProps> = ({ dua }) => {
           </p>
 
           {/* التصنيفات */}
-          <div className="flex flex-wrap gap-2 justify-center mb-8">
-            {dua.category?.map((cat) => (
-              <span
-                key={cat}
-                className="bg-gold/10 backdrop-blur-sm rounded-full px-4 py-1 text-sm text-gold border border-gold/20 font-cairo"
-              >
-                {cat}
-              </span>
-            ))}
-          </div>
+          {dua.category && dua.category.length > 0 && (
+            <div className="flex flex-wrap gap-2 justify-center mb-8">
+              {dua.category.map((cat) => (
+                <span
+                  key={cat}
+                  className="bg-gold/10 backdrop-blur-sm rounded-full px-4 py-1 text-sm text-gold border border-gold/20 font-cairo"
+                >
+                  {cat}
+                </span>
+              ))}
+            </div>
+          )}
 
           {/* أزرار التفاعل */}
           <div className="flex flex-col md:flex-row justify-center gap-4 pt-6 border-t border-gold/10">
@@ -155,7 +215,7 @@ const DuaOfTheDay: React.FC<DuaOfTheDayProps> = ({ dua }) => {
             <Button
               onClick={handleShare}
               disabled={sharing}
-              className="flex items-center gap-2 bg-gold text-black hover:bg-gold/80 rounded-full px-8 py-6 transition-all"
+              className="flex items-center gap-2 bg-gold text-black hover:bg-gold/80 rounded-full px-8 py-6 transition-all font-bold"
             >
               {sharing ? (
                 <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
