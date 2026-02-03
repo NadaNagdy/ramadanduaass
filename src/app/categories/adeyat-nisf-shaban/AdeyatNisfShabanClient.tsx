@@ -12,7 +12,8 @@ import {
 } from '@/components/islamic-decorations';
 import DuaCard from '@/components/dua-card';
 import { Button } from '@/components/ui/button';
-import ShabanCountdown from '@/components/shaban-countdown';
+// ✅ تم تعديل الاستيراد هنا ليطابق اسم ملفك الفعلي
+import RamadanCountdown from '@/components/ramadan-countdown'; 
 
 export default function AdeyatNisfShabanClient() {
   return (
@@ -29,7 +30,7 @@ export default function AdeyatNisfShabanClient() {
       <main className="relative space-y-16 py-10 px-4 overflow-hidden">
         <FloatingStars />
 
-        {/* Hero Section المطور */}
+        {/* Hero Section */}
         <section className="text-center space-y-6 pt-10 animate-fade-in">
           <div className="flex justify-center text-6xl drop-shadow-gold">
             {nisfShabanDuas.hero.icon}
@@ -42,7 +43,8 @@ export default function AdeyatNisfShabanClient() {
           </p>
           
           <div className="max-w-md mx-auto pt-4">
-             <ShabanCountdown targetDate="2026-02-13T18:00:00" />
+             {/* ✅ استخدام المكون بالاسم الجديد وتمرير تاريخ ليلة النصف */}
+             <RamadanCountdown targetDate="2026-02-13T18:00:00" />
           </div>
         </section>
 
@@ -74,7 +76,7 @@ export default function AdeyatNisfShabanClient() {
           </section>
         ))}
 
-        {/* ✅ قسم روابط الأرشفة الداخلية */}
+        {/* روابط الأرشفة الداخلية */}
         <section className="max-w-4xl mx-auto space-y-8 bg-card-gradient p-10 rounded-[2rem] border border-gold/20 shadow-2xl">
           <h3 className="text-2xl font-amiri font-bold text-center text-gold">
              استعد لرمضان 2026 مع هذه الأدعية
@@ -97,15 +99,12 @@ export default function AdeyatNisfShabanClient() {
           </div>
         </section>
 
-        {/* Share Section المطور */}
+        {/* Share Section */}
         <section className="text-center space-y-6 pb-20">
           <DecorativeDivider />
           <h3 className="text-2xl font-amiri font-bold text-cream">
             الدال على الخير كفاعله
           </h3>
-          <p className="text-muted-foreground font-cairo max-w-md mx-auto">
-            ساهم في نشر الأدعية لعلها تكون ساعة استجابة لأحدهم في هذه الليلة المباركة.
-          </p>
           <Button size="lg" className="gap-2 bg-gold text-navy hover:bg-gold-light rounded-full px-10 py-6 text-lg font-bold shadow-gold/20">
             <Share2 size={22} />
             مشاركة الصفحة الآن
@@ -118,4 +117,5 @@ export default function AdeyatNisfShabanClient() {
       </main>
     </>
   );
+}
 }
