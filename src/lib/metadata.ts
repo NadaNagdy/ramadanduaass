@@ -1,62 +1,41 @@
-// lib/metadata.ts
-// Global SEO configuration for the entire site
-
+/// lib/metadata.ts
 import { Metadata } from 'next';
 
 export const siteConfig = {
-  name: 'أدعية رمضان',
-  description: 'أدعية رمضان المبارك - مجموعة شاملة من الأدعية الصحيحة من القرآن والسنة لرمضان، الجمعة، ليلة القدر، الزواج، الأبناء، السفر وجميع المناسبات',
-  url: 'https://ramadanduaass.com',
-  ogImage: 'https://ramadanduaass.com/og-image.jpg',
+  name: 'أدعية رمضان 2026',
+  description: 'أكبر موسوعة لأدعية شهر رمضان المبارك 2026 - 1447هـ. أدعية مستجابة من القرآن والسنة، أدعية ليلة القدر، الرزق، الشفاء، والسفر.',
+  // ملاحظة: تأكد من تطابق الـ URL مع الدومين الفعلي (vercel.app أو .com)
+  url: 'https://ramadanduaass.vercel.app', 
+  ogImage: 'https://ramadanduaass.vercel.app/og-image.jpg',
   links: {
     twitter: 'https://twitter.com/ramadanduaass',
     facebook: 'https://facebook.com/ramadanduaass',
   },
   keywords: [
-    // رمضان
-    'أدعية رمضان',
-    'ادعية رمضان',
-    'دعاء رمضان',
-    'أدعية رمضان مكتوبة',
-    'ادعية رمضان مكتوبة',
+    // رمضان 2026
+    'أدعية رمضان 2026',
+    'ادعية رمضان 1447',
+    'دعاء رمضان مكتوب',
+    'تحميل أدعية رمضان',
     
     // ليلة القدر
-    'أدعية ليلة القدر',
-    'دعاء ليلة القدر',
-    'ليلة القدر',
+    'أدعية ليلة القدر 2026',
+    'دعاء العشر الأواخر من رمضان',
+    'أفضل أدعية ليلة القدر',
     
-    // الجمعة
-    'أدعية يوم الجمعة',
-    'دعاء يوم الجمعة',
-    'دعاء الجمعة',
-    'ادعية الجمعة',
+    // تصنيفات حيوية
+    'أدعية النصف من شعبان',
+    'أدعية يوم الجمعة في رمضان',
+    'أدعية الرزق والفرج',
+    'أدعية الشفاء من المرض',
+    'أدعية تيسير الزواج',
+    'أدعية حفظ الأبناء',
+    'أدعية السفر المستجابة',
     
-    // الزواج
-    'أدعية الزواج',
-    'دعاء الزواج',
-    'دعاء الزواج من شخص معين',
-    'دعاء تيسير الزواج',
-    'دعاء الزوج الصالح',
-    
-    // الأبناء
-    'أدعية الأبناء',
-    'دعاء للأبناء',
-    'دعاء للأولاد',
-    'دعاء حفظ الأبناء',
-    'دعاء صلاح الأبناء',
-    
-    // السفر
-    'أدعية السفر',
-    'دعاء السفر',
-    'دعاء السفر الكامل',
-    'دعاء ركوب السيارة',
-    'دعاء الاستيداع',
-    'دعاء المسافر',
-    
-    // General
-    'أدعية مستجابة',
-    'أدعية من القرآن والسنة',
-    'أدعية إسلامية',
+    // كلمات عامة قوية في البحث
+    'أدعية إسلامية نادرة',
+    'أدعية مستجابة من الكتاب والسنة',
+    'دعاء اليوم في رمضان',
   ],
 };
 
@@ -70,11 +49,11 @@ export const defaultMetadata: Metadata = {
   keywords: siteConfig.keywords,
   authors: [
     {
-      name: 'أدعية رمضان',
+      name: 'علي النقرشي', // بصفتك المطور
       url: siteConfig.url,
     },
   ],
-  creator: 'أدعية رمضان',
+  creator: 'Aly Elnokrashy',
   publisher: 'أدعية رمضان',
   formatDetection: {
     email: false,
@@ -129,18 +108,13 @@ export const defaultMetadata: Metadata = {
     },
   },
   verification: {
-    google: 'your-google-verification-code',
-    yandex: 'your-yandex-verification-code',
+    // تم ربط الكود الذي أرسلته سابقاً هنا
+    google: '04Iz04z7UnvFr6OP_sUBi1tOuxHrfvcxF2iTOKyNLNY',
   },
   category: 'religion',
-  classification: 'Islamic Duas and Prayers',
-  other: {
-    'google-site-verification': 'your-verification-code',
-    'msvalidate.01': 'your-bing-verification-code',
-  },
 };
 
-// Helper function to generate page-specific metadata
+// ... الدوال المساعدة كما هي (Helper Functions)
 export function generatePageMetadata({
   title,
   description,
@@ -153,14 +127,14 @@ export function generatePageMetadata({
   keywords?: string[];
   path?: string;
   image?: string;
-}): Metadata {
+}) {
   const url = `${siteConfig.url}${path}`;
   const ogImage = image || siteConfig.ogImage;
 
   return {
     title,
     description,
-    keywords: [...siteConfig.keywords, ...keywords],
+    keywords: Array.from(new Set([...siteConfig.keywords, ...keywords])), // منع تكرار الكلمات
     openGraph: {
       type: 'article',
       locale: 'ar_EG',
@@ -168,14 +142,7 @@ export function generatePageMetadata({
       title,
       description,
       siteName: siteConfig.name,
-      images: [
-        {
-          url: ogImage,
-          width: 1200,
-          height: 630,
-          alt: title,
-        },
-      ],
+      images: [{ url: ogImage, width: 1200, height: 630, alt: title }],
     },
     twitter: {
       card: 'summary_large_image',
@@ -189,7 +156,6 @@ export function generatePageMetadata({
   };
 }
 
-// Compatibility helper for existing pages (fix build errors)
 export function generateDuaMetadata(seo: {
   title: string;
   description: string;
@@ -203,5 +169,5 @@ export function generateDuaMetadata(seo: {
     keywords: seo.keywords,
     path: seo.canonicalPath,
     image: seo.image,
-  });
+  }) as Metadata;
 }
