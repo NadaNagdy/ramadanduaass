@@ -1,5 +1,3 @@
-// app/sitemap.ts
-
 import { MetadataRoute } from 'next';
 import { categories } from '@/lib/duas';
 import { getSortedPostsData } from '@/lib/posts';
@@ -14,6 +12,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/ramadan',
     '/ramadan/laylat-alqadr',
     '/yawm-aljumaa',
+    '/daily-duas', // ✅ تمت إضافته لضمان أرشفة جدول رمضان 2026
     '/share',
     '/community',
     '/blog',
@@ -42,22 +41,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   /* -------- New Special Category Routes (Updated) -------- */
-  // قمت بإضافة المسارات الجديدة التي أضفناها في الصفحة الرئيسية
   const newCategoryRoutes: MetadataRoute.Sitemap = [
     {
-      url: `${baseUrl}/categories/adeyat-nisf-shaban`, // القسم الجديد
+      url: `${baseUrl}/categories/adeyat-nisf-shaban`,
       lastModified,
-      changeFrequency: 'daily' as const, // يومي لأننا في موسم شعبان حالياً
+      changeFrequency: 'daily' as const,
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/categories/adeyat-almared`, // القسم الجديد
+      url: `${baseUrl}/categories/adeyat-almared`,
       lastModified,
       changeFrequency: 'weekly' as const,
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/categories/adeyat-alrezq`, // القسم الجديد
+      url: `${baseUrl}/categories/adeyat-alrezq`,
       lastModified,
       changeFrequency: 'weekly' as const,
       priority: 0.9,
