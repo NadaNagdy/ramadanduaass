@@ -2,11 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-interface ShareSectionProps {
-  title: string;
-}
-
-export default function ShareSection({ title }: ShareSectionProps) {
+export default function ShareSection({ title }: { title: string }) {
   const [currentUrl, setCurrentUrl] = useState("");
 
   useEffect(() => {
@@ -27,10 +23,16 @@ export default function ShareSection({ title }: ShareSectionProps) {
       <h3 className="text-3xl font-bold mb-4">أنشر هذا الخير وشارك الأجر</h3>
       <p className="text-xl mb-8 opacity-90">قال رسول الله ﷺ: "الدال على الخير كفاعله"</p>
       <div className="flex justify-center gap-4 flex-wrap relative z-10">
-        <button onClick={shareWhatsApp} className="bg-[#25D366] text-white px-8 py-4 rounded-full font-bold shadow-lg hover:scale-105 transition-all">
+        <button 
+          onClick={shareWhatsApp} 
+          className="bg-[#25D366] text-white px-8 py-4 rounded-full font-bold shadow-lg hover:scale-105 transition-all"
+        >
           مشاركة عبر واتساب
         </button>
-        <button onClick={shareFacebook} className="bg-[#1877F2] text-white px-8 py-4 rounded-full font-bold shadow-lg hover:scale-105 transition-all">
+        <button 
+          onClick={shareFacebook} 
+          className="bg-[#1877F2] text-white px-8 py-4 rounded-full font-bold shadow-lg hover:scale-105 transition-all"
+        >
           مشاركة عبر فيسبوك
         </button>
       </div>
