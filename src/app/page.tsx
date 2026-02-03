@@ -2,13 +2,14 @@ import { Metadata } from 'next';
 import HeroSection from '@/components/hero-section';
 import DuaOfTheDay from '@/components/DuaOfTheDay';
 import RamadanReflection from '@/components/ramadan-reflections';
+import RamadanCountdown from '@/components/ramadan-countdown'; // استيراد العداد الجديد
 import { dailyDuas, categories as importedCategories } from '@/lib/duas';
 import { getRamadanDay, isRamadan } from '@/lib/date-helper';
 import { generateDuaMetadata } from '@/lib/metadata';
 import Link from 'next/link';
-import Script from 'next/script'; // استيراد مكون Script للتعامل مع السكريبتات
+import Script from 'next/script';
 
-// تحديث إعدادات الـ SEO لتشمل عام 2026 بشكل أساسي
+// ✅ تحديث إعدادات الـ SEO لعام 2026
 export const metadata: Metadata = generateDuaMetadata({
   title: 'أدعية رمضان 2026 - أدعية إسلامية مستجابة ومكتوبة 1447هـ',
   description:
@@ -59,7 +60,7 @@ export default function HomePage() {
   };
 
   const additionalCategories = [
-   {
+    {
       id: 'nisf-shaban',
       arabicName: 'أدعية النصف من شعبان',
       description: 'ليلة العفو والغفران والستر',
@@ -114,7 +115,6 @@ export default function HomePage() {
     ...additionalCategories,
   ];
 
-  // إعداد بيانات الـ Schema المدمجة
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -138,14 +138,6 @@ export default function HomePage() {
               "@type": "Answer",
               "text": "يقدم التطبيق دعاءً متجدداً لكل يوم من أيام شهر رمضان المبارك بناءً على التاريخ الهجري الحالي."
             }
-          },
-          {
-            "@type": "Question",
-            "name": "هل يمكن العثور على أدعية ليلة القدر؟",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "نعم، يتضمن التطبيق قسماً مخصصاً لأدعية ليلة القدر والأدعية المأثورة في العشر الأواخر من رمضان."
-            }
           }
         ]
       }
@@ -154,7 +146,6 @@ export default function HomePage() {
 
   return (
     <div className="bg-hero-gradient min-h-screen">
-      {/* حقن البيانات المنظمة لـ SEO أفضل */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
@@ -162,18 +153,27 @@ export default function HomePage() {
 
       <HeroSection />
 
+      {/* ✅ إضافة العداد التنازلي لرمضان 2026 هنا لضمان رؤيته فوراً */}
+      {!isRamadanNow && (
+        <section className="container mx-auto px-4 relative z-20 -mt-16 mb-12">
+          <div className="max-w-2xl mx-auto shadow-2xl rounded-[2.5rem]">
+            <RamadanCountdown targetDate="2026-02-18T18:00:00" />
+          </div>
+        </section>
+      )}
+
       {duaForToday && (
-        <div className="relative z-10 -mt-20">
+        <div className="relative z-10 -mt-10">
           <DuaOfTheDay dua={duaForToday} />
         </div>
       )}
 
       <section className="container mx-auto px-4 py-24 text-center relative z-10">
         <div className="mb-12">
-          <h2 className="text-4xl md:text-5xl font-amiri text-white mb-4">
-            تصفح الأدعية حسب الموضوع
+          <h2 className="text-4xl md:text-5xl font-amiri text-white mb-4 uppercase tracking-wide">
+            تصفح الأدعية حسب الموضوع 2026
           </h2>
-          <div className="h-1 w-24 bg-gold mx-auto rounded-full mb-6"></div>
+          <div className="h-1 w-24 bg-gold mx-auto rounded-full mb-6 shadow-glow"></div>
           <p className="text-white/70 text-lg font-amiri">
             اختر النية التي تود الدعاء بها واستكشف كنوز الأدعية المأثورة
           </p>
@@ -214,7 +214,7 @@ export default function HomePage() {
                   )}
                   
                   <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <span className="text-gold text-sm font-cairo">استكشف الأدعية ←</span>
+                    <span className="text-gold text-sm font-cairo underline decoration-gold/30">استكشف الأدعية ←</span>
                   </div>
                 </div>
               </Link>
