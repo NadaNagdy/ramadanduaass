@@ -1,6 +1,6 @@
-import type {Config} from 'tailwindcss';
+import type { Config } from 'tailwindcss';
 
-const config = {
+const config: Config = {
   darkMode: ['class'],
   content: [
     './pages/**/*.{ts,tsx}',
@@ -74,14 +74,62 @@ const config = {
         'hero-gradient': 'var(--gradient-hero)',
         'card-gradient': 'var(--gradient-card)',
       },
+      // ✅ إضافة تخصيص المقالات (Typography)
+      typography: ({ theme }: any) => ({
+        yellow: {
+          css: {
+            '--tw-prose-links': theme('colors.gold.DEFAULT'),
+            '--tw-prose-invert-links': theme('colors.gold.light'),
+          },
+        },
+        invert: {
+          css: {
+            '--tw-prose-body': theme('colors.slate.200'),
+            '--tw-prose-headings': theme('colors.white'),
+            '--tw-prose-links': theme('colors.gold.DEFAULT'),
+            '--tw-prose-bold': theme('colors.gold.light'),
+            '--tw-prose-bullets': theme('colors.gold.DEFAULT'),
+          },
+        },
+        DEFAULT: {
+          css: {
+            textAlign: 'justify',
+            lineHeight: '1.8',
+            fontFamily: theme('fontFamily.cairo'),
+            h1: {
+              fontFamily: theme('fontFamily.amiri'),
+              fontWeight: '700',
+            },
+            h2: {
+              fontFamily: theme('fontFamily.amiri'),
+              color: theme('colors.gold.DEFAULT'),
+              borderRightWidth: '4px',
+              borderRightColor: theme('colors.gold.DEFAULT'),
+              paddingRight: '1rem',
+              marginTop: '2rem',
+              marginBottom: '1rem',
+            },
+            blockquote: {
+              borderRightWidth: '4px',
+              borderLeftWidth: '0',
+              borderRightColor: theme('colors.gold.DEFAULT'),
+              backgroundColor: 'hsla(var(--gold) / 0.05)',
+              fontFamily: theme('fontFamily.amiri'),
+              fontSize: '1.4rem',
+              padding: '1rem 1.5rem',
+              borderRadius: '0.5rem',
+            },
+          },
+        },
+      }),
       keyframes: {
         'accordion-down': {
-          from: {height: '0'},
-          to: {height: 'var(--radix-accordion-content-height)'},
+          from: { height: '0' },
+          to: { height: 'var(--radix-accordion-content-height)' },
         },
         'accordion-up': {
-          from: {height: 'var(--radix-accordion-content-height)'},
-          to: {height: '0'},
+          from: { height: 'var(--radix-accordion-content-height)' },
+          to: { height: '0' },
         },
         float: {
           '0%, 100%': { transform: 'translateY(0)' },
@@ -110,6 +158,10 @@ const config = {
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [
+    require('tailwindcss-animate'),
+    require('@tailwindcss/typography'), // ✅ تأكد من تشغيل هذا الـ Plugin
+  ],
 };
+
 export default config;
