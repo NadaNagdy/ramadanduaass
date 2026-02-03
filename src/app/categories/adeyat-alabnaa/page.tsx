@@ -162,15 +162,15 @@ export default function AlabnaaPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {/* WhatsApp */}
         
-          href={`https://wa.me/?text=${encodeURIComponent(`${pageTitle}\n\n${pageUrl}`)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-green-600 hover:bg-green-700 text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2 transition-colors"
-        >
-          <span className="text-xl">💬</span>
-          <span>واتساب</span>
-        </a>
 
+  href={`https://wa.me/?text=${encodeURIComponent(`${pageTitle}\n\n${pageUrl}`)}`}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="bg-green-600 hover:bg-green-700 text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2 transition-colors"
+>
+  <span className="text-xl">💬</span>
+  <span>واتساب</span>
+</a>
         {/* Facebook */}
         
           href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`}
