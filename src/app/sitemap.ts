@@ -2,7 +2,7 @@
 
 import { MetadataRoute } from 'next';
 import { categories } from '@/lib/duas';
-import { getSortedPostsData } from '@/lib/posts'; // ✅ استيراد دالة جلب المقالات
+import { getSortedPostsData } from '@/lib/posts';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://ramadanduaass.vercel.app';
@@ -16,15 +16,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/yawm-aljumaa',
     '/share',
     '/community',
-    '/blog', // ✅ إضافة مسار المدونة الرئيسي
+    '/blog',
   ].map(route => ({
     url: `${baseUrl}${route}`,
     lastModified,
-    changeFrequency: 'daily' as const, // تم التعديل ليومية لضمان تحديث المحتوى الرمضاني
+    changeFrequency: 'daily' as const,
     priority: route === '' ? 1 : 0.8,
   }));
 
-  /* -------- Category Routes -------- */
+  /* -------- Category Routes (From lib) -------- */
   const categoryRoutes: MetadataRoute.Sitemap = categories.map(cat => ({
     url: `${baseUrl}/categories/${cat.id}`,
     lastModified,
@@ -33,7 +33,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   /* -------- Blog Article Routes (Dynamic) -------- */
-  // جلب المقالات المتاحة حالياً بناءً على التاريخ
   const posts = getSortedPostsData();
   const blogRoutes: MetadataRoute.Sitemap = posts.map(post => ({
     url: `${baseUrl}/blog/${post.slug}`,
@@ -42,8 +41,27 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  /* -------- New Special Category Routes -------- */
+  /* -------- New Special Category Routes (Updated) -------- */
+  // قمت بإضافة المسارات الجديدة التي أضفناها في الصفحة الرئيسية
   const newCategoryRoutes: MetadataRoute.Sitemap = [
+    {
+      url: `${baseUrl}/categories/adeyat-nisf-shaban`, // القسم الجديد
+      lastModified,
+      changeFrequency: 'daily' as const, // يومي لأننا في موسم شعبان حالياً
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/categories/adeyat-almared`, // القسم الجديد
+      lastModified,
+      changeFrequency: 'weekly' as const,
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/categories/adeyat-alrezq`, // القسم الجديد
+      lastModified,
+      changeFrequency: 'weekly' as const,
+      priority: 0.9,
+    },
     {
       url: `${baseUrl}/categories/adeyat-alzawaj`,
       lastModified,
