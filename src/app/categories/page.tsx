@@ -14,7 +14,13 @@ import { useToast } from '@/hooks/use-toast';
 const specialCategoryLinks: Record<string, string> = {
   'laylat-al-qadr': '/laylat-al-qadr',
   'prophets-duas': '/prophets-duas',
-  'quranic-duas': '/quranic-duas'
+  'quranic-duas': '/quranic-duas',
+  'alabnaa': '/categories/adeyat-alabnaa', // ✅ أدعية الأبناء
+  'nisf-shaban': '/categories/adeyat-nisf-shaban', // ✅ أدعية النصف من شعبان
+  'sick': '/categories/adeyat-almared', // ✅ أدعية المريض
+  'wealth': '/categories/adeyat-alrezq', // ✅ أدعية الرزق
+  'marriage': '/categories/adeyat-alzawaj', // ✅ أدعية الزواج
+  'travel': '/categories/adeyat-alsafar', // ✅ أدعية السفر
 };
 
 type DuaItem = string | {
