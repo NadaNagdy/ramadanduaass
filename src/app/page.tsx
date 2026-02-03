@@ -6,28 +6,22 @@ import { dailyDuas, categories as importedCategories } from '@/lib/duas';
 import { getRamadanDay, isRamadan } from '@/lib/date-helper';
 import { generateDuaMetadata } from '@/lib/metadata';
 import Link from 'next/link';
+import Script from 'next/script'; // استيراد مكون Script للتعامل مع السكريبتات
 
-// إعدادات الـ SEO والميتا داتا
+// تحديث إعدادات الـ SEO لتشمل عام 2026 بشكل أساسي
 export const metadata: Metadata = generateDuaMetadata({
-  title: 'أدعية رمضان المبارك - أدعية إسلامية مكتوبة 2025',
+  title: 'أدعية رمضان 2026 - أدعية إسلامية مستجابة ومكتوبة 1447هـ',
   description:
-    'أدعية رمضان، أدعية يوم الجمعة، أدعية ليلة القدر، وأدعية مأثورة من القرآن والسنة. أدعية للشفاء، الرزق، الزواج والأبناء',
+    'دليلك الكامل لأدعية شهر رمضان المبارك 2026. تصفح أدعية ليلة القدر، الجمعة، الرزق، والشفاء. أدعية مكتوبة وصحيحة من القرآن والسنة النبوية.',
   keywords: [
-    'ادعية رمضان',
-    'دعاء رمضان',
-    'أدعية يوم الجمعة',
-    'أدعية ليلة القدر',
-    'أدعية إسلامية',
-    'دعاء الشفاء',
-    'دعاء الرزق',
     'ادعية رمضان 2026',
     'دعاء رمضان 1447',
-    'أدعية مكتوبة 2026',
-    'دعاء ليلة القدر 2026',
-    'أدعية إسلامية نادرة',
-    'تحميل أدعية رمضان',
+    'أدعية ليلة القدر مستجابة',
+    'أدعية مكتوبة للجوال',
     'دعاء اليوم في رمضان',
-    'أدعية قصيرة للجوال',
+    'تطبيق أدعية إسلامية',
+    'أدعية النصف من شعبان',
+    'دعاء الشفاء والرزق'
   ],
   canonicalPath: '/',
 });
@@ -36,20 +30,17 @@ export default function HomePage() {
   const ramadanDay = getRamadanDay();
   const isRamadanNow = isRamadan();
 
-  // تحديد دعاء اليوم بناءً على تاريخ رمضان
   const duaForToday =
     isRamadanNow && ramadanDay
       ? dailyDuas.find((d) => d.day === ramadanDay)
       : dailyDuas[0];
 
-  // خريطة الروابط الخاصة للأقسام التي تمتلك صفحات مستقلة
   const specialCategoryLinks: Record<string, string> = {
     'laylat-al-qadr': '/laylat-al-qadr',
     'prophets-duas': '/prophets-duas',
     'quranic-duas': '/quranic-duas'
   };
 
-  // خريطة الألوان لكل تصنيف لإعطاء واجهة مبهجة ومتنوعة
   const colorMap: Record<string, string> = {
     'myself': 'from-emerald-500/20 to-teal-500/20',
     'family': 'from-blue-500/20 to-indigo-500/20',
@@ -65,10 +56,8 @@ export default function HomePage() {
     'children': 'from-blue-500/20 to-indigo-500/20',
     'travel': 'from-purple-500/20 to-violet-500/20',
     'nisf-shaban': 'from-violet-500/20 to-purple-500/20',
-
   };
 
-  // الفئات الإضافية (أدعية الشفاء، الرزق، السفر، إلخ)
   const additionalCategories = [
    {
       id: 'nisf-shaban',
@@ -114,7 +103,6 @@ export default function HomePage() {
     },
   ];
 
-  // دمج الفئات من duas.ts مع الفئات الإضافية
   const allCategories = [
     ...importedCategories.map((cat) => ({
       id: cat.id,
@@ -126,19 +114,60 @@ export default function HomePage() {
     ...additionalCategories,
   ];
 
+  // إعداد بيانات الـ Schema المدمجة
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "name": "أدعية رمضان 2026",
+        "url": "https://ramadanduaass.vercel.app/",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://ramadanduaass.vercel.app/categories?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "ما هو دعاء اليوم في رمضان؟",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "يقدم التطبيق دعاءً متجدداً لكل يوم من أيام شهر رمضان المبارك بناءً على التاريخ الهجري الحالي."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "هل يمكن العثور على أدعية ليلة القدر؟",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "نعم، يتضمن التطبيق قسماً مخصصاً لأدعية ليلة القدر والأدعية المأثورة في العشر الأواخر من رمضان."
+            }
+          }
+        ]
+      }
+    ]
+  };
+
   return (
     <div className="bg-hero-gradient min-h-screen">
-      {/* قسم الهيرو (البداية) */}
+      {/* حقن البيانات المنظمة لـ SEO أفضل */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+
       <HeroSection />
 
-      {/* قسم دعاء اليوم - يظهر بشكل تلقائي بناءً على يوم رمضان */}
       {duaForToday && (
         <div className="relative z-10 -mt-20">
           <DuaOfTheDay dua={duaForToday} />
         </div>
       )}
 
-      {/* قسم تصفح الأقسام */}
       <section className="container mx-auto px-4 py-24 text-center relative z-10">
         <div className="mb-12">
           <h2 className="text-4xl md:text-5xl font-amiri text-white mb-4">
@@ -168,7 +197,6 @@ export default function HomePage() {
                     shadow-xl hover:shadow-gold/10
                   `}
                 >
-                  {/* تأثير لمعان عند الحوم (Hover) */}
                   <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 rounded-[2rem] transition-opacity"></div>
                   
                   <div className="text-6xl mb-4 transform group-hover:scale-110 group-hover:-rotate-12 transition-transform duration-500">
@@ -195,7 +223,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* قسم خواطر رمضانية */}
       <div className="pb-20">
         <RamadanReflection />
       </div>
