@@ -1,5 +1,6 @@
 // src/app/categories/adeyat-alabnaa/page.tsx
-import type { Metadata } from "next";
+"use client";
+
 import Link from "next/link";
 import { alabnaaDuas } from "@/lib/duas-data/alabnaa-duas";
 
@@ -42,47 +43,32 @@ const otherCategories = [
   },
 ];
 
-export const metadata: Metadata = {
-  title: "أدعية الأبناء | دعاء للأبناء بالتوفيق والصلاح - أدعية رمضان",
-  description: "أدعية الأبناء والأولاد مكتوبة من القرآن والسنة - دعاء للأبناء بالتوفيق والنجاح، دعاء حفظ الأولاد، دعاء صلاح الأبناء وهدايتهم، أدعية للأطفال، دعاء شفاء الأبناء المرضى",
-  keywords: [
-    "أدعية الأبناء",
-    "دعاء للأبناء",
-    "أدعية للأولاد",
-    "دعاء للأولاد",
-    "دعاء للأبناء بالتوفيق",
-    "دعاء للأبناء بالصلاح",
-    "دعاء حفظ الأبناء",
-    "دعاء لحفظ الأولاد",
-    "دعاء صلاح الأبناء وهدايتهم",
-    "دعاء هداية الأبناء",
-    "أدعية للأطفال",
-    "دعاء للأطفال",
-    "دعاء شفاء الأبناء",
-    "دعاء للطفل المريض",
-    "دعاء النجاح للأولاد",
-    "دعاء الامتحانات للأبناء",
-    "دعاء لأولادي",
-    "دعاء لابني",
-    "دعاء لبنتي",
-    "دعاء الأم للأبناء"
-  ],
-  openGraph: {
-    title: "أدعية الأبناء - دعاء للأبناء بالتوفيق والصلاح",
-    description: "أدعية الأبناء الصحيحة من القرآن والسنة لحفظ الأولاد وهدايتهم وتوفيقهم",
-    type: "article",
-    locale: "ar_EG",
-    url: "https://ramadanduaass.vercel.app/categories/adeyat-alabnaa",
-    siteName: "أدعية رمضان",
-  },
-  alternates: {
-    canonical: "https://ramadanduaass.vercel.app/categories/adeyat-alabnaa",
-  },
-};
-
 export default function AlabnaaPage() {
-  const pageUrl = "https://ramadanduaass.vercel.app/categories/adeyat-alabnaa";
+  const pageUrl = typeof window !== 'undefined' ? window.location.href : "https://ramadanduaass.vercel.app/categories/adeyat-alabnaa";
   const pageTitle = "أدعية الأبناء";
+  
+  const handleShare = (platform: string) => {
+    let shareUrl = '';
+    
+    switch(platform) {
+      case 'whatsapp':
+        shareUrl = `https://wa.me/?text=${encodeURIComponent(`${pageTitle}\n\n${pageUrl}`)}`;
+        break;
+      case 'facebook':
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`;
+        break;
+      case 'twitter':
+        shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(pageTitle)}&url=${encodeURIComponent(pageUrl)}`;
+        break;
+      case 'telegram':
+        shareUrl = `https://t.me/share/url?url=${encodeURIComponent(pageUrl)}&text=${encodeURIComponent(pageTitle)}`;
+        break;
+    }
+    
+    if (shareUrl) {
+      window.open(shareUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
@@ -161,48 +147,40 @@ export default function AlabnaaPage() {
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {/* WhatsApp */}
-              <a
-                href={`https://wa.me/?text=${encodeURIComponent(`${pageTitle}\n\n${pageUrl}`)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-green-600 hover:bg-green-700 text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2 transition-colors"
+              <button
+                onClick={() => handleShare('whatsapp')}
+                className="bg-green-600 hover:bg-green-700 text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2 transition-colors cursor-pointer"
               >
                 <span className="text-xl">💬</span>
                 <span>واتساب</span>
-              </a>
+              </button>
 
               {/* Facebook */}
-              <a
-                href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2 transition-colors"
+              <button
+                onClick={() => handleShare('facebook')}
+                className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2 transition-colors cursor-pointer"
               >
                 <span className="text-xl">📘</span>
                 <span>فيسبوك</span>
-              </a>
+              </button>
 
               {/* Twitter/X */}
-              <a
-                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(pageTitle)}&url=${encodeURIComponent(pageUrl)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-slate-900 hover:bg-black text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2 transition-colors"
+              <button
+                onClick={() => handleShare('twitter')}
+                className="bg-slate-900 hover:bg-black text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2 transition-colors cursor-pointer"
               >
                 <span className="text-xl">𝕏</span>
                 <span>تويتر</span>
-              </a>
+              </button>
 
               {/* Telegram */}
-              <a
-                href={`https://t.me/share/url?url=${encodeURIComponent(pageUrl)}&text=${encodeURIComponent(pageTitle)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-sky-500 hover:bg-sky-600 text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2 transition-colors"
+              <button
+                onClick={() => handleShare('telegram')}
+                className="bg-sky-500 hover:bg-sky-600 text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2 transition-colors cursor-pointer"
               >
                 <span className="text-xl">✈️</span>
                 <span>تليجرام</span>
-              </a>
+              </button>
             </div>
           </div>
         </div>
