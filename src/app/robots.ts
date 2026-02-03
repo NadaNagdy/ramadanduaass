@@ -1,8 +1,7 @@
-// app/robots.ts
 import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
-  // تأكد من استخدام الرابط الذي تظهر به في نتائج جوجل حالياً
+  // الرابط الأساسي للموقع
   const baseUrl = 'https://ramadanduaass.vercel.app';
   
   return {
@@ -13,18 +12,20 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [
           '/api/',      // منع أرشفة روابط العمليات الخلفية
           '/admin/',    // حماية مسارات الإدارة (إن وجدت)
-          '/_next/',    // تجاهل ملفات النظام الخاصة بـ Next.js
-          '/private/',  // أي ملفات خاصة بالتطوير
+          '/_next/',    // تجاهل ملفات النظام الأساسية
+          '/private/',  // الملفات الخاصة بالتطوير
           '/*.json$',   // منع أرشفة ملفات البيانات الخام
+          '/search',    // ✅ منع أرشفة صفحات البحث لتجنب تكرار المحتوى (Duplicate Content)
         ],
       },
-      // توجيهات خاصة لمحرك بحث جوجل لضمان وصول كامل للملفات العامة
       {
+        // إعدادات خاصة لـ Googlebot لتحسين الـ Rendering
         userAgent: 'Googlebot',
         allow: [
             '/',
-            '/_next/static/css/', // السماح بجلب التنسيقات لضمان عرض الصفحة بشكل سليم للزاحف
-            '/_next/static/chunks/', // السماح بجلب ملفات الـ JS الضرورية للـ Rendering
+            '/_next/static/css/',   // السماح بالتنسيقات
+            '/_next/static/chunks/', // السماح بملفات التشغيل
+            '/_next/static/media/',  // ✅ السماح بالصور والخطوط لضمان رؤية التصميم كاملاً
         ],
       },
     ],
