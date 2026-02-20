@@ -5,6 +5,8 @@ import RamadanReflection from '@/components/ramadan-reflections';
 import RamadanCountdown from '@/components/ramadan-countdown'; 
 import { dailyDuas, categories as importedCategories } from '@/lib/duas';
 import { getRamadanDay, isRamadan } from '@/lib/date-helper';
+import RamadanDuaClient from '@/app/components/ramadan-dua-client';
+import RamadanDuaLink from '@/app/components/ramadan-dua-link';
 import { generateDuaMetadata } from '@/lib/metadata';
 import Link from 'next/link';
 
@@ -22,11 +24,6 @@ export const metadata: Metadata = generateDuaMetadata({
 export default function HomePage() {
   const ramadanDay = getRamadanDay();
   const isRamadanNow = isRamadan();
-
-  // تحديد دعاء اليوم
-  const duaForToday = isRamadanNow && ramadanDay
-      ? dailyDuas.find((d) => d.day === ramadanDay)
-      : dailyDuas[0];
 
   const colorMap: Record<string, string> = {
     'myself': 'from-emerald-500/20 to-teal-500/20',
@@ -93,11 +90,10 @@ export default function HomePage() {
         </section>
       )}
 
-      {duaForToday && (
-        <div className="relative z-10 -mt-10">
-          <DuaOfTheDay dua={duaForToday} />
-        </div>
-      )}
+  <div className="relative z-10 -mt-10">
+        <RamadanDuaClient />
+      </div>
+      <RamadanDuaLink />
 
       <section className="container mx-auto px-4 py-24 text-center relative z-10">
         <div className="mb-12">
